@@ -57,6 +57,7 @@
     "activeMember": "Active member",
     "left": "Left",
     "open": "Open",
+    "owner": "Owner",
     "youLeftOn": "You left on {{date}}"
   },
   "tabs": {

@@ -22,9 +22,8 @@ function addDaysStr(dateStr: string, days: number) {
 
 export default function EventDetail() {
   const { eventId = "" } = useParams();
-  const today = new Date();
-  const defaultDate = isoDate(new Date(today.getTime() + 24 * 3600 * 1000));
-  const [forDate, setForDate] = React.useState<string>(defaultDate);
+  const tomorrow = isoDate(new Date(Date.now() + 24 * 3600 * 1000));
+  const [forDate, setForDate] = React.useState<string>(tomorrow);
   const [search, setSearch] = useSearchParams();
   const activeTab = (search.get("tab") || "day") as "day" | "history" | "payments" | "admin";
   const setTab = (tab: string) =>
@@ -51,6 +50,13 @@ export default function EventDetail() {
   const endDate = ev.data?.end_date;
   const prevDisabled = !!startDate && forDate <= startDate;
   const nextDisabled = !!endDate && forDate >= endDate;
+
+  // Clamp date to event range when data loads
+  React.useEffect(() => {
+    if (!startDate || !endDate) return;
+    if (forDate < startDate) setForDate(startDate);
+    else if (forDate > endDate) setForDate(endDate);
+  }, [startDate, endDate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function changeDate(newDate: string) {
     setForDate(newDate);
@@ -98,9 +104,16 @@ export default function EventDetail() {
             );
           }
           return (
-            <span className="chip open" style={{ marginLeft: 8 }}>
-              {t("events.activeMember")}
-            </span>
+            <>
+              <span className="chip open" style={{ marginLeft: 8 }}>
+                {t("events.activeMember")}
+              </span>
+              {isOwner && (
+                <span className="chip" style={{ marginLeft: 4, fontWeight: 600 }}>
+                  {t("events.owner")}
+                </span>
+              )}
+            </>
           );
         })()}
       </div>
