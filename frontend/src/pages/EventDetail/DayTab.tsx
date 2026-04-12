@@ -235,6 +235,8 @@ export default function DayTab({
           <DateField
             value={forDate}
             onChange={(d) => onChangeDate(d)}
+            min={ev.data?.start_date}
+            max={ev.data?.end_date}
             style={{ width: 200, maxWidth: "100%" }}
             holidaysLabelByDate={holidays.labelByDate}
           />
