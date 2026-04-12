@@ -1,21 +1,23 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { formatYMDToLocale } from "../lib/date";
 
 export default function EventsList() {
+  const { t } = useTranslation();
   const q = useQuery({ queryKey: ["events"], queryFn: api.listEvents });
   return (
     <div>
       <div className="row" style={{ alignItems: "center", margin: "8px 0 12px" }}>
-        <h2 style={{ margin: 0 }}>Your Events</h2>
+        <h2 style={{ margin: 0 }}>{t("events.title")}</h2>
         <span className="spacer" />
         <Link to="/events/new" className="btn">
-          New Event
+          {t("events.create")}
         </Link>
       </div>
-      {!q.data && q.isLoading && <p className="muted">Loading…</p>}
+      {!q.data && q.isLoading && <p className="muted">{t("app.loading")}</p>}
       {q.error && <p className="danger">{String(q.error)}</p>}
       <ul className="grid" style={{ padding: 0, listStyle: "none" }}>
         {q.data?.map((ev) => (
@@ -33,9 +35,9 @@ export default function EventsList() {
                 >
                   <span>{ev.name}</span>
                   {ev.left_at ? (
-                    <span className="chip muted">Left</span>
+                    <span className="chip muted">{t("events.left")}</span>
                   ) : (
-                    <span className="chip open">Active</span>
+                    <span className="chip open">{t("events.activeMember")}</span>
                   )}
                 </div>
                 <div className="muted">
@@ -44,15 +46,13 @@ export default function EventsList() {
                 </div>
               </div>
               <Link to={`/events/${ev.id}`} className="btn primary">
-                Open
+                {t("events.open")}
               </Link>
             </div>
           </li>
         ))}
       </ul>
-      {!q.data?.length && !q.isLoading && (
-        <p className="muted">No events yet. Ask an owner for an invite.</p>
-      )}
+      {!q.data?.length && !q.isLoading && <p className="muted">{t("events.noEvents")}</p>}
     </div>
   );
 }

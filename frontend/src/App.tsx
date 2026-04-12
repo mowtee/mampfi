@@ -6,7 +6,7 @@ import { useAuth } from "./hooks/useAuth";
 
 export default function App() {
   const { user, logout } = useAuth();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
 
   // Dev mode state
@@ -44,7 +44,7 @@ export default function App() {
           <div className="row" style={{ alignItems: "center", gap: 8 }}>
             <span className="muted">{user.name || user.email}</span>
             <button className="btn" onClick={logout}>
-              Logout
+              {t("app.logout")}
             </button>
           </div>
         )}

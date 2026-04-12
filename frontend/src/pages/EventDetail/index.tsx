@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { formatYMDToLocale } from "../../lib/date";
 import { useHolidays } from "../../lib/holidays";
 import { useEventContext } from "../../hooks/useEventContext";
@@ -33,6 +34,7 @@ export default function EventDetail() {
       return n;
     });
 
+  const { t } = useTranslation();
   const ctx = useEventContext(eventId, forDate, activeTab);
   const { ev, meMember, isOwner, qc } = ctx;
 
@@ -67,7 +69,7 @@ export default function EventDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forDate]);
 
-  if (ev.isLoading) return <p className="muted">Loading…</p>;
+  if (ev.isLoading) return <p className="muted">{t("app.loading")}</p>;
   if (ev.error) return <p className="danger">{String(ev.error)}</p>;
   if (!ev.data) return <p className="danger">Event not found</p>;
 
@@ -75,7 +77,7 @@ export default function EventDetail() {
     <div>
       <p>
         <Link to="/" className="btn ghost">
-          ← Back
+          ← {t("app.back")}
         </Link>
       </p>
       <h2 style={{ margin: "8px 0 4px" }}>{ev.data.name}</h2>
@@ -91,13 +93,13 @@ export default function EventDetail() {
             const left = new Date(m.left_at);
             return (
               <span className="chip muted" style={{ marginLeft: 8 }}>
-                You left on {left.toLocaleDateString()}
+                {t("events.youLeftOn", { date: left.toLocaleDateString() })}
               </span>
             );
           }
           return (
             <span className="chip open" style={{ marginLeft: 8 }}>
-              Active member
+              {t("events.activeMember")}
             </span>
           );
         })()}
@@ -108,26 +110,26 @@ export default function EventDetail() {
           className={`tab ${activeTab === "day" ? "active" : ""}`}
           onClick={() => setTab("day")}
         >
-          Day
+          {t("tabs.day")}
         </button>
         <button
           className={`tab ${activeTab === "history" ? "active" : ""}`}
           onClick={() => setTab("history")}
         >
-          History
+          {t("tabs.history")}
         </button>
         <button
           className={`tab ${activeTab === "payments" ? "active" : ""}`}
           onClick={() => setTab("payments")}
         >
-          Payments
+          {t("tabs.payments")}
         </button>
         {isOwner && (
           <button
             className={`tab ${activeTab === "admin" ? "active" : ""}`}
             onClick={() => setTab("admin")}
           >
-            Admin
+            {t("tabs.admin")}
           </button>
         )}
       </div>

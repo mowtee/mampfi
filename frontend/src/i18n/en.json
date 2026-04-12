@@ -46,6 +46,8 @@
     "create": "Create Event",
     "noEvents": "No events yet.",
     "activeMember": "Active member",
+    "left": "Left",
+    "open": "Open",
     "youLeftOn": "You left on {{date}}"
   },
   "tabs": {

@@ -46,6 +46,8 @@
     "create": "Event erstellen",
     "noEvents": "Noch keine Events.",
     "activeMember": "Aktives Mitglied",
+    "left": "Verlassen",
+    "open": "Öffnen",
     "youLeftOn": "Verlassen am {{date}}"
   },
   "tabs": {
