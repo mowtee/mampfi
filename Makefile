@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
 .PHONY: help db-up db-down db-reset dev-api dev-web migrate seed \
-        lint-api lint-web format-api format-web
+        lint-api lint-web format-api format-web test-api test-web
 
 help:
 	@echo "Targets:"
@@ -16,6 +16,8 @@ help:
 	@echo "  lint-web     - Lint frontend with eslint"
 	@echo "  format-api   - Format backend with ruff"
 	@echo "  format-web   - Format frontend with prettier"
+	@echo "  test-api     - Run backend tests (pytest)"
+	@echo "  test-web     - Run frontend tests (vitest)"
 
 db-up:
 	@if docker ps -a --format '{{.Names}}' | grep -q '^mampfi-db$$'; then \
@@ -25,7 +27,7 @@ db-up:
 		docker run -d --name mampfi-db \
 		  -e POSTGRES_USER=mampfi -e POSTGRES_PASSWORD=mampfi -e POSTGRES_DB=mampfi \
 		  -p 5432:5432 -v mampfi_pgdata:/var/lib/postgresql/data \
-		  postgres:16-alpine >/dev/null; \
+		  postgres:18-alpine >/dev/null; \
 	fi; \
 	echo "Postgres running on localhost:5432 (DB=mampfi, user=mampfi)"
 
@@ -63,3 +65,9 @@ format-api:
 
 format-web:
 	cd frontend && pnpm format
+
+test-api:
+	cd backend && uv run pytest tests/ -q
+
+test-web:
+	cd frontend && pnpm test --run
