@@ -73,7 +73,10 @@ export default function DateField({
       typeof window !== "undefined" &&
       window.matchMedia &&
       window.matchMedia("(pointer: coarse)").matches;
-    const touch = typeof navigator !== "undefined" && (navigator as any).maxTouchPoints > 0;
+    const touch =
+      typeof navigator !== "undefined" &&
+      (navigator as { maxTouchPoints?: number }).maxTouchPoints != null &&
+      (navigator as { maxTouchPoints?: number }).maxTouchPoints > 0;
     const narrow = typeof window !== "undefined" && window.innerWidth < 700;
     return coarse || touch || narrow;
   }
@@ -84,10 +87,8 @@ export default function DateField({
       const el = ref.current;
       if (!el) return;
       // Try native showPicker if supported; fall back to focus
-      // @ts-expect-error: showPicker may exist
-      if (typeof el.showPicker === "function") {
-        // @ts-ignore
-        el.showPicker();
+      if (typeof (el as HTMLInputElement & { showPicker?: () => void }).showPicker === "function") {
+        (el as HTMLInputElement & { showPicker: () => void }).showPicker();
       } else {
         el.focus();
         el.click();

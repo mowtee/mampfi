@@ -22,7 +22,9 @@ async function http<T>(path: string, init?: RequestInit): Promise<T> {
     let detail;
     try {
       detail = await res.json();
-    } catch {}
+    } catch {
+      /* ignore parse errors */
+    }
     throw new Error(`HTTP ${res.status}: ${JSON.stringify(detail || {})}`);
   }
   const text = await res.text();
@@ -125,7 +127,9 @@ export const api = {
     let detail: unknown = undefined;
     try {
       detail = await res.json();
-    } catch {}
+    } catch {
+      /* ignore parse errors */
+    }
     throw Object.assign(new Error(`HTTP ${res.status}: ${JSON.stringify(detail || {})}`), {
       detail,
     });

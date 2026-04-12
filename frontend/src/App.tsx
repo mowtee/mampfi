@@ -65,7 +65,7 @@ export default function App() {
           </button>
           <button
             className="btn primary"
-            onClick={(e) => {
+            onClick={() => {
               // mimic form submit
               localStorage.setItem("devEmail", email.trim());
               setDevOpen(false);
