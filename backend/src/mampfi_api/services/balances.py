@@ -23,7 +23,7 @@ def compute_balances(session: Session, event_id: uuid.UUID) -> dict[uuid.UUID, i
             for alloc in line.get("allocations") or []:
                 try:
                     uid = uuid.UUID(str(alloc.get("user_id")))
-                except (ValueError, AttributeError):
+                except ValueError, AttributeError:
                     continue
                 qty = int(alloc.get("qty") or 0)
                 balances[uid] = balances.get(uid, 0) - unit * qty

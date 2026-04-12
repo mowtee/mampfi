@@ -1,6 +1,5 @@
 """Tests for payment lifecycle: create → confirm/decline/cancel."""
 
-
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session
@@ -14,7 +13,9 @@ from .conftest import auth_headers, make_event
 @pytest.fixture()
 def ev(session: Session, user, other_user):
     ev = make_event(session, user)
-    session.add(Membership(user_id=other_user.id, event_id=ev.id, role="member", joined_at=now_utc()))
+    session.add(
+        Membership(user_id=other_user.id, event_id=ev.id, role="member", joined_at=now_utc())
+    )
     session.commit()
     return ev
 

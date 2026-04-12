@@ -12,7 +12,7 @@ type AdminTabProps = {
 };
 
 export default function AdminTab({ ctx, eventId, ev }: AdminTabProps) {
-  const { invites, memberLabel } = ctx;
+  const { invites } = ctx;
 
   return (
     <>

@@ -1,23 +1,25 @@
-import React from 'react'
-import { Link, Outlet, useNavigate } from 'react-router-dom'
-import { Modal, ModalBody, ModalActions } from './components/ui/Modal'
+import React from "react";
+import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Modal, ModalBody, ModalActions } from "./components/ui/Modal";
 
 export default function App() {
-  const [email, setEmail] = React.useState<string>(() => localStorage.getItem('devEmail') || '')
-  const navigate = useNavigate()
-  const [devOpen, setDevOpen] = React.useState(false)
+  const [email, setEmail] = React.useState<string>(() => localStorage.getItem("devEmail") || "");
+  const navigate = useNavigate();
+  const [devOpen, setDevOpen] = React.useState(false);
 
   function saveEmail(e: React.FormEvent) {
-    e.preventDefault()
-    localStorage.setItem('devEmail', email.trim())
+    e.preventDefault();
+    localStorage.setItem("devEmail", email.trim());
     // force refresh of data by navigating (optional)
-    navigate(0)
+    navigate(0);
   }
 
   return (
     <div className="site">
       <header className="topbar">
-        <Link to="/" className="brand">Mampfi</Link>
+        <Link to="/" className="brand">
+          Mampfi
+        </Link>
         <span className="spacer" />
         {/* Inline on larger screens */}
         <form onSubmit={saveEmail} className="row sm-hidden" style={{ marginLeft: 8 }}>
@@ -29,10 +31,14 @@ export default function App() {
             placeholder="you@example.com"
             style={{ width: 240 }}
           />
-          <button type="submit" className="btn">Save</button>
+          <button type="submit" className="btn">
+            Save
+          </button>
         </form>
         {/* Compact toggle on small screens */}
-        <button className="btn sm-only" onClick={() => setDevOpen(true)} aria-label="Set dev email">Dev</button>
+        <button className="btn sm-only" onClick={() => setDevOpen(true)} aria-label="Set dev email">
+          Dev
+        </button>
       </header>
       <div className="section">
         <Outlet />
@@ -54,18 +60,22 @@ export default function App() {
           </div>
         </ModalBody>
         <ModalActions>
-          <button className="btn" onClick={() => setDevOpen(false)}>Cancel</button>
+          <button className="btn" onClick={() => setDevOpen(false)}>
+            Cancel
+          </button>
           <button
             className="btn primary"
             onClick={(e) => {
               // mimic form submit
-              localStorage.setItem('devEmail', email.trim())
-              setDevOpen(false)
-              navigate(0)
+              localStorage.setItem("devEmail", email.trim());
+              setDevOpen(false);
+              navigate(0);
             }}
-          >Save</button>
+          >
+            Save
+          </button>
         </ModalActions>
       </Modal>
     </div>
-  )
+  );
 }

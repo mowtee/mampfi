@@ -1,6 +1,5 @@
 """Tests for event creation, price items, and member listing."""
 
-
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
@@ -107,7 +106,9 @@ def test_add_price_item_non_owner_forbidden(client: TestClient, other_user, even
     from mampfi_api.models import Membership
     from mampfi_api.timeutils import now_utc
 
-    session.add(Membership(user_id=other_user.id, event_id=event.id, role="member", joined_at=now_utc()))
+    session.add(
+        Membership(user_id=other_user.id, event_id=event.id, role="member", joined_at=now_utc())
+    )
     session.commit()
     resp = client.post(
         f"/v1/events/{event.id}/price-items",

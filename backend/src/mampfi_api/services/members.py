@@ -45,12 +45,8 @@ def leave_event(session: Session, event_id: uuid.UUID, user: User) -> None:
         plan: list[dict] = []
         if my_bal < 0:
             remaining = -my_bal
-            creditors = [
-                t for t in totals if t["balance_minor"] > 0 and t["user_id"] != user.id
-            ]
-            creditors.sort(
-                key=lambda t: (not t.get("wants_to_leave", False), -t["balance_minor"])
-            )
+            creditors = [t for t in totals if t["balance_minor"] > 0 and t["user_id"] != user.id]
+            creditors.sort(key=lambda t: (not t.get("wants_to_leave", False), -t["balance_minor"]))
             for c in creditors:
                 if remaining <= 0:
                     break

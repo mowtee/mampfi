@@ -73,17 +73,13 @@ def test_get_purchase(client: TestClient, session: Session, user, ev, item):
     payload = _purchase_payload(today, item.id)
     payload["lines"][0]["allocations"] = [{"user_id": str(user.id), "qty": 2}]
     client.post(f"/v1/events/{ev.id}/purchases", json=payload, headers=auth_headers(user.email))
-    resp = client.get(
-        f"/v1/events/{ev.id}/purchases/{today}", headers=auth_headers(user.email)
-    )
+    resp = client.get(f"/v1/events/{ev.id}/purchases/{today}", headers=auth_headers(user.email))
     assert resp.status_code == 200
     assert resp.json()["date"] == str(today)
 
 
 def test_get_purchase_not_found(client: TestClient, user, ev):
-    resp = client.get(
-        f"/v1/events/{ev.id}/purchases/2000-01-01", headers=auth_headers(user.email)
-    )
+    resp = client.get(f"/v1/events/{ev.id}/purchases/2000-01-01", headers=auth_headers(user.email))
     assert resp.status_code == 404
 
 

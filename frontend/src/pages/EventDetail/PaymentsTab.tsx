@@ -557,10 +557,11 @@ function LeavePlanView({
     detail && typeof detail === "object" && "detail" in detail
       ? (detail as { detail: LeaveErrorPayload }).detail
       : (detail as LeaveErrorPayload | undefined);
-  if (!payload || payload.reason !== "balance_not_zero") {
+  const [dismissed, setDismissed] = React.useState(false);
+  const isValid = !!payload && payload.reason === "balance_not_zero";
+  if (!isValid) {
     return <div className="danger">Unable to leave.</div>;
   }
-  const [dismissed, setDismissed] = React.useState(false);
   if (dismissed) return <div className="muted">Dismissed.</div>;
   const bal = Number(payload.balance_minor || 0);
   const plan = Array.isArray(payload.plan) ? payload.plan : [];

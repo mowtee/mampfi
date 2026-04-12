@@ -101,7 +101,9 @@ def test_upsert_order_outside_window(client: TestClient, session: Session, user,
 
 
 def test_get_order_empty(client: TestClient, session: Session, user, ev, item):
-    resp = client.get(f"/v1/events/{ev.id}/orders/{ORDER_DATE}/me", headers=auth_headers(user.email))
+    resp = client.get(
+        f"/v1/events/{ev.id}/orders/{ORDER_DATE}/me", headers=auth_headers(user.email)
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["items"] == []

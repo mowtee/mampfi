@@ -40,7 +40,7 @@ def get_event_as_member(session: Session, event_id: uuid.UUID, user: User) -> Ev
 def validate_timezone(timezone: str) -> None:
     try:
         ZoneInfo(timezone)
-    except (ZoneInfoNotFoundError, KeyError):
+    except ZoneInfoNotFoundError, KeyError:
         raise DomainError(f"unknown timezone: {timezone}") from None
 
 

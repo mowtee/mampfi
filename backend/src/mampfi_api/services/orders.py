@@ -13,7 +13,7 @@ from ..services.events import require_member
 def _get_timezone(ev: Event) -> ZoneInfo:
     try:
         return ZoneInfo(ev.timezone)
-    except (ZoneInfoNotFoundError, KeyError):
+    except ZoneInfoNotFoundError, KeyError:
         raise DomainError("invalid event timezone") from None
 
 
@@ -72,9 +72,7 @@ def upsert_order(
             select(PriceItem.id).where(PriceItem.event_id == ev.id, PriceItem.active == True)  # noqa: E712
         ).all()
     )
-    all_item_ids = set(
-        session.exec(select(PriceItem.id).where(PriceItem.event_id == ev.id)).all()
-    )
+    all_item_ids = set(session.exec(select(PriceItem.id).where(PriceItem.event_id == ev.id)).all())
 
     norm_items: list[dict] = []
     inactive_ids: list[str] = []
@@ -108,9 +106,7 @@ def upsert_order(
     session.commit()
 
 
-def get_my_order(
-    session: Session, event_id: uuid.UUID, for_date: dt.date, user: User
-) -> OrderOut:
+def get_my_order(session: Session, event_id: uuid.UUID, for_date: dt.date, user: User) -> OrderOut:
     ev = session.get(Event, event_id)
     if ev is None:
         raise NotFound("event")

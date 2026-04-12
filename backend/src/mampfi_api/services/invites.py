@@ -94,9 +94,7 @@ def list_invites(session: Session, event_id: uuid.UUID, user: User) -> list[Invi
     return [InviteOut.model_validate(i, from_attributes=True) for i in invites]
 
 
-def revoke_invite(
-    session: Session, event_id: uuid.UUID, invite_id: uuid.UUID, user: User
-) -> None:
+def revoke_invite(session: Session, event_id: uuid.UUID, invite_id: uuid.UUID, user: User) -> None:
     ev = get_event(session, event_id)
     require_owner(session, ev.id, user.id)
     inv = session.get(InviteToken, invite_id)
