@@ -51,12 +51,20 @@ export default function DayTab({
     lockInfo,
     readOnly,
     inactiveForDate,
-    statusChip,
     meMember,
     memberLabel,
     priceName,
     qc,
   } = ctx;
+
+  const statusChip = React.useMemo(() => {
+    if (purchase.data) return { className: "chip finalized", text: t("day.finalized") };
+    if (lockInfo.locked) return { className: "chip locked", text: t("day.locked") };
+    return {
+      className: "chip open",
+      text: t("day.openUntil", { time: lockInfo.cutoffTime }),
+    };
+  }, [purchase.data, lockInfo, t]);
 
   // --- Local state ---
   const [quantities, setQuantities] = React.useState<Record<string, number>>({});

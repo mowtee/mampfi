@@ -143,16 +143,12 @@ export function useEventContext(eventId: string, forDate: string, activeTab: str
     let locked = false;
     if (nowDate > prev) locked = true;
     else if (nowDate === prev) locked = nowHM >= cutoffTime;
-    const label = locked ? "Locked" : `Open until ${cutoffTime}`;
-    return { locked, label };
+    return { locked, cutoffTime };
   }, [ev.data, forDate]);
 
   const readOnly = !!purchase.data || lockInfo.locked || inactiveForDate;
 
-  const statusChip = React.useMemo(() => {
-    if (purchase.data) return { className: "chip finalized", text: "Finalized" };
-    return { className: `chip ${lockInfo.locked ? "locked" : "open"}`, text: lockInfo.label };
-  }, [purchase.data, lockInfo]);
+  // statusChip removed — computed in DayTab with i18n
 
   // Tab-aware polling intervals
   const dayInterval: number | false = isDay
@@ -231,7 +227,6 @@ export function useEventContext(eventId: string, forDate: string, activeTab: str
     priceName,
     lockInfo,
     readOnly,
-    statusChip,
   };
 }
 

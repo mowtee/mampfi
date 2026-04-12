@@ -57,7 +57,7 @@
     "activeMember": "Aktives Mitglied",
     "left": "Verlassen",
     "open": "Öffnen",
-    "owner": "Eigentümer",
+    "owner": "Admin",
     "youLeftOn": "Verlassen am {{date}}"
   },
   "tabs": {
@@ -67,9 +67,10 @@
     "admin": "Admin"
   },
   "day": {
+    "today": "Heute",
     "date": "Datum",
-    "lockInfo": "Bestellungen sperren am Vortag um {{time}}.",
-    "rollover": "Übernahme",
+    "lockInfo": "Bestellungen möglich bis {{time}}.",
+    "rollover": "Übernehmen",
     "rolloverHint": "Deine letzte Bestellung wird automatisch für morgen übernommen, sofern du sie nicht vor der Sperrzeit änderst.",
     "yourOrder": "Deine Bestellung",
     "rolledOver": "Übernommene Bestellung von einem früheren Tag",
@@ -81,8 +82,10 @@
     "item": "Artikel",
     "unit": "Preis",
     "qty": "Menge",
-    "total": "Gesamt",
-    "yourTotal": "Dein Gesamt: {{amount}}",
+    "total": "Summe",
+    "yourTotal": "Deine Summe: {{amount}}",
+    "locked": "Gesperrt",
+    "openUntil": "Offen bis {{time}}",
     "finalized": "Abgeschlossen",
     "saving": "Speichern…",
     "saveOrder": "Bestellung speichern",
@@ -179,7 +182,7 @@
     "noPurchases": "Noch keine Einkäufe.",
     "date": "Datum",
     "buyer": "Käufer",
-    "total": "Gesamt",
+    "total": "Summe",
     "view": "Ansehen",
     "aggregate": "Aggregat",
     "perMember": "Pro Mitglied",

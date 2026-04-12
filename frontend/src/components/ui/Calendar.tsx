@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 export type CalendarProps = {
   value?: string; // YYYY-MM-DD
@@ -45,6 +46,8 @@ export default function Calendar({
   onClose,
   holidaysLabelByDate,
 }: CalendarProps) {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === "de" ? "de-DE" : "en-US";
   const todayStr = ymdFromDateUTC(new Date());
   const initial = value ? dateFromYmdUTC(value) : new Date();
   const [view, setView] = React.useState<Date>(
@@ -52,12 +55,12 @@ export default function Calendar({
   );
 
   const monthName = React.useMemo(() => {
-    return new Intl.DateTimeFormat(undefined, {
+    return new Intl.DateTimeFormat(locale, {
       month: "long",
       year: "numeric",
       timeZone: "UTC",
     }).format(view);
-  }, [view]);
+  }, [view, locale]);
 
   // Monday-first grid
   const year = view.getUTCFullYear();
@@ -93,7 +96,13 @@ export default function Calendar({
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const weekdays = React.useMemo(() => {
+    // Generate localized weekday abbreviations starting from Monday
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(Date.UTC(2024, 0, i + 1)); // 2024-01-01 is a Monday
+      return new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" }).format(d);
+    });
+  }, [locale]);
 
   return (
     <div className="calendar-pop card" role="dialog" aria-label="Choose date">
@@ -167,7 +176,7 @@ export default function Calendar({
             onClose?.();
           }}
         >
-          Today
+          {t("day.today")}
         </button>
       </div>
     </div>

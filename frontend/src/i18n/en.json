@@ -67,6 +67,7 @@
     "admin": "Admin"
   },
   "day": {
+    "today": "Today",
     "date": "Date",
     "lockInfo": "Orders lock on the previous day at {{time}}.",
     "rollover": "Rollover",
@@ -83,6 +84,8 @@
     "qty": "Qty",
     "total": "Total",
     "yourTotal": "Your total: {{amount}}",
+    "locked": "Locked",
+    "openUntil": "Open until {{time}}",
     "finalized": "Finalized",
     "saving": "Saving…",
     "saveOrder": "Save Order",

@@ -109,7 +109,10 @@ export default function EventDetail() {
                 {t("events.activeMember")}
               </span>
               {isOwner && (
-                <span className="chip" style={{ marginLeft: 4, fontWeight: 600 }}>
+                <span
+                  className="chip"
+                  style={{ marginLeft: 4, fontWeight: 600, background: "#e5e7eb" }}
+                >
                   {t("events.owner")}
                 </span>
               )}
