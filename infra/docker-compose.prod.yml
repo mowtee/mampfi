@@ -28,6 +28,8 @@ services:
     image: ghcr.io/mowtee/mampfi-api:${TAG:-latest}
     env_file:
       - .env
+    environment:
+      DATABASE_URL: "postgresql+psycopg://${POSTGRES_USER:-mampfi}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-mampfi}"
     depends_on:
       db:
         condition: service_healthy
@@ -53,6 +55,8 @@ services:
     image: ghcr.io/mowtee/mampfi-api:${TAG:-latest}
     env_file:
       - .env
+    environment:
+      DATABASE_URL: "postgresql+psycopg://${POSTGRES_USER:-mampfi}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-mampfi}"
     command: ["python", "-m", "mampfi_api.worker"]
     depends_on:
       db:
@@ -64,6 +68,8 @@ services:
     image: ghcr.io/mowtee/mampfi-api:${TAG:-latest}
     env_file:
       - .env
+    environment:
+      DATABASE_URL: "postgresql+psycopg://${POSTGRES_USER:-mampfi}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-mampfi}"
     command: ["alembic", "upgrade", "head"]
     depends_on:
       db:
