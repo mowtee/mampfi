@@ -1,0 +1,8 @@
+{% extends "email/base.txt" %}
+{% block content %}
+{{ greeting }} {{ name }},
+
+{{ body }}
+
+{{ link }}
+{% endblock %}

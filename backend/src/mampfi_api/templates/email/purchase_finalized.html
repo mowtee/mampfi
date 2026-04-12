@@ -1,0 +1,6 @@
+{% extends "email/base.html" %}
+{% block content %}
+<p>{{ greeting }} {{ name }},</p>
+<p>{{ body }}</p>
+<p><a href="{{ link }}" class="btn">{{ cta }}</a></p>
+{% endblock %}

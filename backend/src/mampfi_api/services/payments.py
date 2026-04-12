@@ -2,11 +2,17 @@ import uuid
 
 from sqlmodel import Session, select
 
+from ..config import get_settings
 from ..exceptions import Conflict, DomainError, Forbidden, NotFound
 from ..models import Event, Payment, PaymentEvent, User
 from ..schemas.payments import DeclineIn, PaymentCreateIn, PaymentEventOut, PaymentOut
+from ..services.email import notify_payment_confirmed, notify_payment_created
 from ..services.events import require_member
 from ..timeutils import now_utc
+
+
+def _fmt_money(minor: int, currency: str) -> str:
+    return f"{minor / 100:.2f} {currency}"
 
 
 def _get_payment(session: Session, event_id: uuid.UUID, payment_id: uuid.UUID) -> Payment:
@@ -55,6 +61,21 @@ def create_payment(
     )
     session.commit()
     session.refresh(p)
+
+    # Notify recipient
+    recipient = session.get(User, p.to_user_id)
+    if recipient:
+        settings = get_settings()
+        notify_payment_created(
+            session,
+            recipient,
+            user,
+            ev,
+            _fmt_money(p.amount_minor, ev.currency),
+            settings.frontend_url,
+        )
+        session.commit()
+
     return PaymentOut.model_validate(p, from_attributes=True)
 
 
@@ -100,6 +121,21 @@ def confirm_payment(
     )
     session.commit()
     session.refresh(p)
+
+    # Notify proposer that payment was confirmed
+    proposer = session.get(User, p.from_user_id)
+    if proposer:
+        settings = get_settings()
+        notify_payment_confirmed(
+            session,
+            proposer,
+            user,
+            ev,
+            _fmt_money(p.amount_minor, ev.currency),
+            settings.frontend_url,
+        )
+        session.commit()
+
     return PaymentOut.model_validate(p, from_attributes=True)
 
 

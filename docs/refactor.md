@@ -81,6 +81,6 @@ Implementation order:
 
 - [x] **Run containers as non-root** — Backend uses `app` user; frontend uses `nginxinc/nginx-unprivileged` on port 8080.
 
-- [~] **Notifications worker** — Outbox processor + SMTP sending implemented. Remaining: wire domain events (payments, purchases) to enqueue notification emails.
+- [x] **Notifications worker** — Outbox processor + SMTP sending. Payment created/confirmed and purchase finalized trigger i18n email notifications to relevant members.
 
 - [ ] **Post-deploy smoke test** — `infra/deploy.sh` has no health check after restart to confirm the deploy succeeded. **(later)**

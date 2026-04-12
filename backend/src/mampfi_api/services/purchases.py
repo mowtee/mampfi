@@ -3,9 +3,11 @@ import uuid
 
 from sqlmodel import Session, select
 
+from ..config import get_settings
 from ..exceptions import Conflict, DomainError, NotFound
 from ..models import Event, PriceItem, Purchase, User
 from ..schemas.purchases import PurchaseCreateIn, PurchaseOut
+from ..services.email import notify_purchase_finalized
 from ..services.events import require_member
 from ..timeutils import now_utc
 
@@ -77,6 +79,36 @@ def finalize_purchase(
     session.add(purchase)
     session.commit()
     session.refresh(purchase)
+
+    # Notify members who have allocations
+    settings = get_settings()
+    notified: set[uuid.UUID] = set()
+    for line in normalized_lines:
+        for alloc in line.get("allocations") or []:
+            uid_str = alloc.get("user_id")
+            if not uid_str:
+                continue
+            try:
+                uid = uuid.UUID(str(uid_str))
+            except ValueError:
+                continue
+            if uid in notified or uid == user.id:
+                continue
+            recipient = session.get(User, uid)
+            if recipient:
+                notify_purchase_finalized(
+                    session,
+                    recipient,
+                    user,
+                    ev,
+                    str(data.date),
+                    f"{total_minor / 100:.2f} {ev.currency}",
+                    settings.frontend_url,
+                )
+                notified.add(uid)
+    if notified:
+        session.commit()
+
     return PurchaseOut.model_validate(purchase, from_attributes=True)
 
 

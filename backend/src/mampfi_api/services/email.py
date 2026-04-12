@@ -6,7 +6,7 @@ from jinja2 import Environment, FileSystemLoader
 from sqlmodel import Session
 
 from ..i18n import get_lang, t
-from ..models import EmailOutbox, User
+from ..models import EmailOutbox, Event, User
 
 _TEMPLATE_DIR = Path(__file__).resolve().parent.parent / "templates"
 _jinja = Environment(loader=FileSystemLoader(str(_TEMPLATE_DIR)), autoescape=True)
@@ -69,3 +69,112 @@ def enqueue_password_reset_email(
     body_html = _render("email/reset_password.html", **ctx)
     body_text = _render("email/reset_password.txt", **ctx)
     return enqueue_email(session, user.email, subject, body_html, body_text)
+
+
+# ---------------------------------------------------------------------------
+# Domain notification emails
+# ---------------------------------------------------------------------------
+
+
+def _event_link(frontend_url: str, event_id: str) -> str:
+    return f"{frontend_url}/events/{event_id}?tab=payments"
+
+
+def notify_payment_created(
+    session: Session,
+    recipient: User,
+    from_user: User,
+    event: Event,
+    amount_formatted: str,
+    frontend_url: str,
+) -> EmailOutbox:
+    lang = get_lang(recipient.locale)
+    name = recipient.name or recipient.email
+    from_name = from_user.name or from_user.email
+    link = _event_link(frontend_url, str(event.id))
+
+    subject = t("payment_created_subject", lang, event_name=event.name)
+    ctx = dict(
+        lang=lang,
+        greeting=t("greeting", lang),
+        name=name,
+        body=t("payment_created_body", lang, from_name=from_name, amount=amount_formatted),
+        link=link,
+        cta=t("payment_created_cta", lang),
+    )
+    return enqueue_email(
+        session,
+        recipient.email,
+        subject,
+        _render("email/payment_created.html", **ctx),
+        _render("email/payment_created.txt", **ctx),
+    )
+
+
+def notify_payment_confirmed(
+    session: Session,
+    recipient: User,
+    to_user: User,
+    event: Event,
+    amount_formatted: str,
+    frontend_url: str,
+) -> EmailOutbox:
+    lang = get_lang(recipient.locale)
+    name = recipient.name or recipient.email
+    to_name = to_user.name or to_user.email
+    link = _event_link(frontend_url, str(event.id))
+
+    subject = t("payment_confirmed_subject", lang, event_name=event.name)
+    ctx = dict(
+        lang=lang,
+        greeting=t("greeting", lang),
+        name=name,
+        body=t("payment_confirmed_body", lang, amount=amount_formatted, to_name=to_name),
+        link=link,
+        cta=t("payment_created_cta", lang),
+    )
+    return enqueue_email(
+        session,
+        recipient.email,
+        subject,
+        _render("email/payment_confirmed.html", **ctx),
+        _render("email/payment_confirmed.txt", **ctx),
+    )
+
+
+def notify_purchase_finalized(
+    session: Session,
+    recipient: User,
+    buyer: User,
+    event: Event,
+    date_str: str,
+    total_formatted: str,
+    frontend_url: str,
+) -> EmailOutbox:
+    lang = get_lang(recipient.locale)
+    name = recipient.name or recipient.email
+    buyer_name = buyer.name or buyer.email
+    link = _event_link(frontend_url, str(event.id))
+
+    subject = t("purchase_finalized_subject", lang, date=date_str)
+    ctx = dict(
+        lang=lang,
+        greeting=t("greeting", lang),
+        name=name,
+        body=t(
+            "purchase_finalized_body",
+            lang,
+            buyer_name=buyer_name,
+            date=date_str,
+            total=total_formatted,
+        ),
+        link=link,
+        cta=t("payment_created_cta", lang),
+    )
+    return enqueue_email(
+        session,
+        recipient.email,
+        subject,
+        _render("email/purchase_finalized.html", **ctx),
+        _render("email/purchase_finalized.txt", **ctx),
+    )
