@@ -39,6 +39,11 @@ export default function EventsList() {
                   ) : (
                     <span className="chip open">{t("events.activeMember")}</span>
                   )}
+                  {ev.role === "owner" && (
+                    <span className="chip" style={{ background: "#e5e7eb", fontWeight: 600 }}>
+                      {t("events.owner")}
+                    </span>
+                  )}
                 </div>
                 <div className="muted">
                   {formatYMDToLocale(ev.start_date)} → {formatYMDToLocale(ev.end_date)} •{" "}

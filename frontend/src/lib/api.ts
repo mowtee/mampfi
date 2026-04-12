@@ -74,6 +74,7 @@ export type Event = {
   holiday_country_code?: string | null;
   holiday_region_code?: string | null;
   left_at?: string | null;
+  role?: string | null;
 };
 
 export type PriceItem = { id: UUID; name: string; unit_price_minor: number; active: boolean };

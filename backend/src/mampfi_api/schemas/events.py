@@ -58,6 +58,7 @@ class EventWithMe(BaseModel):
     holiday_country_code: str | None = None
     holiday_region_code: str | None = None
     left_at: dt.datetime | None = None
+    role: str | None = None
 
 
 class PriceItemAdd(BaseModel):

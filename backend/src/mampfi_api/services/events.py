@@ -103,6 +103,7 @@ def list_my_events(session: Session, user: User) -> list[EventWithMe]:
                 holiday_country_code=ev.holiday_country_code,
                 holiday_region_code=ev.holiday_region_code,
                 left_at=m.left_at if m else None,
+                role=m.role if m else None,
             )
         )
     return out
