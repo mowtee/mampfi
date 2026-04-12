@@ -24,7 +24,8 @@ export default function App() {
   return (
     <div className="site">
       <header className="topbar">
-        <Link to="/" className="brand">
+        <Link to="/" className="brand" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <img src="/logo.png" alt="Mampfi" style={{ height: 32, width: 32 }} />
           Mampfi
         </Link>
         <span className="spacer" />
