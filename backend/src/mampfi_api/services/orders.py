@@ -6,7 +6,14 @@ from sqlmodel import Session, select
 
 from ..exceptions import Conflict, DomainError, Forbidden, NotFound
 from ..models import DailyOrder, Event, Membership, PriceItem, Purchase, User
-from ..schemas.orders import AggregateOut, OrderItemOut, OrderOut, OrderUpsertIn
+from ..schemas.orders import (
+    AggregateConsumerOut,
+    AggregateItemOut,
+    AggregateOut,
+    OrderItemOut,
+    OrderOut,
+    OrderUpsertIn,
+)
 from ..services.events import require_member
 
 
@@ -242,15 +249,17 @@ def aggregate_orders(
     }
 
     totals: dict[str, int] = {}
-    consumers: dict[str, list[dict]] = {}
+    consumers: dict[str, list[AggregateConsumerOut]] = {}
     for o in orders:
         for it in o.items:
             pid = str(it.get("price_item_id"))
             qty = int(it.get("qty", 0))
             totals[pid] = totals.get(pid, 0) + qty
-            consumers.setdefault(pid, []).append({"user_id": str(o.user_id), "qty": qty})
+            consumers.setdefault(pid, []).append(
+                AggregateConsumerOut(user_id=str(o.user_id), qty=qty)
+            )
 
-    agg_items = []
+    agg_items: list[AggregateItemOut] = []
     grand_total = 0
     for pid, qty in totals.items():
         m = meta.get(pid, {})
@@ -259,13 +268,13 @@ def aggregate_orders(
         if isinstance(item_total, int):
             grand_total += item_total
         agg_items.append(
-            {
-                "price_item_id": pid,
-                "name": m.get("name"),
-                "unit_price_minor": unit,
-                "item_total_minor": item_total,
-                "total_qty": qty,
-                "consumers": consumers.get(pid, []),
-            }
+            AggregateItemOut(
+                price_item_id=pid,
+                name=m.get("name"),
+                unit_price_minor=unit,
+                item_total_minor=item_total,
+                total_qty=qty,
+                consumers=consumers.get(pid, []),
+            )
         )
     return AggregateOut(date=date, total_minor=grand_total, items=agg_items)

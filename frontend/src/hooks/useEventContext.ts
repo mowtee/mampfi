@@ -8,26 +8,34 @@ export function useEventContext(eventId: string, forDate: string, activeTab: str
   const isDay = activeTab === "day";
   const isPayments = activeTab === "payments";
 
+  // Static or slow-changing data gets longer staleTime to reduce refetches
+  const STATIC = 5 * 60_000; // 5 min — event metadata, price items
+  const MODERATE = 60_000; // 1 min — members list
+
   const ev = useQuery({
     queryKey: ["event", eventId],
     queryFn: () => api.getEvent(eventId),
     enabled: !!eventId,
+    staleTime: STATIC,
   });
-  const meQ = useQuery({ queryKey: ["me"], queryFn: () => api.getMe() });
+  const meQ = useQuery({ queryKey: ["me"], queryFn: () => api.getMe(), staleTime: STATIC });
   const price = useQuery({
     queryKey: ["price", eventId],
     queryFn: () => api.listPriceItems(eventId),
     enabled: !!eventId,
+    staleTime: STATIC,
   });
   const priceAll = useQuery({
     queryKey: ["priceAll", eventId],
     queryFn: () => api.listPriceItems(eventId, true),
     enabled: !!eventId,
+    staleTime: STATIC,
   });
   const members = useQuery({
     queryKey: ["members", eventId],
     queryFn: () => api.listMembers(eventId),
     enabled: !!eventId,
+    staleTime: MODERATE,
   });
 
   const meId = meQ.data?.id;

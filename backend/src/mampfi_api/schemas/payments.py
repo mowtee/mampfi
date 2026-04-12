@@ -1,13 +1,13 @@
 import datetime as dt
 import uuid
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class PaymentCreateIn(BaseModel):
     to_user_id: uuid.UUID
-    amount_minor: int
-    note: str | None = None
+    amount_minor: int = Field(gt=0)
+    note: str | None = Field(default=None, max_length=500)
 
 
 class PaymentOut(BaseModel):
@@ -25,7 +25,7 @@ class PaymentOut(BaseModel):
 
 
 class DeclineIn(BaseModel):
-    reason: str | None = None
+    reason: str | None = Field(default=None, max_length=500)
 
 
 class PaymentEventOut(BaseModel):

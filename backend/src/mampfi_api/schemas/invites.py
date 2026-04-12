@@ -1,17 +1,17 @@
 import datetime as dt
 import uuid
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Field
 
 
 class GroupInviteIn(BaseModel):
-    ttl_days: int = 14
-    max_uses: int | None = None
+    ttl_days: int = Field(default=14, gt=0, le=365)
+    max_uses: int | None = Field(default=None, gt=0)
 
 
 class SingleInviteIn(BaseModel):
-    ttl_days: int = 14
-    email: str | None = None
+    ttl_days: int = Field(default=14, gt=0, le=365)
+    email: EmailStr | None = None
 
 
 class InviteOut(BaseModel):

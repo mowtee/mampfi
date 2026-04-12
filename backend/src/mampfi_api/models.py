@@ -1,5 +1,6 @@
 import datetime as dt
 import uuid
+from typing import TypedDict
 
 from sqlalchemy import JSON, Column
 from sqlalchemy import DateTime as SADateTime
@@ -80,6 +81,11 @@ class PriceItem(SQLModel, table=True):
     )
 
 
+class OrderItemDict(TypedDict):
+    price_item_id: str
+    qty: int
+
+
 class DailyOrder(SQLModel, table=True):
     __tablename__ = "daily_orders"
 
@@ -87,11 +93,25 @@ class DailyOrder(SQLModel, table=True):
     event_id: uuid.UUID = Field(sa_type=UUID(as_uuid=True), index=True)
     user_id: uuid.UUID = Field(sa_type=UUID(as_uuid=True), index=True)
     date: dt.date = Field(index=True)
-    # [{price_item_id: UUID, qty: int}]
-    items: list[dict] = Field(sa_type=PgJSON)
+    items: list[OrderItemDict] = Field(sa_type=PgJSON)
     locked_at: dt.datetime | None = Field(
         default=None, sa_column=Column(SADateTime(timezone=True), nullable=True)
     )
+
+
+class PurchaseAllocationDict(TypedDict):
+    user_id: str
+    qty: int
+
+
+class PurchaseLineDict(TypedDict, total=False):
+    type: str
+    price_item_id: str | None
+    name: str | None
+    qty_final: int
+    unit_price_minor: int
+    reason: str | None
+    allocations: list[PurchaseAllocationDict]
 
 
 class Purchase(SQLModel, table=True):
@@ -105,8 +125,7 @@ class Purchase(SQLModel, table=True):
         default_factory=now_utc,
         sa_column=Column(SADateTime(timezone=True), nullable=False),
     )
-    # authoritative lines, substitutions/omissions with allocations
-    lines: list[dict] = Field(sa_type=PgJSON)
+    lines: list[PurchaseLineDict] = Field(sa_type=PgJSON)
     total_minor: int
     notes: str | None = None
     version: int = Field(default=1)

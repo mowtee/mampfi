@@ -40,7 +40,7 @@ def test_create_event_bad_dates(client: TestClient, user):
         },
         headers=auth_headers(user.email),
     )
-    assert resp.status_code == 400
+    assert resp.status_code == 422
 
 
 def test_create_event_bad_timezone(client: TestClient, user):
@@ -57,7 +57,7 @@ def test_create_event_bad_timezone(client: TestClient, user):
         },
         headers=auth_headers(user.email),
     )
-    assert resp.status_code == 400
+    assert resp.status_code == 422
 
 
 def test_list_my_events_empty(client: TestClient, user):

@@ -47,7 +47,7 @@ def test_create_payment_zero_amount(client: TestClient, user, other_user, ev):
         json={"to_user_id": str(other_user.id), "amount_minor": 0},
         headers=auth_headers(user.email),
     )
-    assert resp.status_code == 400
+    assert resp.status_code == 422
 
 
 def test_confirm_payment(client: TestClient, user, other_user, ev):

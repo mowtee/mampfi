@@ -2,7 +2,7 @@ import datetime as dt
 import uuid
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class AllocationIn(BaseModel):
@@ -23,7 +23,22 @@ class PurchaseLineIn(BaseModel):
 class PurchaseCreateIn(BaseModel):
     date: dt.date
     lines: list[PurchaseLineIn]
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=2000)
+
+
+class AllocationOut(BaseModel):
+    user_id: str
+    qty: int
+
+
+class PurchaseLineOut(BaseModel):
+    type: str
+    price_item_id: str | None = None
+    name: str | None = None
+    qty_final: int
+    unit_price_minor: int
+    reason: str | None = None
+    allocations: list[AllocationOut] | None = None
 
 
 class PurchaseOut(BaseModel):
@@ -31,6 +46,6 @@ class PurchaseOut(BaseModel):
     date: dt.date
     buyer_id: uuid.UUID
     finalized_at: dt.datetime
-    lines: list[dict]
+    lines: list[PurchaseLineOut]
     total_minor: int
     notes: str | None = None

@@ -117,9 +117,8 @@ export default function DayTab({
     },
   });
 
-  const [finalizeOpen, setFinalizeOpen] = React.useState(false);
-  const [precheckOpen, setPrecheckOpen] = React.useState(false);
-  const [worksheetOpen, setWorksheetOpen] = React.useState(false);
+  type ModalState = "closed" | "precheck" | "finalize" | "worksheet";
+  const [modal, setModal] = React.useState<ModalState>("closed");
   const [ws, setWs] = React.useState<WSLine[]>([]);
   const [wsNotes, setWsNotes] = React.useState("");
   const [addItemId, setAddItemId] = React.useState("");
@@ -163,8 +162,7 @@ export default function DayTab({
       return api.createPurchase(eventId, forDate, lines, notes);
     },
     onSuccess: () => {
-      setWorksheetOpen(false);
-      setFinalizeOpen(false);
+      setModal("closed");
       qc.invalidateQueries({ queryKey: ["purchase", eventId, forDate] });
       qc.invalidateQueries({ queryKey: ["balances", eventId] });
       qc.invalidateQueries({ queryKey: ["payments", eventId] });
@@ -214,9 +212,7 @@ export default function DayTab({
       });
     }
     setWs(lines);
-    setWorksheetOpen(true);
-    setPrecheckOpen(false);
-    setFinalizeOpen(false);
+    setModal("worksheet");
   }
 
   if (!ev.data) return null;
@@ -516,7 +512,7 @@ export default function DayTab({
                 </p>
               ) : (
                 <button
-                  onClick={() => setPrecheckOpen(true)}
+                  onClick={() => setModal("precheck")}
                   disabled={finalize.isPending}
                   className="btn primary"
                 >
@@ -528,10 +524,10 @@ export default function DayTab({
           )}
 
           {/* Finalize confirmation modal */}
-          {finalizeOpen && agg.data && (
+          {modal === "finalize" && agg.data && (
             <Modal
               open={true}
-              onClose={() => !finalize.isPending && setFinalizeOpen(false)}
+              onClose={() => !finalize.isPending && setModal("closed")}
               size="lg"
               top
             >
@@ -580,7 +576,7 @@ export default function DayTab({
               <ModalActions>
                 <button
                   className="btn"
-                  onClick={() => setFinalizeOpen(false)}
+                  onClick={() => setModal("closed")}
                   disabled={finalize.isPending}
                 >
                   Cancel
@@ -597,8 +593,8 @@ export default function DayTab({
           )}
 
           {/* Precheck modal */}
-          {precheckOpen && (
-            <Modal open={true} onClose={() => setPrecheckOpen(false)} size="sm" top>
+          {modal === "precheck" && (
+            <Modal open={true} onClose={() => setModal("closed")} size="sm" top>
               <ModalBody>
                 <h3>Everything bought as ordered?</h3>
                 <p className="muted">
@@ -607,14 +603,13 @@ export default function DayTab({
                 </p>
               </ModalBody>
               <ModalActions>
-                <button className="btn" onClick={() => setPrecheckOpen(false)}>
+                <button className="btn" onClick={() => setModal("closed")}>
                   Cancel
                 </button>
                 <button
                   className="btn primary"
                   onClick={() => {
-                    setPrecheckOpen(false);
-                    setFinalizeOpen(true);
+                    setModal("finalize");
                   }}
                 >
                   Yes, finalize as is
@@ -627,8 +622,8 @@ export default function DayTab({
           )}
 
           {/* Worksheet modal */}
-          {worksheetOpen && (
-            <Modal open={true} onClose={() => setWorksheetOpen(false)} size="lg" top dim>
+          {modal === "worksheet" && (
+            <Modal open={true} onClose={() => setModal("closed")} size="lg" top dim>
               <ModalBody>
                 <h3>Finalize with adjustments</h3>
                 <div className="muted" style={{ marginBottom: 8 }}>
@@ -875,7 +870,7 @@ export default function DayTab({
                 </div>
               </ModalBody>
               <ModalActions>
-                <button className="btn" onClick={() => setWorksheetOpen(false)}>
+                <button className="btn" onClick={() => setModal("closed")}>
                   Close
                 </button>
                 <button className="btn primary" onClick={() => finalizeFromWorksheet()}>

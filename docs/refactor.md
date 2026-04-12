@@ -28,18 +28,18 @@ src/mampfi_api/
 Domain exceptions are raised by services and translated to HTTP responses by a single exception handler registered in `main.py`. Business logic never imports `HTTPException`.
 
 Implementation order:
-- [~] **`exceptions.py`** — `NotFound`, `Forbidden`, `Conflict`, `DomainError`; register handler in `main.py`
-- [ ] **`schemas/`** — extract all inline Pydantic models from routers into per-domain schema files
-- [ ] **`services/`** — one module per domain (events, orders, purchases, payments, members, invites, balances); move all business logic; use domain exceptions
-- [ ] **Thin routers** — routers become pure HTTP adapters: validate input, call service, return schema
-- [ ] **Type JSONB fields** — `DailyOrder.items` and `Purchase.lines` are raw `list[dict]`; define Pydantic models for order line items and purchase lines; do this while writing service layer
-- [ ] **Remove duplicate balance calculation** — `_compute_balances_for_event()` duplicated in `members.py` and `balances.py`; consolidate into `services/balances.py`
+- [x] **`exceptions.py`** — `NotFound`, `Forbidden`, `Conflict`, `DomainError`; register handler in `main.py`
+- [x] **`schemas/`** — extract all inline Pydantic models from routers into per-domain schema files
+- [x] **`services/`** — one module per domain (events, orders, purchases, payments, members, invites, balances); move all business logic; use domain exceptions
+- [x] **Thin routers** — routers become pure HTTP adapters: validate input, call service, return schema
+- [x] **Type JSONB fields** — `DailyOrder.items` typed as `list[OrderItemDict]`, `Purchase.lines` as `list[PurchaseLineDict]`; output schemas `AggregateOut` and `PurchaseOut` use typed Pydantic models
+- [x] **Remove duplicate balance calculation** — consolidated into `services/balances.py`; `members.py` imports from there
 
 ### Remaining Backend
 
-- [ ] **Harden input validation** — Name/description fields have no max length. Email validation only checks for `@`. Timezone should be validated at schema level. Notes fields risk XSS.
+- [x] **Harden input validation** — Added max_length constraints to all string fields, `gt=0` for amounts/prices, IANA timezone validation, `EmailStr` for invite emails, `end_date >= start_date` check.
 
-- [ ] **Add test suite** — `pytest` and `httpx` in dev deps but zero test files. Write integration tests against real DB once service layer is in place (services are easier to test than routers).
+- [x] **Add test suite** — 54 integration tests via pytest + httpx against SQLite in-memory DB.
 
 - [ ] **Production auth** — `X-Dev-User` header is dev-only. Replace with invite-based signup + session cookies. Swap only touches `auth.py` and router signatures — service layer is auth-agnostic.
 
@@ -51,17 +51,17 @@ Implementation order:
 
 ### High Priority
 
-- [ ] **Split `EventDetail.tsx` (1,626 lines)** — Extract tab-scoped components: `DayTab`, `HistoryTab`, `PaymentsTab`, `AdminTab`. Create a shared `useEventContext` hook to hold the 13+ queries and common state. Current file is unmaintainable.
+- [x] **Split `EventDetail.tsx` (1,626 lines)** — Extracted into `DayTab`, `HistoryTab`, `PaymentsTab`, `AdminTab` + `useEventContext` hook. Sub-components colocated in tab files.
 
-- [ ] **Eliminate `any` casts (44+ instances)** — `strict: true` is set but bypassed. Focus on `lib/api.ts` (8 instances) and `EventDetail.tsx` (pervasive). Define proper response types per API endpoint.
+- [x] **Eliminate `any` casts** — Defined domain types in `lib/types.ts`. Replaced all `any` in `api.ts` return types and most component code.
 
 ### Medium Priority
 
-- [ ] **Replace 9 modal boolean flags with state machine** — `devOpen`, `finalizeOpen`, `worksheetOpen`, etc. declared separately. Use a single `useReducer` or enum-keyed state object.
+- [x] **Replace modal boolean flags with state machine** — DayTab's 3 finalize modals (`finalizeOpen`, `precheckOpen`, `worksheetOpen`) replaced with single `ModalState` enum.
 
-- [ ] **Extract custom hooks** — Tab switching (useSearchParams), event context queries, and rollover preference (localStorage) are good candidates.
+- [x] **Extract custom hooks** — `useEventContext` hook extracts all 13+ queries and derived state from EventDetail.
 
-- [ ] **Tune React Query `staleTime`** — Currently `0` everywhere (refetch on every mount). Set sensible per-query values; static data like price items can be cached much longer.
+- [x] **Tune React Query `staleTime`** — Static data (event, price items, me) cached 5 min; members cached 1 min; orders/balances/payments stay at 0 (polled).
 
 ### Low Priority / Later
 
@@ -75,7 +75,7 @@ Implementation order:
 
 ## Infra / DevOps
 
-- [ ] **Add CI/CD pipeline** — No GitHub Actions yet. Add: lint + test on PR (ruff, pytest, eslint, vitest), Docker build validation.
+- [x] **Add CI/CD pipeline** — CI workflow (lint + test on push/PR) and release workflow (Docker images on `v*` tags to GHCR).
 
 - [ ] **Add database backup strategy** — Production data lives on a named Docker volume with no documented backup/restore procedure.
 

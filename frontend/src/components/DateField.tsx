@@ -75,8 +75,7 @@ export default function DateField({
       window.matchMedia("(pointer: coarse)").matches;
     const touch =
       typeof navigator !== "undefined" &&
-      (navigator as { maxTouchPoints?: number }).maxTouchPoints != null &&
-      (navigator as { maxTouchPoints?: number }).maxTouchPoints > 0;
+      ((navigator as { maxTouchPoints?: number }).maxTouchPoints ?? 0) > 0;
     const narrow = typeof window !== "undefined" && window.innerWidth < 700;
     return coarse || touch || narrow;
   }
