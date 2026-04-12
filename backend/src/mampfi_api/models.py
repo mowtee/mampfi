@@ -1,18 +1,19 @@
-from __future__ import annotations
-
 import datetime as dt
 import uuid
 
-from sqlalchemy import Column
+from sqlalchemy import JSON, Column
 from sqlalchemy import DateTime as SADateTime
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlmodel import Field, SQLModel
 
 from .timeutils import now_utc
 
+# JSONB on PostgreSQL, plain JSON on SQLite (tests).
+PgJSON = JSONB().with_variant(JSON(), "sqlite")
+
 
 def uuid_pk() -> uuid.UUID:
-    return uuid.uuid4()
+    return uuid.uuid7()
 
 
 class User(SQLModel, table=True):
@@ -87,7 +88,7 @@ class DailyOrder(SQLModel, table=True):
     user_id: uuid.UUID = Field(sa_type=UUID(as_uuid=True), index=True)
     date: dt.date = Field(index=True)
     # [{price_item_id: UUID, qty: int}]
-    items: list[dict] = Field(sa_type=JSONB)
+    items: list[dict] = Field(sa_type=PgJSON)
     locked_at: dt.datetime | None = Field(
         default=None, sa_column=Column(SADateTime(timezone=True), nullable=True)
     )
@@ -105,7 +106,7 @@ class Purchase(SQLModel, table=True):
         sa_column=Column(SADateTime(timezone=True), nullable=False),
     )
     # authoritative lines, substitutions/omissions with allocations
-    lines: list[dict] = Field(sa_type=JSONB)
+    lines: list[dict] = Field(sa_type=PgJSON)
     total_minor: int
     notes: str | None = None
     version: int = Field(default=1)
@@ -168,6 +169,6 @@ class InviteToken(SQLModel, table=True):
         default=None, sa_column=Column(SADateTime(timezone=True), nullable=True)
     )
     email_domain: str | None = None
-    email_allowlist: list[str] | None = Field(default=None, sa_type=JSONB)
+    email_allowlist: list[str] | None = Field(default=None, sa_type=PgJSON)
     locale_hint: str | None = None
     notes: str | None = None

@@ -16,10 +16,15 @@ def _hash_token(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
+def _as_utc(d: dt.datetime) -> dt.datetime:
+    """Attach UTC tzinfo to naive datetimes (SQLite stores datetimes without tz)."""
+    return d if d.tzinfo is not None else d.replace(tzinfo=dt.UTC)
+
+
 def _validate_invite(inv: InviteToken, now: dt.datetime) -> None:
     if inv.revoked_at is not None:
         raise DomainError("invite revoked")
-    if now >= inv.expires_at:
+    if now >= _as_utc(inv.expires_at):
         raise DomainError("invite expired")
     if inv.max_uses is not None and inv.used_count >= inv.max_uses:
         raise DomainError("invite exhausted")

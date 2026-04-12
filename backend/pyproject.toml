@@ -18,7 +18,9 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest>=8.4.1",
+    "pytest-asyncio>=0.25",
     "httpx>=0.28.1",
+    "anyio>=4",
     "ruff>=0.12.9",
 ]
 
@@ -55,3 +57,7 @@ known-first-party = ["mampfi_api"]
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
