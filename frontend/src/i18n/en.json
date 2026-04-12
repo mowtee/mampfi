@@ -1,0 +1,57 @@
+{
+  "app": {
+    "name": "Mampfi",
+    "loading": "Loading...",
+    "back": "Back",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "logout": "Logout",
+    "language": "Language"
+  },
+  "auth": {
+    "login": "Log in",
+    "signup": "Create account",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name (optional)",
+    "loggingIn": "Logging in...",
+    "creating": "Creating...",
+    "createAccount": "Create account",
+    "alreadyHaveAccount": "Already have an account?",
+    "noAccount": "Create an account",
+    "forgotPassword": "Forgot password?",
+    "forgotPasswordTitle": "Forgot password",
+    "sendResetLink": "Send reset link",
+    "sending": "Sending...",
+    "backToLogin": "Back to login",
+    "checkEmail": "Check your email",
+    "checkEmailBody": "We sent a verification link to <strong>{{email}}</strong>. Click it to activate your account, then",
+    "checkEmailResetBody": "If an account with that email exists, we sent a password reset link.",
+    "verifyEmail": "Email Verification",
+    "verifying": "Verifying...",
+    "verified": "Email verified successfully.",
+    "verifyFailed": "Verification failed.",
+    "missingToken": "Missing verification token.",
+    "resetPassword": "Reset password",
+    "newPassword": "New password",
+    "setNewPassword": "Set new password",
+    "saving": "Saving...",
+    "passwordUpdated": "Password updated",
+    "passwordUpdatedBody": "Your password has been reset."
+  },
+  "events": {
+    "title": "My Events",
+    "create": "Create Event",
+    "noEvents": "No events yet.",
+    "activeMember": "Active member",
+    "youLeftOn": "You left on {{date}}"
+  },
+  "tabs": {
+    "day": "Day",
+    "history": "History",
+    "payments": "Payments",
+    "admin": "Admin"
+  }
+}

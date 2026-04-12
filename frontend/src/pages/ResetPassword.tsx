@@ -1,8 +1,10 @@
 import React from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 
 export default function ResetPassword() {
+  const { t } = useTranslation();
   const [search] = useSearchParams();
   const token = search.get("token") || "";
   const [password, setPassword] = React.useState("");
@@ -27,8 +29,8 @@ export default function ResetPassword() {
   if (!token) {
     return (
       <div style={{ maxWidth: 400, margin: "40px auto" }}>
-        <p className="danger">Missing reset token.</p>
-        <Link to="/login">Back to login</Link>
+        <p className="danger">{t("auth.missingToken")}</p>
+        <Link to="/login">{t("auth.backToLogin")}</Link>
       </div>
     );
   }
@@ -36,10 +38,10 @@ export default function ResetPassword() {
   if (done) {
     return (
       <div style={{ maxWidth: 400, margin: "40px auto" }}>
-        <h2>Password updated</h2>
-        <p className="ok">Your password has been reset.</p>
+        <h2>{t("auth.passwordUpdated")}</h2>
+        <p className="ok">{t("auth.passwordUpdatedBody")}</p>
         <Link to="/login" className="btn primary">
-          Log in
+          {t("auth.login")}
         </Link>
       </div>
     );
@@ -47,11 +49,11 @@ export default function ResetPassword() {
 
   return (
     <div style={{ maxWidth: 400, margin: "40px auto" }}>
-      <h2>Reset password</h2>
+      <h2>{t("auth.resetPassword")}</h2>
       <form onSubmit={handleSubmit}>
         <div className="vstack">
           <div className="field">
-            <label className="muted">New password</label>
+            <label className="muted">{t("auth.newPassword")}</label>
             <input
               className="input"
               type="password"
@@ -64,7 +66,7 @@ export default function ResetPassword() {
           </div>
           {error && <div className="danger">{error}</div>}
           <button className="btn primary" type="submit" disabled={loading}>
-            {loading ? "Saving..." : "Set new password"}
+            {loading ? t("auth.saving") : t("auth.setNewPassword")}
           </button>
         </div>
       </form>

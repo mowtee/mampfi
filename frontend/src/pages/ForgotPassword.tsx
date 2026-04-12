@@ -1,8 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 
 export default function ForgotPassword() {
+  const { t } = useTranslation();
   const [email, setEmail] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [done, setDone] = React.useState(false);
@@ -22,22 +24,20 @@ export default function ForgotPassword() {
   if (done) {
     return (
       <div style={{ maxWidth: 400, margin: "40px auto" }}>
-        <h2>Check your email</h2>
-        <p className="muted">
-          If an account with that email exists, we sent a password reset link.
-        </p>
-        <Link to="/login">Back to login</Link>
+        <h2>{t("auth.checkEmail")}</h2>
+        <p className="muted">{t("auth.checkEmailResetBody")}</p>
+        <Link to="/login">{t("auth.backToLogin")}</Link>
       </div>
     );
   }
 
   return (
     <div style={{ maxWidth: 400, margin: "40px auto" }}>
-      <h2>Forgot password</h2>
+      <h2>{t("auth.forgotPasswordTitle")}</h2>
       <form onSubmit={handleSubmit}>
         <div className="vstack">
           <div className="field">
-            <label className="muted">Email</label>
+            <label className="muted">{t("auth.email")}</label>
             <input
               className="input"
               type="email"
@@ -48,10 +48,10 @@ export default function ForgotPassword() {
             />
           </div>
           <button className="btn primary" type="submit" disabled={loading}>
-            {loading ? "Sending..." : "Send reset link"}
+            {loading ? t("auth.sending") : t("auth.sendResetLink")}
           </button>
           <div className="muted" style={{ marginTop: 8 }}>
-            <Link to="/login">Back to login</Link>
+            <Link to="/login">{t("auth.backToLogin")}</Link>
           </div>
         </div>
       </form>

@@ -1,0 +1,57 @@
+{
+  "app": {
+    "name": "Mampfi",
+    "loading": "Laden...",
+    "back": "Zurueck",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Loeschen",
+    "confirm": "Bestaetigen",
+    "logout": "Abmelden",
+    "language": "Sprache"
+  },
+  "auth": {
+    "login": "Anmelden",
+    "signup": "Konto erstellen",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "name": "Name (optional)",
+    "loggingIn": "Anmeldung...",
+    "creating": "Erstellen...",
+    "createAccount": "Konto erstellen",
+    "alreadyHaveAccount": "Bereits ein Konto?",
+    "noAccount": "Konto erstellen",
+    "forgotPassword": "Passwort vergessen?",
+    "forgotPasswordTitle": "Passwort vergessen",
+    "sendResetLink": "Link senden",
+    "sending": "Senden...",
+    "backToLogin": "Zurueck zur Anmeldung",
+    "checkEmail": "E-Mail pruefen",
+    "checkEmailBody": "Wir haben einen Bestaetigunslink an <strong>{{email}}</strong> gesendet. Klicke darauf, um dein Konto zu aktivieren, dann",
+    "checkEmailResetBody": "Falls ein Konto mit dieser E-Mail existiert, haben wir einen Link zum Zuruecksetzen gesendet.",
+    "verifyEmail": "E-Mail-Bestaetigung",
+    "verifying": "Bestaetigung...",
+    "verified": "E-Mail erfolgreich bestaetigt.",
+    "verifyFailed": "Bestaetigung fehlgeschlagen.",
+    "missingToken": "Fehlender Token.",
+    "resetPassword": "Passwort zuruecksetzen",
+    "newPassword": "Neues Passwort",
+    "setNewPassword": "Neues Passwort setzen",
+    "saving": "Speichern...",
+    "passwordUpdated": "Passwort aktualisiert",
+    "passwordUpdatedBody": "Dein Passwort wurde zurueckgesetzt."
+  },
+  "events": {
+    "title": "Meine Events",
+    "create": "Event erstellen",
+    "noEvents": "Noch keine Events.",
+    "activeMember": "Aktives Mitglied",
+    "youLeftOn": "Verlassen am {{date}}"
+  },
+  "tabs": {
+    "day": "Tag",
+    "history": "Verlauf",
+    "payments": "Zahlungen",
+    "admin": "Admin"
+  }
+}

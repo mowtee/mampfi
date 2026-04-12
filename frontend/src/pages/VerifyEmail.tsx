@@ -1,8 +1,10 @@
 import React from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 
 export default function VerifyEmail() {
+  const { t } = useTranslation();
   const [search] = useSearchParams();
   const token = search.get("token") || "";
   const [status, setStatus] = React.useState<"loading" | "ok" | "error">("loading");
@@ -11,7 +13,7 @@ export default function VerifyEmail() {
   React.useEffect(() => {
     if (!token) {
       setStatus("error");
-      setError("Missing verification token.");
+      setError(t("auth.missingToken"));
       return;
     }
     api
@@ -21,24 +23,24 @@ export default function VerifyEmail() {
         setStatus("error");
         setError(String(err));
       });
-  }, [token]);
+  }, [token, t]);
 
   return (
     <div style={{ maxWidth: 400, margin: "40px auto" }}>
-      <h2>Email Verification</h2>
-      {status === "loading" && <p className="muted">Verifying...</p>}
+      <h2>{t("auth.verifyEmail")}</h2>
+      {status === "loading" && <p className="muted">{t("auth.verifying")}</p>}
       {status === "ok" && (
         <div>
-          <p className="ok">Email verified successfully.</p>
+          <p className="ok">{t("auth.verified")}</p>
           <Link to="/login" className="btn primary">
-            Log in
+            {t("auth.login")}
           </Link>
         </div>
       )}
       {status === "error" && (
         <div>
-          <p className="danger">{error || "Verification failed."}</p>
-          <Link to="/login">Back to login</Link>
+          <p className="danger">{error || t("auth.verifyFailed")}</p>
+          <Link to="/login">{t("auth.backToLogin")}</Link>
         </div>
       )}
     </div>

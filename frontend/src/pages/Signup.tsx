@@ -1,8 +1,10 @@
 import React from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 
 export default function Signup() {
+  const { t, i18n } = useTranslation();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [name, setName] = React.useState("");
@@ -17,7 +19,7 @@ export default function Signup() {
     setError(null);
     setLoading(true);
     try {
-      await api.signup(email, password, name || undefined);
+      await api.signup(email, password, name || undefined, i18n.language);
       setDone(true);
     } catch (err) {
       setError(String(err));
@@ -29,26 +31,25 @@ export default function Signup() {
   if (done) {
     return (
       <div style={{ maxWidth: 400, margin: "40px auto" }}>
-        <h2>Check your email</h2>
-        <p>
-          We sent a verification link to <strong>{email}</strong>. Click it to activate your
-          account, then{" "}
-          <Link to={`/login${next !== "/" ? `?next=${encodeURIComponent(next)}` : ""}`}>
-            log in
-          </Link>
-          .
-        </p>
+        <h2>{t("auth.checkEmail")}</h2>
+        <p
+          dangerouslySetInnerHTML={{
+            __html:
+              t("auth.checkEmailBody", { email }) +
+              ` <a href="/login${next !== "/" ? `?next=${encodeURIComponent(next)}` : ""}">${t("auth.login")}</a>.`,
+          }}
+        />
       </div>
     );
   }
 
   return (
     <div style={{ maxWidth: 400, margin: "40px auto" }}>
-      <h2>Create account</h2>
+      <h2>{t("auth.createAccount")}</h2>
       <form onSubmit={handleSubmit}>
         <div className="vstack">
           <div className="field">
-            <label className="muted">Email</label>
+            <label className="muted">{t("auth.email")}</label>
             <input
               className="input"
               type="email"
@@ -59,11 +60,11 @@ export default function Signup() {
             />
           </div>
           <div className="field">
-            <label className="muted">Name (optional)</label>
+            <label className="muted">{t("auth.name")}</label>
             <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div className="field">
-            <label className="muted">Password</label>
+            <label className="muted">{t("auth.password")}</label>
             <input
               className="input"
               type="password"
@@ -75,12 +76,12 @@ export default function Signup() {
           </div>
           {error && <div className="danger">{error}</div>}
           <button className="btn primary" type="submit" disabled={loading}>
-            {loading ? "Creating..." : "Create account"}
+            {loading ? t("auth.creating") : t("auth.createAccount")}
           </button>
           <div className="muted" style={{ marginTop: 8 }}>
-            Already have an account?{" "}
+            {t("auth.alreadyHaveAccount")}{" "}
             <Link to={`/login${next !== "/" ? `?next=${encodeURIComponent(next)}` : ""}`}>
-              Log in
+              {t("auth.login")}
             </Link>
           </div>
         </div>

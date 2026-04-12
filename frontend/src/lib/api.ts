@@ -254,10 +254,10 @@ export const api = {
   ) => http(`/v1/events/${eventId}`, { method: "PATCH", body: JSON.stringify(data) }),
 
   // Auth
-  signup: (email: string, password: string, name?: string) =>
+  signup: (email: string, password: string, name?: string, locale?: string) =>
     http<{ message: string }>(`/v1/auth/signup`, {
       method: "POST",
-      body: JSON.stringify({ email, password, name }),
+      body: JSON.stringify({ email, password, name, locale }),
     }),
   login: (email: string, password: string) =>
     http<AuthUser>(`/v1/auth/login`, {

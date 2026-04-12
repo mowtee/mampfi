@@ -1,10 +1,12 @@
 import React from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Modal, ModalBody, ModalActions } from "./components/ui/Modal";
 import { useAuth } from "./hooks/useAuth";
 
 export default function App() {
   const { user, logout } = useAuth();
+  const { i18n } = useTranslation();
   const navigate = useNavigate();
 
   // Dev mode state
@@ -26,6 +28,18 @@ export default function App() {
           Mampfi
         </Link>
         <span className="spacer" />
+        <select
+          className="input select"
+          value={i18n.language}
+          onChange={(e) => {
+            i18n.changeLanguage(e.target.value);
+            localStorage.setItem("lang", e.target.value);
+          }}
+          style={{ width: 60 }}
+        >
+          <option value="de">DE</option>
+          <option value="en">EN</option>
+        </select>
         {user && (
           <div className="row" style={{ alignItems: "center", gap: 8 }}>
             <span className="muted">{user.name || user.email}</span>
