@@ -49,6 +49,7 @@ services:
       - "traefik.http.routers.mampfi-api.rule=Host(`mampfi.zenbytes.eu`) && (PathPrefix(`/v1`) || PathPrefix(`/docs`) || Path(`/health`))"
       - "traefik.http.routers.mampfi-api.entrypoints=websecure"
       - "traefik.http.routers.mampfi-api.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.mampfi-api.priority=100"
       - "traefik.http.services.mampfi-api.loadbalancer.server.port=8000"
 
   worker:
