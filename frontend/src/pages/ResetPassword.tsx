@@ -29,7 +29,7 @@ export default function ResetPassword() {
 
   if (!token) {
     return (
-      <div style={{ maxWidth: 400, margin: "40px auto" }}>
+      <div style={{ maxWidth: 400, margin: "40px auto", padding: "0 16px" }}>
         <p className="danger">{t("auth.missingToken")}</p>
         <Link to="/login">{t("auth.backToLogin")}</Link>
       </div>
@@ -38,7 +38,7 @@ export default function ResetPassword() {
 
   if (done) {
     return (
-      <div style={{ maxWidth: 400, margin: "40px auto" }}>
+      <div style={{ maxWidth: 400, margin: "40px auto", padding: "0 16px" }}>
         <h2>{t("auth.passwordUpdated")}</h2>
         <p className="ok">{t("auth.passwordUpdatedBody")}</p>
         <Link to="/login" className="btn primary">
@@ -49,7 +49,7 @@ export default function ResetPassword() {
   }
 
   return (
-    <div style={{ maxWidth: 400, margin: "40px auto" }}>
+    <div style={{ maxWidth: 400, margin: "40px auto", padding: "0 16px" }}>
       <h2>{t("auth.resetPassword")}</h2>
       <form onSubmit={handleSubmit}>
         <div className="vstack">

@@ -27,11 +27,11 @@ export default function VerifyEmail() {
   }, [token, t]);
 
   return (
-    <div style={{ maxWidth: 400, margin: "40px auto" }}>
+    <div style={{ maxWidth: 400, margin: "40px auto", padding: "0 16px" }}>
       <h2>{t("auth.verifyEmail")}</h2>
       {status === "loading" && <p className="muted">{t("auth.verifying")}</p>}
       {status === "ok" && (
-        <div>
+        <div className="vstack">
           <p className="ok">{t("auth.verified")}</p>
           <Link to="/login" className="btn primary">
             {t("auth.login")}
@@ -39,7 +39,7 @@ export default function VerifyEmail() {
         </div>
       )}
       {status === "error" && (
-        <div>
+        <div className="vstack">
           <p className="danger">{error || t("auth.verifyFailed")}</p>
           <Link to="/login">{t("auth.backToLogin")}</Link>
         </div>

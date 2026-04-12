@@ -31,7 +31,7 @@ export default function Signup() {
 
   if (done) {
     return (
-      <div style={{ maxWidth: 400, margin: "40px auto" }}>
+      <div style={{ maxWidth: 400, margin: "40px auto", padding: "0 16px" }}>
         <h2>{t("auth.checkEmail")}</h2>
         <p
           dangerouslySetInnerHTML={{
@@ -45,7 +45,7 @@ export default function Signup() {
   }
 
   return (
-    <div style={{ maxWidth: 400, margin: "40px auto" }}>
+    <div style={{ maxWidth: 400, margin: "40px auto", padding: "0 16px" }}>
       <h2>{t("auth.createAccount")}</h2>
       <form onSubmit={handleSubmit}>
         <div className="vstack">

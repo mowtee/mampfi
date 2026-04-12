@@ -32,7 +32,7 @@ export default function Login() {
   }
 
   return (
-    <div style={{ maxWidth: 400, margin: "40px auto" }}>
+    <div style={{ maxWidth: 400, margin: "40px auto", padding: "0 16px" }}>
       <h2>{t("auth.login")}</h2>
       <form onSubmit={handleSubmit}>
         <div className="vstack">
