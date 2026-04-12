@@ -74,9 +74,9 @@ def process_outbox(engine: Engine, settings: Settings) -> int:
                 msg.sent_at = now
                 count += 1
                 logger.info("Sent email to %s: %s", msg.to_email, msg.subject)
-            except Exception:
+            except Exception as exc:
                 msg.attempts += 1
-                msg.error = str(msg.error)[:500] if msg.error else None
+                msg.error = str(exc)[:500]
                 if msg.attempts >= 5:
                     msg.failed_at = now
                     logger.error("Email to %s failed permanently after 5 attempts", msg.to_email)

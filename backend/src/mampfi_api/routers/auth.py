@@ -3,8 +3,10 @@
 from fastapi import APIRouter, Cookie, Depends, Response
 from sqlmodel import Session
 
+from ..auth import get_current_user
 from ..config import Settings, get_settings
 from ..db import session_dep
+from ..models import User
 from ..schemas.auth import (
     AuthUserOut,
     ForgotPasswordIn,
@@ -135,3 +137,8 @@ def reset_password(
 ) -> dict:
     auth_svc.reset_password(session, data.token, data.password, settings.secret_key)
     return {"message": "Password updated"}
+
+
+@router.get("/me")
+def auth_me(user: User = Depends(get_current_user)) -> AuthUserOut:
+    return _user_out(user)
