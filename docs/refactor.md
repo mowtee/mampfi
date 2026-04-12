@@ -41,7 +41,7 @@ Implementation order:
 
 - [x] **Add test suite** — 54 integration tests via pytest + httpx against SQLite in-memory DB.
 
-- [ ] **Production auth** — `X-Dev-User` header is dev-only. Replace with invite-based signup + session cookies. Swap only touches `auth.py` and router signatures — service layer is auth-agnostic.
+- [x] **Production auth** — Email+password signup, JWT access tokens (15min) + refresh tokens (30d) with family-based rotation and reuse detection. Email verification required. Dev header preserved in development mode.
 
 - [x] **Structured logging** — JSON output in production, human-readable in dev. Request logging middleware with method/path/status/duration.
 
