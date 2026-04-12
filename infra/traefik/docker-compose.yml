@@ -1,0 +1,42 @@
+# Traefik reverse proxy — shared across all compose stacks on this host.
+# Deploy once: docker compose -f infra/traefik/docker-compose.yml up -d
+#
+# Each app stack attaches to the `traefik` network and declares routing
+# via labels. No central config changes needed when adding services.
+
+name: traefik
+
+services:
+  traefik:
+    image: traefik:v3.4
+    restart: unless-stopped
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=traefik"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # Redirect all HTTP to HTTPS
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      # Let's Encrypt ACME
+      - "--certificatesresolvers.letsencrypt.acme.email=timo.sirinyan@protonmail.com"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      # Dashboard (optional, disabled by default)
+      - "--api.dashboard=false"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "letsencrypt:/letsencrypt"
+    networks:
+      - traefik
+
+volumes:
+  letsencrypt:
+
+networks:
+  traefik:
+    name: traefik

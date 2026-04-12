@@ -1,16 +1,19 @@
+# Development compose — builds from source.
+# Usage: docker compose -f infra/docker-compose.yml --profile dev up -d
+#
+# For production, use docker-compose.prod.yml instead.
+
 name: mampfi
 
 services:
   db:
     image: postgres:18-alpine
-    # Healthcheck ensures dependents wait until DB is ready
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-mampfi} -d $${POSTGRES_DB:-mampfi} -h localhost"]
       interval: 10s
       timeout: 5s
       retries: 6
     restart: unless-stopped
-    # Configure DB via env (see infra/.env.example). Defaults apply if unset.
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-mampfi}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mampfi}
@@ -29,18 +32,14 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
-    # ports:
-    #   - "8000:8000"
+    ports:
+      - "8000:8000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 10s
       timeout: 3s
       retries: 10
-    profiles: ["dev", "prod"]
-    # Attach to external caddy network for reverse proxying
-    networks:
-      - default
-      - caddy_network
+    profiles: ["dev"]
 
   worker:
     build:
@@ -52,7 +51,7 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
-    profiles: ["dev", "prod"]
+    profiles: ["dev"]
 
   migrate:
     build:
@@ -74,25 +73,9 @@ services:
     depends_on:
       - api
     restart: unless-stopped
-    # ports:
-    #   - "8080:8080"
-    profiles: ["dev", "prod"]
-    # Attach to external caddy network for reverse proxying
-    networks:
-      - default
-      - caddy_network
-
-# Notes:
-# - For production behind Caddy (or another proxy), avoid publishing host ports for `api` and `web`.
-# - Create an external Docker network (e.g., `caddy_network`) and attach both the Caddy container and
-#   these services to it so Caddy can reach `api:8000` and `web:8080` by container name.
-#   Example: `docker network create caddy_network`
-#   In your Caddy container/service, declare: `networks: [caddy_network]`.
+    ports:
+      - "8080:8080"
+    profiles: ["dev"]
 
 volumes:
   pgdata:
-
-networks:
-  # External network shared with an out-of-stack Caddy reverse proxy
-  caddy_network:
-    external: true

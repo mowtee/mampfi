@@ -83,4 +83,4 @@ Implementation order:
 
 - [x] **Notifications worker** — Outbox processor + SMTP sending. Payment created/confirmed and purchase finalized trigger i18n email notifications to relevant members.
 
-- [ ] **Post-deploy smoke test** — `infra/deploy.sh` has no health check after restart to confirm the deploy succeeded. **(later)**
+- [x] **Post-deploy smoke test** — deploy.sh waits for API /health endpoint after restart, fails with logs on timeout.

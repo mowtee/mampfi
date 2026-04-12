@@ -1,0 +1,98 @@
+# Production compose — pulls pre-built images from GHCR.
+# Usage: docker compose -f infra/docker-compose.prod.yml --profile prod up -d
+#
+# Requires:
+#   - Traefik running (infra/traefik/docker-compose.yml)
+#   - GHCR login: echo $PAT | docker login ghcr.io -u USERNAME --password-stdin
+#   - infra/.env with production values (see .env.example)
+
+name: mampfi
+
+services:
+  db:
+    image: postgres:18-alpine
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-mampfi} -d $${POSTGRES_DB:-mampfi} -h localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mampfi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-mampfi}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    image: ghcr.io/mowtee/mampfi-api:${TAG:-latest}
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    profiles: ["prod"]
+    networks:
+      - default
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      # API routes: /v1/* and /docs*
+      - "traefik.http.routers.mampfi-api.rule=Host(`mampfi.zenbytes.eu`) && (PathPrefix(`/v1`) || PathPrefix(`/docs`) || Path(`/health`))"
+      - "traefik.http.routers.mampfi-api.entrypoints=websecure"
+      - "traefik.http.routers.mampfi-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.mampfi-api.loadbalancer.server.port=8000"
+
+  worker:
+    image: ghcr.io/mowtee/mampfi-api:${TAG:-latest}
+    env_file:
+      - .env
+    command: ["python", "-m", "mampfi_api.worker"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles: ["prod"]
+
+  migrate:
+    image: ghcr.io/mowtee/mampfi-api:${TAG:-latest}
+    env_file:
+      - .env
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+    profiles: ["migrate"]
+
+  web:
+    image: ghcr.io/mowtee/mampfi-web:${TAG:-latest}
+    depends_on:
+      - api
+    restart: unless-stopped
+    profiles: ["prod"]
+    networks:
+      - default
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      # Frontend: everything else on the domain
+      - "traefik.http.routers.mampfi-web.rule=Host(`mampfi.zenbytes.eu`)"
+      - "traefik.http.routers.mampfi-web.entrypoints=websecure"
+      - "traefik.http.routers.mampfi-web.tls.certresolver=letsencrypt"
+      - "traefik.http.services.mampfi-web.loadbalancer.server.port=8080"
+      # Lower priority so API routes match first
+      - "traefik.http.routers.mampfi-web.priority=1"
+
+volumes:
+  pgdata:
+
+networks:
+  traefik:
+    external: true
