@@ -10,6 +10,7 @@ from .config import get_settings
 from .db import get_engine
 from .exceptions import Conflict, DomainError, Forbidden, NotFound
 from .logging import setup_logging
+from .routers import auth as auth_router
 from .routers import balances as balances_router
 from .routers import events as events_router
 from .routers import holidays as holidays_router
@@ -94,6 +95,7 @@ def health() -> dict:
     return {"status": "ok", "db": db}
 
 
+app.include_router(auth_router.router)
 app.include_router(events_router.router)
 app.include_router(purchases_router.router)
 app.include_router(orders_router.router)

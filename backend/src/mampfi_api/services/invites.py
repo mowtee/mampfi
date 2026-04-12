@@ -128,7 +128,7 @@ def redeem_invite(session: Session, token: str, user: User) -> dict:
     return {"status": "joined", "event": {"id": str(ev.id), "name": ev.name}}
 
 
-def preview_invite(session: Session, token: str, user: User) -> dict:
+def preview_invite(session: Session, token: str) -> dict:
     now = now_utc()
     token_hash = _hash_token(token)
     inv = session.exec(select(InviteToken).where(InviteToken.token_hash == token_hash)).first()

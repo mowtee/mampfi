@@ -14,6 +14,8 @@ dependencies = [
     "python-dotenv>=1.1.1",
     "pydantic-settings>=2.10.1",
     "pydantic[email]>=2.12.5",
+    "argon2-cffi>=24.0",
+    "pyjwt>=2.10",
 ]
 
 [dependency-groups]

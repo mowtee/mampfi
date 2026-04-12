@@ -79,6 +79,5 @@ def redeem_invite(
 def preview_invite(
     token: str,
     session: Session = Depends(session_dep),
-    user: User = Depends(get_current_user),
 ) -> dict:
-    return svc.preview_invite(session, token, user)
+    return svc.preview_invite(session, token)

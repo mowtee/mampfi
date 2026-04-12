@@ -8,10 +8,14 @@ from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
 from sqlmodel import Session, SQLModel
 
+from mampfi_api.config import get_settings
 from mampfi_api.db import session_dep
 from mampfi_api.main import app
 from mampfi_api.models import Event, Membership, User
 from mampfi_api.timeutils import now_utc
+
+# Ensure cookies work over plain HTTP in tests
+get_settings().cookie_secure = False
 
 
 @pytest.fixture(name="engine", scope="function")

@@ -24,6 +24,10 @@ class User(SQLModel, table=True):
     email: str = Field(index=True, unique=True)
     name: str | None = None
     locale: str | None = None
+    password_hash: str | None = None
+    email_verified_at: dt.datetime | None = Field(
+        default=None, sa_column=Column(SADateTime(timezone=True), nullable=True)
+    )
     created_at: dt.datetime = Field(
         default_factory=now_utc,
         sa_column=Column(SADateTime(timezone=True), nullable=False),
@@ -191,3 +195,47 @@ class InviteToken(SQLModel, table=True):
     email_allowlist: list[str] | None = Field(default=None, sa_type=PgJSON)
     locale_hint: str | None = None
     notes: str | None = None
+
+
+class RefreshToken(SQLModel, table=True):
+    __tablename__ = "refresh_tokens"
+
+    id: uuid.UUID = Field(default_factory=uuid_pk, sa_type=UUID(as_uuid=True), primary_key=True)
+    user_id: uuid.UUID = Field(sa_type=UUID(as_uuid=True), index=True)
+    token_hash: str = Field(index=True, unique=True)
+    family_id: uuid.UUID = Field(sa_type=UUID(as_uuid=True), index=True)
+    created_at: dt.datetime = Field(
+        default_factory=now_utc,
+        sa_column=Column(SADateTime(timezone=True), nullable=False),
+    )
+    expires_at: dt.datetime = Field(sa_column=Column(SADateTime(timezone=True), nullable=False))
+    replaced_by: uuid.UUID | None = Field(default=None, sa_type=UUID(as_uuid=True))
+    revoked_at: dt.datetime | None = Field(
+        default=None, sa_column=Column(SADateTime(timezone=True), nullable=True)
+    )
+
+
+class EmailOutbox(SQLModel, table=True):
+    __tablename__ = "email_outbox"
+
+    id: uuid.UUID = Field(default_factory=uuid_pk, sa_type=UUID(as_uuid=True), primary_key=True)
+    to_email: str
+    subject: str
+    body_html: str
+    body_text: str | None = None
+    created_at: dt.datetime = Field(
+        default_factory=now_utc,
+        sa_column=Column(SADateTime(timezone=True), nullable=False),
+    )
+    sent_at: dt.datetime | None = Field(
+        default=None, sa_column=Column(SADateTime(timezone=True), nullable=True)
+    )
+    failed_at: dt.datetime | None = Field(
+        default=None, sa_column=Column(SADateTime(timezone=True), nullable=True)
+    )
+    error: str | None = None
+    attempts: int = Field(default=0)
+    next_attempt_at: dt.datetime = Field(
+        default_factory=now_utc,
+        sa_column=Column(SADateTime(timezone=True), nullable=False),
+    )
