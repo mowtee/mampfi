@@ -62,7 +62,7 @@ docker compose -f "${COMPOSE_FILE}" --profile prod up -d
 # Health check
 echo "Waiting for API health..."
 for i in $(seq 1 30); do
-  if docker compose -f "${COMPOSE_FILE}" exec -T api curl -sf http://localhost:8000/health > /dev/null 2>&1; then
+  if docker compose -f "${COMPOSE_FILE}" exec -T api python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" > /dev/null 2>&1; then
     echo "API healthy."
     break
   fi
