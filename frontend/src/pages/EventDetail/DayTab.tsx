@@ -231,8 +231,10 @@ export default function DayTab({
   return (
     <>
       <div className="toolbar section">
-        <label className="muted">{t("day.date")}</label>
-        <div className="row" style={{ alignItems: "center" }}>
+        <div className="row" style={{ alignItems: "center", flexWrap: "nowrap" }}>
+          <label className="muted" style={{ whiteSpace: "nowrap" }}>
+            {t("day.date")}
+          </label>
           <button
             className="btn"
             onClick={() => !prevDisabled && onChangeDate(onAddDays(-1))}
