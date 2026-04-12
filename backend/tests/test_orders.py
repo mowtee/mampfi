@@ -39,6 +39,7 @@ def ev(session: Session, user):
         start_date=today - dt.timedelta(days=5),
         end_date=today + dt.timedelta(days=10),
         cutoff_time=dt.time(23, 59),
+        timezone="UTC",
     )
 
 
