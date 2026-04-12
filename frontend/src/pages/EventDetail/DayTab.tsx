@@ -261,11 +261,8 @@ export default function DayTab({
         <span className={statusChip.className} style={{ marginLeft: 8 }}>
           {statusChip.text}
         </span>
-        <span className="muted" style={{ marginLeft: 12 }}>
-          {t("day.lockInfo", { time: String(ev.data.cutoff_time || "").slice(0, 5) })}
-        </span>
         {holidays.labelByDate.get(forDate) && (
-          <span className="chip muted" style={{ marginLeft: 8 }}>
+          <span className="chip muted" style={{ marginLeft: 8, border: "1px solid #d1d5db" }}>
             {holidays.labelByDate.get(forDate)}
           </span>
         )}

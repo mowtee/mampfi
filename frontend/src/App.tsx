@@ -27,7 +27,7 @@ export default function App() {
     <div className="site">
       <header className="topbar">
         <Link to="/" className="brand" style={{ display: "flex", alignItems: "center" }}>
-          <img src="/logo.png" alt="Mampfi" style={{ height: 52 }} />
+          <img src="/logo.png" alt="Mampfi" style={{ height: 72 }} />
         </Link>
         <span className="spacer" />
         {user && <span className="muted">{user.name || user.email}</span>}
