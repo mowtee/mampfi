@@ -136,3 +136,12 @@ Before touching a refactor item, mark it `[~]` in `docs/refactor.md`.
 **Commit authorship:** don't reference Claude as a co-author
 
 **PRs:** one logical change per PR; reference the relevant `docs/refactor.md` item in the description if applicable.
+
+**Before every commit — run formatters:**
+
+```bash
+make format-api   # ruff format + ruff check --fix (backend)
+make format-web   # prettier --write (frontend)
+```
+
+CI enforces format checks (`ruff format --check`, `prettier --check`) and will fail if files are not formatted.
