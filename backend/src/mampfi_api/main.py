@@ -1,9 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
 from .config import get_settings
 from .db import get_engine
+from .exceptions import Conflict, DomainError, Forbidden, NotFound
 from .routers import balances as balances_router
 from .routers import events as events_router
 from .routers import holidays as holidays_router
@@ -33,9 +35,28 @@ if origins:
     )
 
 
+@app.exception_handler(NotFound)
+def not_found_handler(request: Request, exc: NotFound) -> JSONResponse:
+    return JSONResponse(status_code=404, content={"detail": f"{exc.resource} not found"})
+
+
+@app.exception_handler(Forbidden)
+def forbidden_handler(request: Request, exc: Forbidden) -> JSONResponse:
+    return JSONResponse(status_code=403, content={"detail": exc.detail})
+
+
+@app.exception_handler(Conflict)
+def conflict_handler(request: Request, exc: Conflict) -> JSONResponse:
+    return JSONResponse(status_code=409, content={"detail": exc.detail})
+
+
+@app.exception_handler(DomainError)
+def domain_error_handler(request: Request, exc: DomainError) -> JSONResponse:
+    return JSONResponse(status_code=400, content={"detail": exc.detail})
+
+
 @app.get("/health")
 def health() -> dict:
-    # Basic DB connectivity check
     try:
         with get_engine().connect() as conn:
             conn.execute(text("SELECT 1"))

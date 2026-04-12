@@ -11,6 +11,9 @@ build/
 # uv
 # uv.lock is intentionally committed — do not ignore it
 
+# ruff
+.ruff_cache
+
 # Environment
 .env
 .env.*

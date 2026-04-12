@@ -8,29 +8,42 @@ Status: `[ ]` planned · `[~]` in progress · `[x]` done
 
 ## Backend
 
-### High Priority
+### Architecture — Service Layer (in progress)
 
-- [ ] **Extract membership auth dependency** — `session.get(Membership, (user.id, ev.id))` is repeated ~40 times across all routers. Replace with a single `Depends(require_member)` FastAPI dependency. A `_ensure_member()` helper already exists in `payments.py` — generalize it.
+Current state: all business logic lives inline in routers. No separation between HTTP concerns and domain logic. Membership checks, balance calculations, and validation are scattered across ~1500 LOC of router code.
 
-- [ ] **Type JSONB fields** — `DailyOrder.items` and `Purchase.lines` are raw `list[dict]`. Define `TypedDict` or Pydantic models for order line items and purchase lines. Eliminate scattered `str(it.get("price_item_id"))` coercions.
+Target architecture:
 
-- [ ] **Remove duplicate balance calculation** — `_compute_balances_for_event()` is implemented separately in both `members.py` (lines 43–60) and `balances.py` (lines 38–57). Extract to a shared utility function.
+```
+src/mampfi_api/
+├── routers/        # thin HTTP layer: parse request → call service → return schema
+├── services/       # business logic: one module per domain area, raises domain exceptions
+├── schemas/        # all Pydantic request/response models (extracted from routers)
+├── exceptions.py   # domain exceptions: NotFound, Forbidden, Conflict, DomainError
+├── models.py       # SQLModel DB models (unchanged)
+├── auth.py         # current user dependency (dev header now, real auth later)
+└── db.py           # session management
+```
 
-### Medium Priority
+Domain exceptions are raised by services and translated to HTTP responses by a single exception handler registered in `main.py`. Business logic never imports `HTTPException`.
 
-- [ ] **Harden input validation** — Name/description fields have no max length. Email validation only checks for `@`. Timezone should be validated at schema level (not runtime try/except). Notes fields risk XSS.
+Implementation order:
+- [~] **`exceptions.py`** — `NotFound`, `Forbidden`, `Conflict`, `DomainError`; register handler in `main.py`
+- [ ] **`schemas/`** — extract all inline Pydantic models from routers into per-domain schema files
+- [ ] **`services/`** — one module per domain (events, orders, purchases, payments, members, invites, balances); move all business logic; use domain exceptions
+- [ ] **Thin routers** — routers become pure HTTP adapters: validate input, call service, return schema
+- [ ] **Type JSONB fields** — `DailyOrder.items` and `Purchase.lines` are raw `list[dict]`; define Pydantic models for order line items and purchase lines; do this while writing service layer
+- [ ] **Remove duplicate balance calculation** — `_compute_balances_for_event()` duplicated in `members.py` and `balances.py`; consolidate into `services/balances.py`
 
-- [ ] **Fix broad exception swallowing** — `except Exception` in `holidays.py:26`, `main.py:43`, and `members.py:51–54` silently masks real errors. Use specific exception types or at minimum re-raise after logging.
+### Remaining Backend
 
-- [ ] **Add test suite** — `pytest` and `httpx` are in dev deps but zero test files exist. Start with router-level integration tests using a real test DB.
+- [ ] **Harden input validation** — Name/description fields have no max length. Email validation only checks for `@`. Timezone should be validated at schema level. Notes fields risk XSS.
 
-- [ ] **Add response DTOs** — Several routes return raw SQLModel objects or plain dicts. Define explicit Pydantic read models per resource for stable API contracts.
+- [ ] **Add test suite** — `pytest` and `httpx` in dev deps but zero test files. Write integration tests against real DB once service layer is in place (services are easier to test than routers).
 
-### Low Priority / Later
+- [ ] **Production auth** — `X-Dev-User` header is dev-only. Replace with invite-based signup + session cookies. Swap only touches `auth.py` and router signatures — service layer is auth-agnostic.
 
-- [ ] **Production auth** — `X-Dev-User` header creates users on first request. Replace with JWT or session-based auth before any production deployment.
-
-- [ ] **Structured logging** — Add JSON logging from FastAPI and worker services to enable log aggregation.
+- [ ] **Structured logging** — Add JSON logging from FastAPI and worker services.
 
 ---
 
