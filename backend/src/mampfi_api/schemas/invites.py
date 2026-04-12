@@ -24,5 +24,10 @@ class InviteOut(BaseModel):
     last_used_at: dt.datetime | None
 
 
+class EmailInviteIn(BaseModel):
+    emails: str = Field(min_length=1, max_length=2000)
+    lang: str = Field(default="de", max_length=10)
+
+
 class RedeemIn(BaseModel):
     token: str

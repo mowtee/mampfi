@@ -197,6 +197,11 @@ export const api = {
     ),
   revokeInvite: (eventId: UUID, invite_id: UUID) =>
     http(`/v1/events/${eventId}/invites/${invite_id}/revoke`, { method: "POST" }),
+  sendEmailInvites: (eventId: UUID, emails: string, lang: string) =>
+    http<{ sent: number; emails: string[] }>(`/v1/events/${eventId}/invites/email`, {
+      method: "POST",
+      body: JSON.stringify({ emails, lang }),
+    }),
   redeemInvite: (token: string) =>
     http<{ status: string; event: { id: UUID; name: string } }>(`/v1/invites/redeem`, {
       method: "POST",

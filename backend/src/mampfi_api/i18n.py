@@ -44,6 +44,12 @@ EMAIL_STRINGS: dict[str, dict[str, str]] = {
         "payment_confirmed_body": "Deine Zahlung über {amount} an {to_name} wurde bestätigt.",
         "purchase_finalized_subject": "Einkauf abgeschlossen für {date}",
         "purchase_finalized_body": "{buyer_name} hat den Einkauf für {date} abgeschlossen. Gesamtsumme: {total}.",
+        # Invite email
+        "invite_subject": "Einladung zu {event_name} auf Mampfi",
+        "invite_body": "{from_name} hat dich zu {event_name} auf Mampfi eingeladen. Klicke auf den Link, um beizutreten:",
+        "invite_cta": "Einladung annehmen",
+        "invite_fallback": "Falls der Button nicht funktioniert, kopiere diesen Link:",
+        "invite_expiry": "Diese Einladung ist 14 Tage gültig.",
     },
     "en": {
         # Common
@@ -70,6 +76,12 @@ EMAIL_STRINGS: dict[str, dict[str, str]] = {
         "payment_confirmed_body": "Your payment of {amount} to {to_name} was confirmed.",
         "purchase_finalized_subject": "Purchase finalized for {date}",
         "purchase_finalized_body": "{buyer_name} finalized the purchase for {date}. Total: {total}.",
+        # Invite email
+        "invite_subject": "Invitation to {event_name} on Mampfi",
+        "invite_body": "{from_name} invited you to {event_name} on Mampfi. Click the link to join:",
+        "invite_cta": "Accept invitation",
+        "invite_fallback": "If the button doesn't work, copy this link:",
+        "invite_expiry": "This invitation expires in 14 days.",
     },
 }
 

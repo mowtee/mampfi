@@ -86,6 +86,38 @@ def _event_link(frontend_url: str, event_id: str) -> str:
     return f"{frontend_url}/events/{event_id}?tab=payments"
 
 
+def enqueue_invite_email(
+    session: Session,
+    to_email: str,
+    from_user: User,
+    event: Event,
+    raw_token: str,
+    frontend_url: str,
+    lang: str,
+) -> EmailOutbox:
+    from_name = from_user.name or from_user.email
+    link = f"{frontend_url}/join?token={raw_token}"
+
+    subject = t("invite_subject", lang, event_name=event.name)
+    ctx = dict(
+        lang=lang,
+        logo_url=_logo_url(frontend_url),
+        greeting=t("greeting", lang),
+        body=t("invite_body", lang, from_name=from_name, event_name=event.name),
+        link=link,
+        cta=t("invite_cta", lang),
+        fallback=t("invite_fallback", lang),
+        expiry_note=t("invite_expiry", lang),
+    )
+    return enqueue_email(
+        session,
+        to_email,
+        subject,
+        _render("email/invite.html", **ctx),
+        _render("email/invite.txt", **ctx),
+    )
+
+
 def notify_payment_created(
     session: Session,
     recipient: User,

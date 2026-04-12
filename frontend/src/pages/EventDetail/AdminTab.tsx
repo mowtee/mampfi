@@ -49,12 +49,25 @@ export default function AdminTab({ ctx, eventId, ev }: AdminTabProps) {
           )}
           {!invites.error && invites.data && (
             <>
-              <div className="row" style={{ marginBottom: 8 }}>
+              <h4 style={{ marginTop: 0 }}>{t("admin.groupInvites")}</h4>
+              <div style={{ marginBottom: 16 }}>
                 <CreateGroupInviteButton eventId={eventId} />
               </div>
-              <div style={{ marginBottom: 12 }}>
-                <CreateSingleInviteForm eventId={eventId} />
+
+              <h4>{t("admin.singleInvites")}</h4>
+              <div style={{ marginBottom: 16 }}>
+                <CreateSingleInviteLink eventId={eventId} />
               </div>
+
+              <h4>{t("admin.emailInvites")}</h4>
+              <p className="muted" style={{ marginTop: -4, marginBottom: 8 }}>
+                {t("admin.emailInvitesHint")}
+              </p>
+              <div style={{ marginBottom: 16 }}>
+                <SendEmailInvites eventId={eventId} />
+              </div>
+
+              <h4>{t("admin.invites")}</h4>
               <table className="table">
                 <thead>
                   <tr>
@@ -324,44 +337,29 @@ function RevokeInviteButton({ eventId, inviteId }: { eventId: string; inviteId: 
   );
 }
 
-function CreateSingleInviteForm({ eventId }: { eventId: string }) {
+function CreateSingleInviteLink({ eventId }: { eventId: string }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const [email, setEmail] = React.useState("");
-  const [ttl, setTtl] = React.useState(14);
   const [created, setCreated] = React.useState<{ token: string; invite_url: string } | null>(null);
   const create = useMutation({
-    mutationFn: () => api.createSingleInvite(eventId, ttl, email || undefined),
+    mutationFn: () => api.createSingleInvite(eventId, 14),
     onSuccess: (res) => {
       setCreated({ token: res.token, invite_url: res.invite_url });
       qc.invalidateQueries({ queryKey: ["invites", eventId] });
-      setEmail("");
     },
   });
   return (
-    <div className="row">
-      <label className="muted">{t("admin.singleInvite")}</label>
-      <input
-        className="input"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder={t("admin.emailOptional")}
-      />
-      <label className="muted">{t("admin.ttlDays")}</label>
-      <input
-        className="input"
-        type="number"
-        min={1}
-        value={ttl}
-        onChange={(e) => setTtl(Math.max(1, parseInt(e.target.value || "1")))}
-        style={{ width: 100 }}
-      />
+    <div>
       <button onClick={() => create.mutate()} disabled={create.isPending} className="btn">
-        {t("app.create")}
+        {t("admin.createSingleInvite")}
       </button>
-      {create.error && <span className="danger">{String(create.error)}</span>}
+      {create.error && (
+        <span className="danger" style={{ marginLeft: 8 }}>
+          {String(create.error)}
+        </span>
+      )}
       {created && (
-        <div className="card" style={{ width: "100%" }}>
+        <div className="card" style={{ marginTop: 8 }}>
           {(() => {
             const absolute = new URL(created.invite_url, window.location.origin).toString();
             return (
@@ -376,9 +374,51 @@ function CreateSingleInviteForm({ eventId }: { eventId: string }) {
               </div>
             );
           })()}
-          <div>
-            <strong>{t("admin.token")}</strong> <span className="code">{created.token}</span>
-          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SendEmailInvites({ eventId }: { eventId: string }) {
+  const { t, i18n } = useTranslation();
+  const qc = useQueryClient();
+  const [emails, setEmails] = React.useState("");
+  const [result, setResult] = React.useState<{ sent: number } | null>(null);
+  const send = useMutation({
+    mutationFn: () => api.sendEmailInvites(eventId, emails.trim(), i18n.language),
+    onSuccess: (res) => {
+      setResult(res);
+      setEmails("");
+      qc.invalidateQueries({ queryKey: ["invites", eventId] });
+    },
+  });
+  return (
+    <div>
+      <div className="row" style={{ alignItems: "flex-start" }}>
+        <input
+          className="input"
+          value={emails}
+          onChange={(e) => setEmails(e.target.value)}
+          placeholder={t("admin.emailPlaceholder")}
+          style={{ minWidth: 300 }}
+        />
+        <button
+          onClick={() => send.mutate()}
+          disabled={send.isPending || !emails.trim()}
+          className="btn primary"
+        >
+          {send.isPending ? t("admin.sending") : t("admin.sendInvites")}
+        </button>
+      </div>
+      {send.error && (
+        <div className="danger" style={{ marginTop: 6 }}>
+          {String(send.error)}
+        </div>
+      )}
+      {result && (
+        <div className="ok" style={{ marginTop: 6 }}>
+          {t("admin.sentCount", { count: result.sent })}
         </div>
       )}
     </div>
