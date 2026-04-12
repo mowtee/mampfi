@@ -27,17 +27,10 @@ export default function App() {
     <div className="site">
       <header className="topbar">
         <Link to="/" className="brand" style={{ display: "flex", alignItems: "center" }}>
-          <img src="/logo.png" alt="Mampfi" style={{ height: 40 }} />
+          <img src="/logo.png" alt="Mampfi" style={{ height: 52 }} />
         </Link>
         <span className="spacer" />
-        <button
-          className="btn ghost"
-          onClick={() => setHelpOpen(true)}
-          aria-label="Help"
-          style={{ fontSize: 18, padding: "4px 8px" }}
-        >
-          ?
-        </button>
+        {user && <span className="muted">{user.name || user.email}</span>}
         <select
           className="input select"
           value={i18n.language}
@@ -50,13 +43,18 @@ export default function App() {
           <option value="de">DE</option>
           <option value="en">EN</option>
         </select>
+        <button
+          className="btn ghost"
+          onClick={() => setHelpOpen(true)}
+          aria-label="Help"
+          style={{ fontSize: 18, padding: "4px 8px" }}
+        >
+          ?
+        </button>
         {user && (
-          <div className="row" style={{ alignItems: "center", gap: 8 }}>
-            <span className="muted">{user.name || user.email}</span>
-            <button className="btn" onClick={logout}>
-              {t("app.logout")}
-            </button>
-          </div>
+          <button className="btn" onClick={logout}>
+            {t("app.logout")}
+          </button>
         )}
         {import.meta.env.DEV && (
           <>

@@ -46,8 +46,8 @@ export default function Signup() {
 
   return (
     <div style={{ maxWidth: 400, margin: "40px auto", padding: "0 16px" }}>
-      <div style={{ textAlign: "center", marginBottom: 32, marginTop: 16 }}>
-        <img src="/logo.png" alt="Mampfi" style={{ height: 120 }} />
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 32, marginTop: 16 }}>
+        <img src="/logo.png" alt="Mampfi" style={{ height: 180 }} />
       </div>
       <h2 style={{ marginBottom: 20 }}>{t("auth.createAccount")}</h2>
       <form onSubmit={handleSubmit}>
