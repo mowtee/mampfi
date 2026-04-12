@@ -36,7 +36,6 @@ export default function Login() {
       <div style={{ display: "flex", justifyContent: "center", marginBottom: 32, marginTop: 16 }}>
         <img src="/logo.png" alt="Mampfi" style={{ height: 180 }} />
       </div>
-      <h2 style={{ marginBottom: 20 }}>{t("auth.login")}</h2>
       <form onSubmit={handleSubmit}>
         <div className="vstack">
           <div className="field">
