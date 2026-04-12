@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+*.egg-info/
+dist/
+build/
+
+# uv
+# uv.lock is intentionally committed — do not ignore it
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+frontend/dist/
+
+# pnpm
+# pnpm-lock.yaml is intentionally committed — do not ignore it
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Docker
+infra/.env
+
+# Test / coverage artefacts
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml

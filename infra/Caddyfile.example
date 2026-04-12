@@ -1,0 +1,32 @@
+## Caddy runs outside Compose. Two options are shown below.
+
+## Option A: Two subdomains
+# app.mampfi.example.com {
+#   encode zstd gzip
+#   reverse_proxy web:80
+# }
+#
+# api.mampfi.example.com {
+#   encode zstd gzip
+#   reverse_proxy api:8000
+# }
+
+## Option B: Single domain (path routing; recommended to avoid CORS)
+## Requires the Caddy container to join the external `caddy_network` so it can reach
+## `api` and `web` by service name.
+# mampfi.example.com {
+#   encode zstd gzip
+#   # API under /v1 and docs (preserve the /v1 prefix)
+#   handle /v1/* {
+#     reverse_proxy api:8000
+#   }
+#   handle /docs* {
+#     reverse_proxy api:8000
+#   }
+#   # Everything else to the SPA
+#   handle /* {
+#     reverse_proxy web:80
+#   }
+# }
+
+# Note: If not running Caddy in Docker, replace `api:8000` and `web:80` with appropriate host:port.

@@ -1,0 +1,7 @@
+Alembic migrations directory (initialized minimal).
+
+Create your first migration after defining models:
+
+    poetry run alembic revision --autogenerate -m "init"
+    poetry run alembic upgrade head
+

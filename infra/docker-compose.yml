@@ -1,0 +1,98 @@
+name: mampfi
+
+services:
+  db:
+    image: postgres:16-alpine
+    # Healthcheck ensures dependents wait until DB is ready
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-mampfi} -d $${POSTGRES_DB:-mampfi} -h localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    restart: unless-stopped
+    # Configure DB via env (see infra/.env.example). Defaults apply if unset.
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mampfi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mampfi}
+      POSTGRES_DB: ${POSTGRES_DB:-mampfi}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  api:
+    build:
+      context: ../backend
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    # ports:
+    #   - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    profiles: ["dev", "prod"]
+    # Attach to external caddy network for reverse proxying
+    networks:
+      - default
+      - caddy_network
+
+  worker:
+    build:
+      context: ../backend
+    env_file:
+      - .env
+    command: ["python", "-m", "mampfi_api.worker"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles: ["dev", "prod"]
+
+  migrate:
+    build:
+      context: ../backend
+    env_file:
+      - .env
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+    profiles: ["migrate"]
+
+  web:
+    build:
+      context: ../frontend
+      args:
+        - VITE_API_URL=${VITE_API_URL:-}
+    depends_on:
+      - api
+    restart: unless-stopped
+    # ports:
+    #   - "8080:80"
+    profiles: ["dev", "prod"]
+    # Attach to external caddy network for reverse proxying
+    networks:
+      - default
+      - caddy_network
+
+# Notes:
+# - For production behind Caddy (or another proxy), avoid publishing host ports for `api` and `web`.
+# - Create an external Docker network (e.g., `caddy_network`) and attach both the Caddy container and
+#   these services to it so Caddy can reach `api:8000` and `web:80` by container name.
+#   Example: `docker network create caddy_network`
+#   In your Caddy container/service, declare: `networks: [caddy_network]`.
+
+volumes:
+  pgdata:
+
+networks:
+  # External network shared with an out-of-stack Caddy reverse proxy
+  caddy_network:
+    external: true
