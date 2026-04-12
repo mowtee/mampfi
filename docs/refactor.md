@@ -43,7 +43,7 @@ Implementation order:
 
 - [ ] **Production auth** — `X-Dev-User` header is dev-only. Replace with invite-based signup + session cookies. Swap only touches `auth.py` and router signatures — service layer is auth-agnostic.
 
-- [ ] **Structured logging** — Add JSON logging from FastAPI and worker services.
+- [x] **Structured logging** — JSON output in production, human-readable in dev. Request logging middleware with method/path/status/duration.
 
 ---
 
@@ -65,7 +65,7 @@ Implementation order:
 
 ### Low Priority / Later
 
-- [ ] **Gate dev auth behind `import.meta.env.DEV`** — The `X-Dev-User` email picker should not be visible in production builds.
+- [x] **Gate dev auth behind `import.meta.env.DEV`** — Dev email picker and X-Dev-User header only active in dev builds.
 
 - [ ] **Implement i18n** — Requirements specify DE default + EN. react-i18next is configured in requirements but UI strings are not yet externalized.
 
@@ -79,7 +79,7 @@ Implementation order:
 
 - [ ] **Add database backup strategy** — Production data lives on a named Docker volume with no documented backup/restore procedure.
 
-- [ ] **Run containers as non-root** — No `USER` directive in either Dockerfile.
+- [x] **Run containers as non-root** — Backend uses `app` user; frontend uses `nginxinc/nginx-unprivileged` on port 8080.
 
 - [ ] **Notifications worker** — Worker service exists in compose but email delivery, scheduling, and templates are unimplemented. See `docs/requirements.md` FR-012.
 

@@ -7,9 +7,11 @@ const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 const DEV_EMAIL_FALLBACK = import.meta.env.VITE_DEV_EMAIL || "";
 
 function devHeaders() {
-  const email = localStorage.getItem("devEmail") || DEV_EMAIL_FALLBACK || "";
   const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (email) headers["X-Dev-User"] = email;
+  if (import.meta.env.DEV) {
+    const email = localStorage.getItem("devEmail") || DEV_EMAIL_FALLBACK || "";
+    if (email) headers["X-Dev-User"] = email;
+  }
   return headers;
 }
 

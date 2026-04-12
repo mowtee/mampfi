@@ -75,7 +75,7 @@ services:
       - api
     restart: unless-stopped
     # ports:
-    #   - "8080:80"
+    #   - "8080:8080"
     profiles: ["dev", "prod"]
     # Attach to external caddy network for reverse proxying
     networks:
@@ -85,7 +85,7 @@ services:
 # Notes:
 # - For production behind Caddy (or another proxy), avoid publishing host ports for `api` and `web`.
 # - Create an external Docker network (e.g., `caddy_network`) and attach both the Caddy container and
-#   these services to it so Caddy can reach `api:8000` and `web:80` by container name.
+#   these services to it so Caddy can reach `api:8000` and `web:8080` by container name.
 #   Example: `docker network create caddy_network`
 #   In your Caddy container/service, declare: `networks: [caddy_network]`.
 

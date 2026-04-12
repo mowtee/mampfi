@@ -3,7 +3,7 @@
 ## Option A: Two subdomains
 # app.mampfi.example.com {
 #   encode zstd gzip
-#   reverse_proxy web:80
+#   reverse_proxy web:8080
 # }
 #
 # api.mampfi.example.com {
@@ -25,8 +25,8 @@
 #   }
 #   # Everything else to the SPA
 #   handle /* {
-#     reverse_proxy web:80
+#     reverse_proxy web:8080
 #   }
 # }
 
-# Note: If not running Caddy in Docker, replace `api:8000` and `web:80` with appropriate host:port.
+# Note: If not running Caddy in Docker, replace `api:8000` and `web:8080` with appropriate host:port.

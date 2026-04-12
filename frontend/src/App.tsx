@@ -21,30 +21,38 @@ export default function App() {
           Mampfi
         </Link>
         <span className="spacer" />
-        {/* Inline on larger screens */}
-        <form onSubmit={saveEmail} className="row sm-hidden" style={{ marginLeft: 8 }}>
-          <span className="muted">Dev Email</span>
-          <input
-            className="input"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            style={{ width: 240 }}
-          />
-          <button type="submit" className="btn">
-            Save
-          </button>
-        </form>
-        {/* Compact toggle on small screens */}
-        <button className="btn sm-only" onClick={() => setDevOpen(true)} aria-label="Set dev email">
-          Dev
-        </button>
+        {import.meta.env.DEV && (
+          <>
+            {/* Inline on larger screens */}
+            <form onSubmit={saveEmail} className="row sm-hidden" style={{ marginLeft: 8 }}>
+              <span className="muted">Dev Email</span>
+              <input
+                className="input"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                style={{ width: 240 }}
+              />
+              <button type="submit" className="btn">
+                Save
+              </button>
+            </form>
+            {/* Compact toggle on small screens */}
+            <button
+              className="btn sm-only"
+              onClick={() => setDevOpen(true)}
+              aria-label="Set dev email"
+            >
+              Dev
+            </button>
+          </>
+        )}
       </header>
       <div className="section">
         <Outlet />
       </div>
 
-      <Modal open={devOpen} onClose={() => setDevOpen(false)} size="sm" top>
+      <Modal open={import.meta.env.DEV && devOpen} onClose={() => setDevOpen(false)} size="sm" top>
         <h3>Developer Email</h3>
         <ModalBody>
           <div className="vstack">
