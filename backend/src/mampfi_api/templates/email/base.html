@@ -50,7 +50,9 @@
 </head>
 <body>
   <div class="wrapper">
-    <div class="brand">Mampfi</div>
+    <div class="brand">
+      <img src="{{ logo_url }}" alt="Mampfi" width="80" style="height: auto; display: block; margin-bottom: 8px;" />
+    </div>
     {% block content %}{% endblock %}
     <div class="footer">
       {% block footer %}— Mampfi{% endblock %}

@@ -12,6 +12,10 @@ _TEMPLATE_DIR = Path(__file__).resolve().parent.parent / "templates"
 _jinja = Environment(loader=FileSystemLoader(str(_TEMPLATE_DIR)), autoescape=True)
 
 
+def _logo_url(frontend_url: str) -> str:
+    return f"{frontend_url.rstrip('/')}/logo.png"
+
+
 def _render(template_name: str, **ctx: str) -> str:
     return _jinja.get_template(template_name).render(**ctx)
 
@@ -34,6 +38,7 @@ def enqueue_verification_email(
     subject = t("verify_subject", lang)
     ctx = dict(
         lang=lang,
+        logo_url=_logo_url(frontend_url),
         greeting=t("greeting", lang),
         name=name,
         body=t("verify_body", lang),
@@ -57,6 +62,7 @@ def enqueue_password_reset_email(
     subject = t("reset_subject", lang)
     ctx = dict(
         lang=lang,
+        logo_url=_logo_url(frontend_url),
         greeting=t("greeting", lang),
         name=name,
         body=t("reset_body", lang),
@@ -96,6 +102,7 @@ def notify_payment_created(
     subject = t("payment_created_subject", lang, event_name=event.name)
     ctx = dict(
         lang=lang,
+        logo_url=_logo_url(frontend_url),
         greeting=t("greeting", lang),
         name=name,
         body=t("payment_created_body", lang, from_name=from_name, amount=amount_formatted),
@@ -127,6 +134,7 @@ def notify_payment_confirmed(
     subject = t("payment_confirmed_subject", lang, event_name=event.name)
     ctx = dict(
         lang=lang,
+        logo_url=_logo_url(frontend_url),
         greeting=t("greeting", lang),
         name=name,
         body=t("payment_confirmed_body", lang, amount=amount_formatted, to_name=to_name),
@@ -159,6 +167,7 @@ def notify_purchase_finalized(
     subject = t("purchase_finalized_subject", lang, date=date_str)
     ctx = dict(
         lang=lang,
+        logo_url=_logo_url(frontend_url),
         greeting=t("greeting", lang),
         name=name,
         body=t(
