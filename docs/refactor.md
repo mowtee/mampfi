@@ -69,7 +69,7 @@ Implementation order:
 
 - [ ] **Implement i18n** — Requirements specify DE default + EN. react-i18next is configured in requirements but UI strings are not yet externalized.
 
-- [ ] **PWA** — Requirements mention `@vite-pwa/plugin` for App Shell + offline fallback. Not yet implemented.
+- [ ] **PWA** — Requirements mention `@vite-pwa/plugin` for App Shell + offline fallback. Not yet implemented. **(later)**
 
 ---
 
@@ -77,10 +77,10 @@ Implementation order:
 
 - [x] **Add CI/CD pipeline** — CI workflow (lint + test on push/PR) and release workflow (Docker images on `v*` tags to GHCR).
 
-- [ ] **Add database backup strategy** — Production data lives on a named Docker volume with no documented backup/restore procedure.
+- [ ] **Add database backup strategy** — Production data lives on a named Docker volume with no documented backup/restore procedure. **(later)**
 
 - [x] **Run containers as non-root** — Backend uses `app` user; frontend uses `nginxinc/nginx-unprivileged` on port 8080.
 
-- [ ] **Notifications worker** — Worker service exists in compose but email delivery, scheduling, and templates are unimplemented. See `docs/requirements.md` FR-012.
+- [~] **Notifications worker** — Outbox processor + SMTP sending implemented. Remaining: wire domain events (payments, purchases) to enqueue notification emails.
 
-- [ ] **Post-deploy smoke test** — `infra/deploy.sh` has no health check after restart to confirm the deploy succeeded.
+- [ ] **Post-deploy smoke test** — `infra/deploy.sh` has no health check after restart to confirm the deploy succeeded. **(later)**
