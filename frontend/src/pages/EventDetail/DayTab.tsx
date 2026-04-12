@@ -529,7 +529,7 @@ export default function DayTab({
               {!agg.data || (agg.data.items || []).length === 0 ? (
                 <p className="muted">
                   {t("day.nothingToFinalize")}{" "}
-                  <button className="btn ghost" onClick={() => onSetTab("day")}>
+                  <button className="btn" onClick={() => onSetTab("day")}>
                     {t("day.goToDay")}
                   </button>
                 </p>
