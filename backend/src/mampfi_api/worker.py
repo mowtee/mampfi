@@ -34,12 +34,21 @@ def send_email(
         msg.attach(MIMEText(body_text, "plain"))
     msg.attach(MIMEText(body_html, "html"))
 
-    with smtplib.SMTP(settings.smtp_host, settings.smtp_port or 587) as server:
-        if settings.smtp_use_tls:
-            server.starttls()
-        if settings.smtp_username:
-            server.login(settings.smtp_username, settings.smtp_password or "")
-        server.send_message(msg)
+    port = settings.smtp_port or 587
+    if port == 465:
+        # Implicit SSL (SMTPS)
+        with smtplib.SMTP_SSL(settings.smtp_host, port) as server:
+            if settings.smtp_username:
+                server.login(settings.smtp_username, settings.smtp_password or "")
+            server.send_message(msg)
+    else:
+        # STARTTLS (typically port 587)
+        with smtplib.SMTP(settings.smtp_host, port) as server:
+            if settings.smtp_use_tls:
+                server.starttls()
+            if settings.smtp_username:
+                server.login(settings.smtp_username, settings.smtp_password or "")
+            server.send_message(msg)
 
 
 def process_outbox(engine: Engine, settings: Settings) -> int:
