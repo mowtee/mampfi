@@ -15,11 +15,25 @@ function devHeaders() {
   return headers;
 }
 
+let isRefreshing: Promise<boolean> | null = null;
+
 async function http<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
+    credentials: "include",
     headers: { ...devHeaders(), ...(init?.headers as Record<string, string> | undefined) },
   });
+
+  // Auto-refresh on 401 (skip for auth endpoints to avoid loops)
+  if (res.status === 401 && !path.startsWith("/v1/auth/")) {
+    const refreshed = await tryRefresh();
+    if (refreshed) {
+      return http<T>(path, init);
+    }
+    window.location.href = "/login";
+    throw new Error("Session expired");
+  }
+
   if (!res.ok) {
     let detail;
     try {
@@ -31,6 +45,20 @@ async function http<T>(path: string, init?: RequestInit): Promise<T> {
   }
   const text = await res.text();
   return text ? (JSON.parse(text) as T) : (undefined as unknown as T);
+}
+
+async function tryRefresh(): Promise<boolean> {
+  if (!isRefreshing) {
+    isRefreshing = fetch(`${API_URL}/v1/auth/refresh`, {
+      method: "POST",
+      credentials: "include",
+    }).then((r) => r.ok);
+  }
+  try {
+    return await isRefreshing;
+  } finally {
+    isRefreshing = null;
+  }
 }
 
 export type Event = {
@@ -224,4 +252,41 @@ export const api = {
     eventId: UUID,
     data: { holiday_country_code?: string | null; holiday_region_code?: string | null },
   ) => http(`/v1/events/${eventId}`, { method: "PATCH", body: JSON.stringify(data) }),
+
+  // Auth
+  signup: (email: string, password: string, name?: string) =>
+    http<{ message: string }>(`/v1/auth/signup`, {
+      method: "POST",
+      body: JSON.stringify({ email, password, name }),
+    }),
+  login: (email: string, password: string) =>
+    http<AuthUser>(`/v1/auth/login`, {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    }),
+  logout: () => http<{ message: string }>(`/v1/auth/logout`, { method: "POST" }),
+  refreshToken: () => http<AuthUser>(`/v1/auth/refresh`, { method: "POST" }),
+  getAuthMe: () => http<AuthUser>(`/v1/auth/me`),
+  verifyEmail: (token: string) =>
+    http<{ message: string }>(`/v1/auth/verify-email`, {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    }),
+  forgotPassword: (email: string) =>
+    http<{ message: string }>(`/v1/auth/forgot-password`, {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+  resetPassword: (token: string, password: string) =>
+    http<{ message: string }>(`/v1/auth/reset-password`, {
+      method: "POST",
+      body: JSON.stringify({ token, password }),
+    }),
+};
+
+export type AuthUser = {
+  id: UUID;
+  email: string;
+  name?: string | null;
+  email_verified: boolean;
 };

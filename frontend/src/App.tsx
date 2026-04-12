@@ -1,16 +1,21 @@
 import React from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { Modal, ModalBody, ModalActions } from "./components/ui/Modal";
+import { useAuth } from "./hooks/useAuth";
 
 export default function App() {
-  const [email, setEmail] = React.useState<string>(() => localStorage.getItem("devEmail") || "");
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  // Dev mode state
+  const [devEmail, setDevEmail] = React.useState<string>(
+    () => localStorage.getItem("devEmail") || "",
+  );
   const [devOpen, setDevOpen] = React.useState(false);
 
-  function saveEmail(e: React.FormEvent) {
+  function saveDevEmail(e: React.FormEvent) {
     e.preventDefault();
-    localStorage.setItem("devEmail", email.trim());
-    // force refresh of data by navigating (optional)
+    localStorage.setItem("devEmail", devEmail.trim());
     navigate(0);
   }
 
@@ -21,23 +26,29 @@ export default function App() {
           Mampfi
         </Link>
         <span className="spacer" />
+        {user && (
+          <div className="row" style={{ alignItems: "center", gap: 8 }}>
+            <span className="muted">{user.name || user.email}</span>
+            <button className="btn" onClick={logout}>
+              Logout
+            </button>
+          </div>
+        )}
         {import.meta.env.DEV && (
           <>
-            {/* Inline on larger screens */}
-            <form onSubmit={saveEmail} className="row sm-hidden" style={{ marginLeft: 8 }}>
-              <span className="muted">Dev Email</span>
+            <form onSubmit={saveDevEmail} className="row sm-hidden" style={{ marginLeft: 8 }}>
+              <span className="muted">Dev</span>
               <input
                 className="input"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={devEmail}
+                onChange={(e) => setDevEmail(e.target.value)}
                 placeholder="you@example.com"
-                style={{ width: 240 }}
+                style={{ width: 200 }}
               />
               <button type="submit" className="btn">
-                Save
+                Set
               </button>
             </form>
-            {/* Compact toggle on small screens */}
             <button
               className="btn sm-only"
               onClick={() => setDevOpen(true)}
@@ -60,8 +71,8 @@ export default function App() {
               <label className="muted">Dev Email</label>
               <input
                 className="input"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={devEmail}
+                onChange={(e) => setDevEmail(e.target.value)}
                 placeholder="you@example.com"
               />
             </div>
@@ -74,8 +85,7 @@ export default function App() {
           <button
             className="btn primary"
             onClick={() => {
-              // mimic form submit
-              localStorage.setItem("devEmail", email.trim());
+              localStorage.setItem("devEmail", devEmail.trim());
               setDevOpen(false);
               navigate(0);
             }}
