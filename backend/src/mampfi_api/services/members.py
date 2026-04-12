@@ -2,11 +2,11 @@ import uuid
 
 from sqlmodel import Session, select
 
-from ..exceptions import Conflict, NotFound
+from ..exceptions import Conflict, DomainError, NotFound
 from ..models import Event, Membership, User
 from ..schemas.members import LeaveIntentOut
 from ..services.balances import compute_balances
-from ..services.events import get_event, require_member
+from ..services.events import get_event, require_member, require_owner
 from ..timeutils import now_utc
 
 
@@ -85,6 +85,32 @@ def leave_event(session: Session, event_id: uuid.UUID, user: User) -> None:
                 "plan": plan,
             }
         )
+
+    mem.left_at = now_utc()
+    mem.wants_to_leave = False
+    session.add(mem)
+    session.commit()
+
+
+def remove_member(
+    session: Session, event_id: uuid.UUID, target_user_id: uuid.UUID, user: User
+) -> None:
+    ev = get_event(session, event_id)
+    require_owner(session, ev.id, user.id)
+
+    if target_user_id == user.id:
+        raise DomainError("cannot remove yourself — use leave instead")
+
+    mem = session.exec(
+        select(Membership).where(
+            Membership.event_id == ev.id,
+            Membership.user_id == target_user_id,
+        )
+    ).first()
+    if not mem:
+        raise NotFound("member")
+    if mem.left_at:
+        raise DomainError("member already left")
 
     mem.left_at = now_utc()
     mem.wants_to_leave = False

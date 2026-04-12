@@ -17,7 +17,8 @@
     "on": "On",
     "off": "Off",
     "create": "Create",
-    "actions": "Actions"
+    "actions": "Actions",
+    "you": "you"
   },
   "auth": {
     "login": "Log in",
@@ -75,10 +76,26 @@
     "language": "Language",
     "languageText": "Switch the language using the dropdown in the top right. Your choice is saved."
   },
+  "members": {
+    "title": "Members",
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "status": "Status",
+    "active": "Active",
+    "left": "Left",
+    "owner": "Admin",
+    "member": "Member",
+    "joined": "Joined",
+    "remove": "Remove",
+    "confirmRemove": "Really remove {{name}}?",
+    "noMembers": "No members."
+  },
   "tabs": {
     "day": "Day",
     "history": "History",
     "payments": "Payments",
+    "members": "Members",
     "admin": "Admin"
   },
   "day": {

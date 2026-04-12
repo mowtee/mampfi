@@ -241,6 +241,8 @@ export const api = {
   },
   // Members
   listMembers: (eventId: UUID) => http<Member[]>(`/v1/events/${eventId}/members`),
+  removeMember: (eventId: UUID, userId: UUID) =>
+    http<void>(`/v1/events/${eventId}/members/${userId}/remove`, { method: "POST" }),
   // Holidays
   getHolidays: (country: string, year: number, region?: string) =>
     http<

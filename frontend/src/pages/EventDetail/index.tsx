@@ -7,6 +7,7 @@ import { useEventContext } from "../../hooks/useEventContext";
 import DayTab from "./DayTab";
 import PaymentsTab from "./PaymentsTab";
 import HistoryTab from "./HistoryTab";
+import MembersTab from "./MembersTab";
 import AdminTab from "./AdminTab";
 
 function isoDate(d: Date) {
@@ -25,7 +26,12 @@ export default function EventDetail() {
   const tomorrow = isoDate(new Date(Date.now() + 24 * 3600 * 1000));
   const [forDate, setForDate] = React.useState<string>(tomorrow);
   const [search, setSearch] = useSearchParams();
-  const activeTab = (search.get("tab") || "day") as "day" | "history" | "payments" | "admin";
+  const activeTab = (search.get("tab") || "day") as
+    | "day"
+    | "history"
+    | "payments"
+    | "members"
+    | "admin";
   const setTab = (tab: string) =>
     setSearch((prev) => {
       const n = new URLSearchParams(prev);
@@ -140,6 +146,12 @@ export default function EventDetail() {
         >
           {t("tabs.payments")}
         </button>
+        <button
+          className={`tab ${activeTab === "members" ? "active" : ""}`}
+          onClick={() => setTab("members")}
+        >
+          {t("tabs.members")}
+        </button>
         {isOwner && (
           <button
             className={`tab ${activeTab === "admin" ? "active" : ""}`}
@@ -167,6 +179,7 @@ export default function EventDetail() {
         <HistoryTab ctx={ctx} eventId={eventId} onPickDate={(d) => setForDate(d)} />
       )}
       {activeTab === "payments" && <PaymentsTab ctx={ctx} eventId={eventId} />}
+      {activeTab === "members" && <MembersTab ctx={ctx} eventId={eventId} />}
       {isOwner && activeTab === "admin" && <AdminTab ctx={ctx} eventId={eventId} ev={ev.data} />}
     </div>
   );

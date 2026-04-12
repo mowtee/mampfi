@@ -17,7 +17,8 @@
     "on": "An",
     "off": "Aus",
     "create": "Erstellen",
-    "actions": "Aktionen"
+    "actions": "Aktionen",
+    "you": "du"
   },
   "auth": {
     "login": "Anmelden",
@@ -75,10 +76,26 @@
     "language": "Sprache",
     "languageText": "Wechsle die Sprache oben rechts über das Dropdown. Deine Wahl wird gespeichert."
   },
+  "members": {
+    "title": "Mitglieder",
+    "name": "Name",
+    "email": "E-Mail",
+    "role": "Rolle",
+    "status": "Status",
+    "active": "Aktiv",
+    "left": "Verlassen",
+    "owner": "Admin",
+    "member": "Mitglied",
+    "joined": "Beigetreten",
+    "remove": "Entfernen",
+    "confirmRemove": "{{name}} wirklich entfernen?",
+    "noMembers": "Keine Mitglieder."
+  },
   "tabs": {
     "day": "Tag",
     "history": "Verlauf",
     "payments": "Zahlungen",
+    "members": "Mitglieder",
     "admin": "Admin"
   },
   "day": {

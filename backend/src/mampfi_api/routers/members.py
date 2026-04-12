@@ -30,3 +30,14 @@ def leave_event(
 ) -> Response:
     svc.leave_event(session, event_id, user)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/{user_id}/remove", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
+def remove_member(
+    event_id: uuid.UUID,
+    user_id: uuid.UUID,
+    session: Session = Depends(session_dep),
+    user: User = Depends(get_current_user),
+) -> Response:
+    svc.remove_member(session, event_id, user_id, user)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
