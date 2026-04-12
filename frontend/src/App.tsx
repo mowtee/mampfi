@@ -9,6 +9,8 @@ export default function App() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
 
+  const [helpOpen, setHelpOpen] = React.useState(false);
+
   // Dev mode state
   const [devEmail, setDevEmail] = React.useState<string>(
     () => localStorage.getItem("devEmail") || "",
@@ -29,6 +31,14 @@ export default function App() {
           Mampfi
         </Link>
         <span className="spacer" />
+        <button
+          className="btn ghost"
+          onClick={() => setHelpOpen(true)}
+          aria-label="Help"
+          style={{ fontSize: 18, padding: "4px 8px" }}
+        >
+          ?
+        </button>
         <select
           className="input select"
           value={i18n.language}
@@ -77,6 +87,54 @@ export default function App() {
       <div className="section">
         <Outlet />
       </div>
+
+      {/* Help modal */}
+      <Modal open={helpOpen} onClose={() => setHelpOpen(false)} size="lg" top>
+        <ModalBody>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+            <img src="/logo.png" alt="Mampfi" style={{ height: 48, width: 48 }} />
+            <h2 style={{ margin: 0 }}>{t("help.title")}</h2>
+          </div>
+          <p>{t("help.intro")}</p>
+          <div className="vstack" style={{ gap: 16 }}>
+            <div>
+              <h4 style={{ margin: "0 0 4px" }}>1. {t("help.createEvent")}</h4>
+              <p className="muted" style={{ margin: 0 }}>
+                {t("help.createEventText")}
+              </p>
+            </div>
+            <div>
+              <h4 style={{ margin: "0 0 4px" }}>2. {t("help.placeOrders")}</h4>
+              <p className="muted" style={{ margin: 0 }}>
+                {t("help.placeOrdersText")}
+              </p>
+            </div>
+            <div>
+              <h4 style={{ margin: "0 0 4px" }}>3. {t("help.finalize")}</h4>
+              <p className="muted" style={{ margin: 0 }}>
+                {t("help.finalizeText")}
+              </p>
+            </div>
+            <div>
+              <h4 style={{ margin: "0 0 4px" }}>4. {t("help.payments")}</h4>
+              <p className="muted" style={{ margin: 0 }}>
+                {t("help.paymentsText")}
+              </p>
+            </div>
+            <div>
+              <h4 style={{ margin: "0 0 4px" }}>{t("help.language")}</h4>
+              <p className="muted" style={{ margin: 0 }}>
+                {t("help.languageText")}
+              </p>
+            </div>
+          </div>
+        </ModalBody>
+        <ModalActions>
+          <button className="btn primary" onClick={() => setHelpOpen(false)}>
+            {t("help.close")}
+          </button>
+        </ModalActions>
+      </Modal>
 
       <Modal open={import.meta.env.DEV && devOpen} onClose={() => setDevOpen(false)} size="sm" top>
         <h3>Developer Email</h3>
