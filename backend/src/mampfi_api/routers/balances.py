@@ -1,16 +1,14 @@
 from __future__ import annotations
 
 import uuid
-from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlmodel import select
 
 from ..auth import get_current_user
 from ..db import get_session
 from ..models import Event, Membership, Payment, Purchase, User
-from pydantic import BaseModel
-
 
 router = APIRouter(prefix="/v1/events/{event_id}", tags=["balances"])
 
@@ -23,7 +21,7 @@ class BalanceLine(BaseModel):
 
 class BalancesOut(BaseModel):
     currency: str
-    totals: List[BalanceLine]
+    totals: list[BalanceLine]
 
 
 @router.get("/balances", response_model=BalancesOut)
@@ -52,7 +50,9 @@ def get_balances(event_id: uuid.UUID, user: User = Depends(get_current_user)) ->
                     balances[uid] = balances.get(uid, 0) - unit * qty
 
         # Confirmed payments: move balances from debtor to creditor
-        for pay in session.exec(select(Payment).where(Payment.event_id == ev.id, Payment.status == "confirmed")).all():
+        for pay in session.exec(
+            select(Payment).where(Payment.event_id == ev.id, Payment.status == "confirmed")
+        ).all():
             balances[pay.from_user_id] = balances.get(pay.from_user_id, 0) + int(pay.amount_minor)
             balances[pay.to_user_id] = balances.get(pay.to_user_id, 0) - int(pay.amount_minor)
 
@@ -63,5 +63,8 @@ def get_balances(event_id: uuid.UUID, user: User = Depends(get_current_user)) ->
 
         # Build output merging wants_to_leave
         wants_map: dict[uuid.UUID, bool] = {m.user_id: bool(m.wants_to_leave) for m in mems}
-        totals = [BalanceLine(user_id=k, balance_minor=v, wants_to_leave=wants_map.get(k, None)) for k, v in balances.items()]
+        totals = [
+            BalanceLine(user_id=k, balance_minor=v, wants_to_leave=wants_map.get(k))
+            for k, v in balances.items()
+        ]
         return BalancesOut(currency=ev.currency, totals=totals)

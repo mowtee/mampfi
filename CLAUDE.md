@@ -68,7 +68,7 @@ Before touching a refactor item, mark it `[~]` in `docs/refactor.md`.
 
 ## Backend Conventions
 
-**Stack:** FastAPI · SQLModel · Alembic · PostgreSQL · Python 3.13
+**Stack:** FastAPI · SQLModel · Alembic · PostgreSQL · Python 3.14
 
 **Tooling (matches Zed defaults):**
 - Formatter + linter: `ruff` — run via `make format-api` / `make lint-api`

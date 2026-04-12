@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime as dt
-from typing import Optional
 
 
 def now_utc() -> dt.datetime:
@@ -13,7 +12,7 @@ def now_utc() -> dt.datetime:
     try:
         utc = dt.UTC  # type: ignore[attr-defined]
     except AttributeError:
-        utc = dt.timezone.utc
+        utc = dt.UTC
     return dt.datetime.now(utc)
 
 
@@ -34,5 +33,4 @@ def ensure_utc(d: dt.datetime) -> dt.datetime:
             second=d.second,
             microsecond=d.microsecond,
         )
-    return d.astimezone(dt.timezone.utc)
-
+    return d.astimezone(dt.UTC)

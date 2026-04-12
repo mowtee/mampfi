@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from sqlalchemy import text
+
 from ..db import get_engine
 
 
@@ -17,4 +18,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

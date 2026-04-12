@@ -1,18 +1,17 @@
 from __future__ import annotations
 
 import datetime as dt
-from typing import List, Optional, Literal
-
-from fastapi import APIRouter, Depends, HTTPException, status, Query
 import uuid
+from typing import Literal
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel
 from sqlmodel import select
 
 from ..auth import get_current_user
 from ..db import get_session
 from ..models import Event, Membership, PriceItem, Purchase, User
 from ..timeutils import now_utc
-from pydantic import BaseModel
-
 
 router = APIRouter(prefix="/v1/events/{event_id}/purchases", tags=["purchases"])
 
@@ -24,22 +23,24 @@ class AllocationIn(BaseModel):
 
 class PurchaseLineIn(BaseModel):
     type: Literal["price_item", "custom"]
-    price_item_id: Optional[uuid.UUID] = None
-    name: Optional[str] = None
+    price_item_id: uuid.UUID | None = None
+    name: str | None = None
     qty_final: int
     unit_price_minor: int
-    reason: Optional[str] = None  # 'unavailable' | 'substituted' | None
-    allocations: Optional[List[AllocationIn]] = None
+    reason: str | None = None  # 'unavailable' | 'substituted' | None
+    allocations: list[AllocationIn] | None = None
 
 
 class PurchaseCreateIn(BaseModel):
     date: dt.date
-    lines: List[PurchaseLineIn]
-    notes: Optional[str] = None
+    lines: list[PurchaseLineIn]
+    notes: str | None = None
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
-def finalize_purchase(event_id: uuid.UUID, data: PurchaseCreateIn, user: User = Depends(get_current_user)) -> dict:
+def finalize_purchase(
+    event_id: uuid.UUID, data: PurchaseCreateIn, user: User = Depends(get_current_user)
+) -> dict:
     with get_session() as session:
         ev = session.get(Event, event_id)
         if ev is None:
@@ -49,7 +50,9 @@ def finalize_purchase(event_id: uuid.UUID, data: PurchaseCreateIn, user: User = 
             raise HTTPException(status_code=403, detail="not a member of this event")
 
         # Check existing purchase for the date
-        existing = session.exec(select(Purchase).where(Purchase.event_id == ev.id, Purchase.date == data.date)).first()
+        existing = session.exec(
+            select(Purchase).where(Purchase.event_id == ev.id, Purchase.date == data.date)
+        ).first()
         if existing:
             raise HTTPException(status_code=409, detail="purchase already finalized for this date")
 
@@ -88,16 +91,20 @@ def finalize_purchase(event_id: uuid.UUID, data: PurchaseCreateIn, user: User = 
                 raise HTTPException(status_code=400, detail="allocations qty must sum to qty_final")
 
             total_minor += qty * unit
-            normalized_lines.append({
-                "type": t,
-                # Store UUIDs as strings inside JSONB to ensure JSON-serializable payloads
-                "price_item_id": str(raw.price_item_id) if raw.price_item_id is not None else None,
-                "name": raw.name,
-                "qty_final": qty,
-                "unit_price_minor": unit,
-                "reason": raw.reason,
-                "allocations": [a.model_dump() for a in allocs],
-            })
+            normalized_lines.append(
+                {
+                    "type": t,
+                    # Store UUIDs as strings inside JSONB to ensure JSON-serializable payloads
+                    "price_item_id": str(raw.price_item_id)
+                    if raw.price_item_id is not None
+                    else None,
+                    "name": raw.name,
+                    "qty_final": qty,
+                    "unit_price_minor": unit,
+                    "reason": raw.reason,
+                    "allocations": [a.model_dump() for a in allocs],
+                }
+            )
 
         purchase = Purchase(
             event_id=ev.id,
@@ -114,14 +121,18 @@ def finalize_purchase(event_id: uuid.UUID, data: PurchaseCreateIn, user: User = 
 
 
 @router.get("/{for_date}")
-def get_purchase(event_id: uuid.UUID, for_date: dt.date, user: User = Depends(get_current_user)) -> dict:
+def get_purchase(
+    event_id: uuid.UUID, for_date: dt.date, user: User = Depends(get_current_user)
+) -> dict:
     with get_session() as session:
         ev = session.get(Event, event_id)
         if ev is None:
             raise HTTPException(status_code=404, detail="event not found")
         if not session.get(Membership, (user.id, ev.id)):
             raise HTTPException(status_code=403, detail="not a member of this event")
-        purchase = session.exec(select(Purchase).where(Purchase.event_id == ev.id, Purchase.date == for_date)).first()
+        purchase = session.exec(
+            select(Purchase).where(Purchase.event_id == ev.id, Purchase.date == for_date)
+        ).first()
         if not purchase:
             raise HTTPException(status_code=404, detail="no purchase for this date")
         return {
@@ -154,7 +165,9 @@ def list_purchases(
         if end_date is not None:
             stmt = stmt.where(Purchase.date <= end_date)
         # order by date desc, finalized_at desc
-        items = session.exec(stmt.order_by(Purchase.date.desc(), Purchase.finalized_at.desc())).all()
+        items = session.exec(
+            stmt.order_by(Purchase.date.desc(), Purchase.finalized_at.desc())
+        ).all()
         out = []
         for p in items:
             out.append(

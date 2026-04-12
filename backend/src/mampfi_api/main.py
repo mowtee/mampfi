@@ -1,18 +1,18 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .config import get_settings
 from sqlalchemy import text
-from .db import get_engine
-from .routers import events as events_router
-from .routers import purchases as purchases_router
-from .routers import orders as orders_router
-from .routers import invites as invites_router
-from .routers import payments as payments_router
-from .routers import balances as balances_router
-from .routers import members as members_router
-from .routers import me as me_router
-from .routers import holidays as holidays_router
 
+from .config import get_settings
+from .db import get_engine
+from .routers import balances as balances_router
+from .routers import events as events_router
+from .routers import holidays as holidays_router
+from .routers import invites as invites_router
+from .routers import me as me_router
+from .routers import members as members_router
+from .routers import orders as orders_router
+from .routers import payments as payments_router
+from .routers import purchases as purchases_router
 
 settings = get_settings()
 

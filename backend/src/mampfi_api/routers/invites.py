@@ -4,17 +4,15 @@ import datetime as dt
 import hashlib
 import secrets
 import uuid
-from typing import Optional, List
 
-from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, status
+from pydantic import BaseModel
 from sqlmodel import select
 
 from ..auth import get_current_user
 from ..db import get_session
 from ..models import Event, InviteToken, Membership, User
 from ..timeutils import now_utc
-from pydantic import BaseModel
-
 
 router = APIRouter(tags=["invites"])
 
@@ -25,22 +23,22 @@ def _hash_token(token: str) -> str:
 
 class GroupInviteIn(BaseModel):
     ttl_days: int = 14
-    max_uses: Optional[int] = None
+    max_uses: int | None = None
 
 
 class SingleInviteIn(BaseModel):
     ttl_days: int = 14
-    email: Optional[str] = None
+    email: str | None = None
 
 
 class InviteOut(BaseModel):
     id: uuid.UUID
     event_id: uuid.UUID
     expires_at: dt.datetime
-    revoked_at: Optional[dt.datetime]
-    max_uses: Optional[int]
+    revoked_at: dt.datetime | None
+    max_uses: int | None
     used_count: int
-    last_used_at: Optional[dt.datetime]
+    last_used_at: dt.datetime | None
 
 
 @router.post("/v1/events/{event_id}/invites/group")
@@ -60,7 +58,11 @@ def create_or_rotate_group_invite(
 
         # Revoke previous group invites (max_uses is NULL indicates group link)
         prev = session.exec(
-            select(InviteToken).where(InviteToken.event_id == ev.id, InviteToken.max_uses.is_(None), InviteToken.revoked_at.is_(None))
+            select(InviteToken).where(
+                InviteToken.event_id == ev.id,
+                InviteToken.max_uses.is_(None),
+                InviteToken.revoked_at.is_(None),
+            )
         ).all()
         for inv in prev:
             inv.revoked_at = now
@@ -88,7 +90,9 @@ def create_or_rotate_group_invite(
 
 
 @router.post("/v1/events/{event_id}/invites/single")
-def create_single_invite(event_id: uuid.UUID, data: SingleInviteIn, user: User = Depends(get_current_user)) -> dict:
+def create_single_invite(
+    event_id: uuid.UUID, data: SingleInviteIn, user: User = Depends(get_current_user)
+) -> dict:
     now = now_utc()
     with get_session() as session:
         ev = session.get(Event, event_id)
@@ -123,8 +127,8 @@ def create_single_invite(event_id: uuid.UUID, data: SingleInviteIn, user: User =
         }
 
 
-@router.get("/v1/events/{event_id}/invites", response_model=List[InviteOut])
-def list_invites(event_id: uuid.UUID, user: User = Depends(get_current_user)) -> List[InviteOut]:
+@router.get("/v1/events/{event_id}/invites", response_model=list[InviteOut])
+def list_invites(event_id: uuid.UUID, user: User = Depends(get_current_user)) -> list[InviteOut]:
     with get_session() as session:
         ev = session.get(Event, event_id)
         if ev is None:
@@ -143,7 +147,9 @@ def list_invites(event_id: uuid.UUID, user: User = Depends(get_current_user)) ->
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
 )
-def revoke_invite(event_id: uuid.UUID, invite_id: uuid.UUID, user: User = Depends(get_current_user)) -> Response:
+def revoke_invite(
+    event_id: uuid.UUID, invite_id: uuid.UUID, user: User = Depends(get_current_user)
+) -> Response:
     now = now_utc()
     with get_session() as session:
         ev = session.get(Event, event_id)

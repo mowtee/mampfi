@@ -1,17 +1,15 @@
 from __future__ import annotations
 
 import uuid
-from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, status
+from pydantic import BaseModel
 from sqlmodel import select
 
 from ..auth import get_current_user
 from ..db import get_session
 from ..models import Event, Membership, Payment, Purchase, User
 from ..timeutils import now_utc
-from pydantic import BaseModel
-
 
 router = APIRouter(prefix="/v1/events/{event_id}/members", tags=["members"])
 
@@ -26,7 +24,9 @@ class LeaveIntentOut(BaseModel):
 
 
 @router.post("/me/leave-intent", response_model=LeaveIntentOut)
-def set_leave_intent(event_id: uuid.UUID, data: LeaveIntentIn, user: User = Depends(get_current_user)) -> LeaveIntentOut:
+def set_leave_intent(
+    event_id: uuid.UUID, data: LeaveIntentIn, user: User = Depends(get_current_user)
+) -> LeaveIntentOut:
     with get_session() as session:
         ev = session.get(Event, event_id)
         if ev is None:
@@ -54,7 +54,9 @@ def _compute_balances_for_event(session, event_id: uuid.UUID) -> dict[uuid.UUID,
                     continue
                 qty = int(alloc.get("qty") or 0)
                 balances[uid] = balances.get(uid, 0) - unit * qty
-    for pay in session.exec(select(Payment).where(Payment.event_id == event_id, Payment.status == "confirmed")).all():
+    for pay in session.exec(
+        select(Payment).where(Payment.event_id == event_id, Payment.status == "confirmed")
+    ).all():
         balances[pay.from_user_id] = balances.get(pay.from_user_id, 0) + int(pay.amount_minor)
         balances[pay.to_user_id] = balances.get(pay.to_user_id, 0) - int(pay.amount_minor)
     return balances
@@ -79,20 +81,33 @@ def leave_event(event_id: uuid.UUID, user: User = Depends(get_current_user)) -> 
             # debtors: negative balances (they owe money)
             all_mems = session.exec(select(Membership).where(Membership.event_id == ev.id)).all()
             wants_map = {m.user_id: bool(m.wants_to_leave) for m in all_mems}
-            totals = [{"user_id": uid, "balance_minor": bal, "wants_to_leave": wants_map.get(uid, False)} for uid, bal in balances.items()]
+            totals = [
+                {"user_id": uid, "balance_minor": bal, "wants_to_leave": wants_map.get(uid, False)}
+                for uid, bal in balances.items()
+            ]
 
             plan: list[dict] = []
             if my_bal < 0:
                 remaining = -my_bal
-                creditors = [t for t in totals if t["balance_minor"] > 0 and t["user_id"] != user.id]
+                creditors = [
+                    t for t in totals if t["balance_minor"] > 0 and t["user_id"] != user.id
+                ]
                 # prioritize creditors who want to leave
-                creditors.sort(key=lambda t: (not t.get("wants_to_leave", False), -t["balance_minor"]))
+                creditors.sort(
+                    key=lambda t: (not t.get("wants_to_leave", False), -t["balance_minor"])
+                )
                 for c in creditors:
                     if remaining <= 0:
                         break
                     can = min(remaining, int(c["balance_minor"]))
                     if can > 0:
-                        plan.append({"action": "pay", "to_user_id": str(c["user_id"]), "amount_minor": int(can)})
+                        plan.append(
+                            {
+                                "action": "pay",
+                                "to_user_id": str(c["user_id"]),
+                                "amount_minor": int(can),
+                            }
+                        )
                         remaining -= can
             else:
                 remaining = my_bal
@@ -104,7 +119,13 @@ def leave_event(event_id: uuid.UUID, user: User = Depends(get_current_user)) -> 
                         break
                     will = min(remaining, -int(d["balance_minor"]))
                     if will > 0:
-                        plan.append({"action": "receive", "from_user_id": str(d["user_id"]), "amount_minor": int(will)})
+                        plan.append(
+                            {
+                                "action": "receive",
+                                "from_user_id": str(d["user_id"]),
+                                "amount_minor": int(will),
+                            }
+                        )
 
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -122,4 +143,3 @@ def leave_event(event_id: uuid.UUID, user: User = Depends(get_current_user)) -> 
         session.add(mem)
         session.commit()
         return Response(status_code=status.HTTP_204_NO_CONTENT)
-

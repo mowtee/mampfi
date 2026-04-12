@@ -2,17 +2,15 @@ from __future__ import annotations
 
 import datetime as dt
 import uuid
-from typing import List, Optional, Dict
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel
 from sqlmodel import select
-from zoneinfo import ZoneInfo
 
 from ..auth import get_current_user
 from ..db import get_session
-from ..models import DailyOrder, Event, Membership, PriceItem, User, Purchase
-from pydantic import BaseModel
-
+from ..models import DailyOrder, Event, Membership, PriceItem, Purchase, User
 
 router = APIRouter(prefix="/v1/events/{event_id}/orders", tags=["orders"])
 
@@ -24,23 +22,27 @@ class OrderItemIn(BaseModel):
 
 class OrderUpsertIn(BaseModel):
     date: dt.date
-    items: List[OrderItemIn]
+    items: list[OrderItemIn]
 
 
-def _cutoff_has_passed_for_date(ev: Event, target_date: dt.date, now_utc: Optional[dt.datetime] = None) -> bool:
+def _cutoff_has_passed_for_date(
+    ev: Event, target_date: dt.date, now_utc: dt.datetime | None = None
+) -> bool:
     """Return True if the cutoff for the given target_date has passed.
 
     Per requirements: the next day's orders lock at the daily cutoff. That means the cutoff
     for target_date occurs at (target_date - 1) at event.cutoff_time in the event timezone.
     """
     if now_utc is None:
-        now_utc = dt.datetime.now(dt.timezone.utc)
+        now_utc = dt.datetime.now(dt.UTC)
     try:
         tz = ZoneInfo(ev.timezone)
     except Exception:
-        raise HTTPException(status_code=500, detail="Invalid event timezone")
-    cutoff_local = dt.datetime.combine(target_date - dt.timedelta(days=1), ev.cutoff_time).replace(tzinfo=tz)
-    cutoff_utc = cutoff_local.astimezone(dt.timezone.utc)
+        raise HTTPException(status_code=500, detail="Invalid event timezone") from None
+    cutoff_local = dt.datetime.combine(target_date - dt.timedelta(days=1), ev.cutoff_time).replace(
+        tzinfo=tz
+    )
+    cutoff_utc = cutoff_local.astimezone(dt.UTC)
     return now_utc >= cutoff_utc
 
 
@@ -71,7 +73,7 @@ def upsert_my_order(
         try:
             tz = ZoneInfo(ev.timezone)
         except Exception:
-            raise HTTPException(status_code=500, detail="Invalid event timezone")
+            raise HTTPException(status_code=500, detail="Invalid event timezone") from None
         joined_date = member.joined_at.astimezone(tz).date()
         left_date = member.left_at.astimezone(tz).date() if member.left_at else None
         active_on_date = (for_date >= joined_date) and (left_date is None or for_date < left_date)
@@ -80,17 +82,27 @@ def upsert_my_order(
 
         # Enforce cutoff locking for the target date
         if _cutoff_has_passed_for_date(ev, for_date):
-            raise HTTPException(status_code=403, detail="orders locked for this date (cutoff passed)")
+            raise HTTPException(
+                status_code=403, detail="orders locked for this date (cutoff passed)"
+            )
 
         # Block changes if purchase already finalized for this date
-        if session.exec(select(Purchase).where(Purchase.event_id == ev.id, Purchase.date == for_date)).first():
-            raise HTTPException(status_code=403, detail="orders locked: purchase already finalized for this date")
+        if session.exec(
+            select(Purchase).where(Purchase.event_id == ev.id, Purchase.date == for_date)
+        ).first():
+            raise HTTPException(
+                status_code=403, detail="orders locked: purchase already finalized for this date"
+            )
 
         # Validate items (only active items are valid for ordering)
         active_item_ids = set(
-            session.exec(select(PriceItem.id).where(PriceItem.event_id == ev.id, PriceItem.active == True)).all()  # noqa: E712
+            session.exec(
+                select(PriceItem.id).where(PriceItem.event_id == ev.id, PriceItem.active == True)  # noqa: E712
+            ).all()
         )
-        all_item_ids = set(session.exec(select(PriceItem.id).where(PriceItem.event_id == ev.id)).all())
+        all_item_ids = set(
+            session.exec(select(PriceItem.id).where(PriceItem.event_id == ev.id)).all()
+        )
         norm_items: list[dict] = []
         inactive_ids: list[str] = []
         unknown_ids: list[str] = []
@@ -110,12 +122,17 @@ def upsert_my_order(
             norm_items.append({"price_item_id": str(it.price_item_id), "qty": int(it.qty)})
 
         if inactive_ids or unknown_ids:
-            raise HTTPException(status_code=400, detail={"inactive_item_ids": inactive_ids, "unknown_item_ids": unknown_ids})
+            raise HTTPException(
+                status_code=400,
+                detail={"inactive_item_ids": inactive_ids, "unknown_item_ids": unknown_ids},
+            )
 
         # Upsert
         existing = session.exec(
             select(DailyOrder).where(
-                DailyOrder.event_id == ev.id, DailyOrder.user_id == user.id, DailyOrder.date == for_date
+                DailyOrder.event_id == ev.id,
+                DailyOrder.user_id == user.id,
+                DailyOrder.date == for_date,
             )
         ).first()
         if existing:
@@ -137,22 +154,25 @@ class OrderOut(BaseModel):
     event_id: uuid.UUID
     user_id: uuid.UUID
     date: dt.date
-    is_rolled_over: Optional[bool] = None
+    is_rolled_over: bool | None = None
+
     # Enriched items: include name and unit price for convenience
     class OrderItemOut(BaseModel):
         price_item_id: str
         qty: int
-        name: Optional[str] = None
-        unit_price_minor: Optional[int] = None
-        item_total_minor: Optional[int] = None
-        inactive: Optional[bool] = None
+        name: str | None = None
+        unit_price_minor: int | None = None
+        item_total_minor: int | None = None
+        inactive: bool | None = None
 
-    items: List[OrderItemOut]
-    total_minor: Optional[int] = None
+    items: list[OrderItemOut]
+    total_minor: int | None = None
 
 
 @router.get("/{for_date}/me", response_model=OrderOut)
-def get_my_order(event_id: uuid.UUID, for_date: dt.date, user: User = Depends(get_current_user)) -> OrderOut:
+def get_my_order(
+    event_id: uuid.UUID, for_date: dt.date, user: User = Depends(get_current_user)
+) -> OrderOut:
     with get_session() as session:
         ev = session.get(Event, event_id)
         if ev is None:
@@ -165,7 +185,7 @@ def get_my_order(event_id: uuid.UUID, for_date: dt.date, user: User = Depends(ge
         try:
             tz = ZoneInfo(ev.timezone)
         except Exception:
-            raise HTTPException(status_code=500, detail="Invalid event timezone")
+            raise HTTPException(status_code=500, detail="Invalid event timezone") from None
         joined_date = member.joined_at.astimezone(tz).date()
         left_date = member.left_at.astimezone(tz).date() if member.left_at else None
         active_on_date = (for_date >= joined_date) and (left_date is None or for_date < left_date)
@@ -174,7 +194,9 @@ def get_my_order(event_id: uuid.UUID, for_date: dt.date, user: User = Depends(ge
 
         order = session.exec(
             select(DailyOrder).where(
-                DailyOrder.event_id == ev.id, DailyOrder.user_id == user.id, DailyOrder.date == for_date
+                DailyOrder.event_id == ev.id,
+                DailyOrder.user_id == user.id,
+                DailyOrder.date == for_date,
             )
         ).first()
 
@@ -197,10 +219,17 @@ def get_my_order(event_id: uuid.UUID, for_date: dt.date, user: User = Depends(ge
 
         # Enrich with item names and unit prices; no writes for rollover
         price_items = session.exec(select(PriceItem).where(PriceItem.event_id == ev.id)).all()
-        meta = {str(pi.id): {"name": pi.name, "unit_price_minor": pi.unit_price_minor, "active": bool(pi.active)} for pi in price_items}
+        meta = {
+            str(pi.id): {
+                "name": pi.name,
+                "unit_price_minor": pi.unit_price_minor,
+                "active": bool(pi.active),
+            }
+            for pi in price_items
+        }
         enriched: list[OrderOut.OrderItemOut] = []
         grand_total = 0
-        for it in (order.items if order else []):
+        for it in order.items if order else []:
             pid = str(it.get("price_item_id"))
             qty = int(it.get("qty", 0))
             m = meta.get(pid, {})
@@ -218,13 +247,20 @@ def get_my_order(event_id: uuid.UUID, for_date: dt.date, user: User = Depends(ge
                     inactive=not bool(m.get("active", False)) if pid in meta else True,
                 )
             )
-        return OrderOut(event_id=ev.id, user_id=user.id, date=for_date, items=enriched, total_minor=grand_total, is_rolled_over=(rolled or None))
+        return OrderOut(
+            event_id=ev.id,
+            user_id=user.id,
+            date=for_date,
+            items=enriched,
+            total_minor=grand_total,
+            is_rolled_over=(rolled or None),
+        )
 
 
 class AggregateOut(BaseModel):
     date: dt.date
-    total_minor: Optional[int] = None
-    items: List[dict]
+    total_minor: int | None = None
+    items: list[dict]
 
 
 @router.get("/aggregate", response_model=AggregateOut)
@@ -240,13 +276,15 @@ def aggregate_orders(
         if not session.get(Membership, (user.id, ev.id)):
             raise HTTPException(status_code=403, detail="not a member of this event")
         # Start with explicit orders for the date
-        orders = session.exec(select(DailyOrder).where(DailyOrder.event_id == ev.id, DailyOrder.date == date)).all()
+        orders = session.exec(
+            select(DailyOrder).where(DailyOrder.event_id == ev.id, DailyOrder.date == date)
+        ).all()
 
         # Determine active memberships for the date (joined_at <= date < left_at in event TZ)
         try:
             tz = ZoneInfo(ev.timezone)
         except Exception:
-            raise HTTPException(status_code=500, detail="Invalid event timezone")
+            raise HTTPException(status_code=500, detail="Invalid event timezone") from None
         mems = session.exec(select(Membership).where(Membership.event_id == ev.id)).all()
         active_user_ids: set[uuid.UUID] = set()
         joined_dates: dict[uuid.UUID, dt.date] = {}
@@ -262,7 +300,9 @@ def aggregate_orders(
 
         # Active items (only these are valid for intended orders)
         active_item_ids = set(
-            session.exec(select(PriceItem.id).where(PriceItem.event_id == ev.id, PriceItem.active == True)).all()  # noqa: E712
+            session.exec(
+                select(PriceItem.id).where(PriceItem.event_id == ev.id, PriceItem.active == True)  # noqa: E712
+            ).all()
         )
 
         # For active users without an explicit order, roll over their most recent prior explicit order
@@ -274,13 +314,17 @@ def aggregate_orders(
                     DailyOrder.event_id == ev.id,
                     DailyOrder.user_id == uid,
                     DailyOrder.date < date,
-                    *( [DailyOrder.date >= jd] if jd else [] ),
+                    *([DailyOrder.date >= jd] if jd else []),
                 )
                 .order_by(DailyOrder.date.desc())
             ).first()
             if prev:
                 # Create a lightweight view object with items filtered to active price items
-                rolled_items = [it for it in (prev.items or []) if str(it.get("price_item_id")) in {str(x) for x in active_item_ids}]
+                rolled_items = [
+                    it
+                    for it in (prev.items or [])
+                    if str(it.get("price_item_id")) in {str(x) for x in active_item_ids}
+                ]
                 if rolled_items:
                     orders.append(
                         DailyOrder(
@@ -294,7 +338,9 @@ def aggregate_orders(
         # Include all price items (active or inactive) for metadata so that
         # deactivated items already present in saved orders are still displayed with names/prices
         pi_rows = session.exec(select(PriceItem).where(PriceItem.event_id == ev.id)).all()
-        meta = {str(pi.id): {"name": pi.name, "unit_price_minor": pi.unit_price_minor} for pi in pi_rows}
+        meta = {
+            str(pi.id): {"name": pi.name, "unit_price_minor": pi.unit_price_minor} for pi in pi_rows
+        }
         # Aggregate totals and consumers
         totals: dict[str, int] = {}
         consumers: dict[str, list[dict]] = {}

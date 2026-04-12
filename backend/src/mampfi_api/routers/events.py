@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import datetime as dt
-from typing import List, Optional
-
-from fastapi import APIRouter, Depends, HTTPException, status, Query, Response
 import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from pydantic import BaseModel
 from sqlmodel import select
 
 from ..auth import get_current_user
@@ -12,29 +12,26 @@ from ..db import get_session
 from ..models import Event, Membership, PriceItem, User
 from ..timeutils import now_utc
 
-
 router = APIRouter(prefix="/v1/events", tags=["events"])
-
-from pydantic import BaseModel
 
 
 class PriceItemCreate(BaseModel):
     name: str
     unit_price_minor: int
-    active: Optional[bool] = True
+    active: bool | None = True
 
 
 class EventCreate(BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     start_date: dt.date
     end_date: dt.date
     timezone: str
     cutoff_time: dt.time
     currency: str
-    price_items: List[PriceItemCreate]
-    holiday_country_code: Optional[str] = None
-    holiday_region_code: Optional[str] = None
+    price_items: list[PriceItemCreate]
+    holiday_country_code: str | None = None
+    holiday_region_code: str | None = None
 
 
 @router.post("", response_model=Event, status_code=status.HTTP_201_CREATED)
@@ -62,7 +59,9 @@ def create_event(data: EventCreate, user: User = Depends(get_current_user)) -> E
         session.flush()
 
         # Add membership for creator as owner
-        session.add(Membership(user_id=user.id, event_id=event.id, role="owner", joined_at=now_utc()))
+        session.add(
+            Membership(user_id=user.id, event_id=event.id, role="owner", joined_at=now_utc())
+        )
 
         # Insert price items (read-only after creation per requirements)
         for item in data.price_items:
@@ -77,9 +76,6 @@ def create_event(data: EventCreate, user: User = Depends(get_current_user)) -> E
         session.commit()
         session.refresh(event)
         return event
-
-
-from pydantic import BaseModel
 
 
 class EventWithMe(BaseModel):
@@ -97,12 +93,14 @@ class EventWithMe(BaseModel):
     left_at: dt.datetime | None = None
 
 
-@router.get("", response_model=List[EventWithMe])
-def list_my_events(user: User = Depends(get_current_user)) -> List[EventWithMe]:
+@router.get("", response_model=list[EventWithMe])
+def list_my_events(user: User = Depends(get_current_user)) -> list[EventWithMe]:
     with get_session() as session:
         mems = session.exec(select(Membership).where(Membership.user_id == user.id)).all()
         event_ids = [m.event_id for m in mems]
-        events = session.exec(select(Event).where(Event.id.in_(event_ids))).all() if event_ids else []
+        events = (
+            session.exec(select(Event).where(Event.id.in_(event_ids))).all() if event_ids else []
+        )
         mem_by_event = {m.event_id: m for m in mems}
         out: list[EventWithMe] = []
         for ev in events:
@@ -138,12 +136,14 @@ def get_event(event_id: uuid.UUID, user: User = Depends(get_current_user)) -> Ev
 
 
 class EventUpdate(BaseModel):
-    holiday_country_code: Optional[str] = None
-    holiday_region_code: Optional[str] = None
+    holiday_country_code: str | None = None
+    holiday_region_code: str | None = None
 
 
 @router.patch("/{event_id}", response_model=Event)
-def update_event(event_id: uuid.UUID, data: EventUpdate, user: User = Depends(get_current_user)) -> Event:
+def update_event(
+    event_id: uuid.UUID, data: EventUpdate, user: User = Depends(get_current_user)
+) -> Event:
     with get_session() as session:
         ev = session.get(Event, event_id)
         if ev is None:
@@ -161,12 +161,12 @@ def update_event(event_id: uuid.UUID, data: EventUpdate, user: User = Depends(ge
         return ev
 
 
-@router.get("/{event_id}/price-items", response_model=List[PriceItem])
+@router.get("/{event_id}/price-items", response_model=list[PriceItem])
 def list_price_items(
     event_id: uuid.UUID,
     user: User = Depends(get_current_user),
     include_inactive: bool = Query(default=False),
-) -> List[PriceItem]:
+) -> list[PriceItem]:
     with get_session() as session:
         ev = session.get(Event, event_id)
         if ev is None:
@@ -186,8 +186,12 @@ class PriceItemAdd(BaseModel):
     unit_price_minor: int
 
 
-@router.post("/{event_id}/price-items", response_model=PriceItem, status_code=status.HTTP_201_CREATED)
-def add_price_item(event_id: uuid.UUID, data: PriceItemAdd, user: User = Depends(get_current_user)) -> PriceItem:
+@router.post(
+    "/{event_id}/price-items", response_model=PriceItem, status_code=status.HTTP_201_CREATED
+)
+def add_price_item(
+    event_id: uuid.UUID, data: PriceItemAdd, user: User = Depends(get_current_user)
+) -> PriceItem:
     if data.unit_price_minor <= 0:
         raise HTTPException(status_code=400, detail="unit_price_minor must be > 0")
     with get_session() as session:
@@ -199,7 +203,9 @@ def add_price_item(event_id: uuid.UUID, data: PriceItemAdd, user: User = Depends
             raise HTTPException(status_code=403, detail="not a member of this event")
         if member.role != "owner":
             raise HTTPException(status_code=403, detail="owner role required")
-        item = PriceItem(event_id=ev.id, name=data.name, unit_price_minor=int(data.unit_price_minor), active=True)
+        item = PriceItem(
+            event_id=ev.id, name=data.name, unit_price_minor=int(data.unit_price_minor), active=True
+        )
         session.add(item)
         session.commit()
         session.refresh(item)
@@ -211,7 +217,9 @@ def add_price_item(event_id: uuid.UUID, data: PriceItemAdd, user: User = Depends
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
 )
-def deactivate_price_item(event_id: uuid.UUID, price_item_id: uuid.UUID, user: User = Depends(get_current_user)) -> Response:
+def deactivate_price_item(
+    event_id: uuid.UUID, price_item_id: uuid.UUID, user: User = Depends(get_current_user)
+) -> Response:
     with get_session() as session:
         ev = session.get(Event, event_id)
         if ev is None:
@@ -235,7 +243,9 @@ def deactivate_price_item(event_id: uuid.UUID, price_item_id: uuid.UUID, user: U
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
 )
-def activate_price_item(event_id: uuid.UUID, price_item_id: uuid.UUID, user: User = Depends(get_current_user)) -> Response:
+def activate_price_item(
+    event_id: uuid.UUID, price_item_id: uuid.UUID, user: User = Depends(get_current_user)
+) -> Response:
     with get_session() as session:
         ev = session.get(Event, event_id)
         if ev is None:
@@ -263,8 +273,8 @@ class MemberOut(BaseModel):
     left_at: dt.datetime | None = None
 
 
-@router.get("/{event_id}/members", response_model=List[MemberOut])
-def list_members(event_id: uuid.UUID, user: User = Depends(get_current_user)) -> List[MemberOut]:
+@router.get("/{event_id}/members", response_model=list[MemberOut])
+def list_members(event_id: uuid.UUID, user: User = Depends(get_current_user)) -> list[MemberOut]:
     with get_session() as session:
         ev = session.get(Event, event_id)
         if ev is None:
@@ -280,7 +290,7 @@ def list_members(event_id: uuid.UUID, user: User = Depends(get_current_user)) ->
         if user_ids:
             for u in session.exec(select(User).where(User.id.in_(user_ids))).all():
                 users[u.id] = u
-        out: List[MemberOut] = []
+        out: list[MemberOut] = []
         for m in mems:
             u = users.get(m.user_id)
             out.append(

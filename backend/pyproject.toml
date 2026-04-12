@@ -2,7 +2,7 @@
 name = "mampfi-api"
 version = "0.1.0"
 description = "Mampfi FastAPI backend"
-requires-python = ">=3.13,<3.14"
+requires-python = ">=3.14,<3.15"
 dependencies = [
     "fastapi>=0.116.1",
     "uvicorn>=0.35.0",
@@ -31,7 +31,7 @@ packages = ["src/mampfi_api"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py313"
+target-version = "py314"
 src = ["src"]
 
 [tool.ruff.lint]
@@ -44,7 +44,10 @@ select = [
     "B",   # flake8-bugbear
     "SIM", # flake8-simplify
 ]
-ignore = ["E501"]  # line length enforced by formatter
+ignore = [
+    "E501",  # line length enforced by formatter
+    "B008",  # Depends/Query in function defaults — required by FastAPI
+]
 
 [tool.ruff.lint.isort]
 known-first-party = ["mampfi_api"]
