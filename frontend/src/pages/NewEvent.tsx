@@ -92,7 +92,13 @@ export default function NewEvent() {
           <div className="row">
             <div className="field">
               <label className="muted">{t("newEvent.start")}</label>
-              <DateField value={start} onChange={setStart} max={end} />
+              <DateField
+                value={start}
+                onChange={(d) => {
+                  setStart(d);
+                  if (d > end) setEnd(d);
+                }}
+              />
             </div>
             <div className="field">
               <label className="muted">{t("newEvent.end")}</label>
