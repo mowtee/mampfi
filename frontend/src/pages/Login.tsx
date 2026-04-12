@@ -33,10 +33,10 @@ export default function Login() {
 
   return (
     <div style={{ maxWidth: 400, margin: "40px auto", padding: "0 16px" }}>
-      <div style={{ textAlign: "center", marginBottom: 16 }}>
-        <img src="/logo.png" alt="Mampfi" style={{ height: 64 }} />
+      <div style={{ textAlign: "center", marginBottom: 32, marginTop: 16 }}>
+        <img src="/logo.png" alt="Mampfi" style={{ height: 120 }} />
       </div>
-      <h2>{t("auth.login")}</h2>
+      <h2 style={{ marginBottom: 20 }}>{t("auth.login")}</h2>
       <form onSubmit={handleSubmit}>
         <div className="vstack">
           <div className="field">
