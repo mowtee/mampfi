@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { formatMoney } from "../../lib/money";
@@ -38,6 +39,7 @@ export default function DayTab({
   onAddDays,
   onSetTab,
 }: DayTabProps) {
+  const { t } = useTranslation();
   const {
     ev,
     meQ,
@@ -186,7 +188,7 @@ export default function DayTab({
       })
       .filter((x) => x.qty_final > 0);
     if (!lines.length) {
-      alert("No delivered items to finalize.");
+      alert(t("day.noDeliveredItems"));
       return;
     }
     finalizeAdjust.mutate({ lines, notes: wsNotes });
@@ -221,7 +223,7 @@ export default function DayTab({
   return (
     <>
       <div className="toolbar section">
-        <label className="muted">Date</label>
+        <label className="muted">{t("day.date")}</label>
         <div className="row" style={{ alignItems: "center" }}>
           <button
             className="btn"
@@ -248,7 +250,7 @@ export default function DayTab({
           {statusChip.text}
         </span>
         <span className="muted" style={{ marginLeft: 12 }}>
-          Orders lock on the previous day at {String(ev.data.cutoff_time || "").slice(0, 5)}.
+          {t("day.lockInfo", { time: String(ev.data.cutoff_time || "").slice(0, 5) })}
         </span>
         {holidays.labelByDate.get(forDate) && (
           <span className="chip muted" style={{ marginLeft: 8 }}>
@@ -257,46 +259,46 @@ export default function DayTab({
         )}
         <span className="spacer" />
         <div className="row" style={{ alignItems: "center", gap: 8 }}>
-          <label className="muted">Rollover</label>
+          <label className="muted">{t("day.rollover")}</label>
           <button className="btn" onClick={toggleRollover}>
-            {rolloverEnabled ? "On" : "Off"}
+            {rolloverEnabled ? t("app.on") : t("app.off")}
           </button>
         </div>
       </div>
       <div className="muted" style={{ marginTop: 6 }}>
-        Your latest order rolls over to tomorrow unless changed before cutoff.
+        {t("day.rolloverHint")}
       </div>
 
       {/* Your Order */}
       <section className="section">
         <div className="card">
-          <h3>Your Order</h3>
+          <h3>{t("day.yourOrder")}</h3>
           {myOrder.data?.is_rolled_over && rolloverEnabled && (
             <div className="chip warn" style={{ marginBottom: 8 }}>
-              Using rolled-over order from a previous day
+              {t("day.rolledOver")}
             </div>
           )}
           {myOrder.data?.is_rolled_over && !rolloverEnabled && (
             <div className="chip muted" style={{ marginBottom: 8 }}>
-              Rollover disabled — starting empty for this day
+              {t("day.rolloverDisabled")}
             </div>
           )}
-          {price.isLoading && <p>Loading price…</p>}
-          {myOrder.isLoading && <p>Loading your order…</p>}
+          {price.isLoading && <p>{t("day.loadingPrice")}</p>}
+          {myOrder.isLoading && <p>{t("day.loadingOrder")}</p>}
           {inactiveForDate && (
             <div className="muted">
               {meMember?.left_at
-                ? `You left this event on ${new Date(meMember.left_at).toLocaleDateString()}. Orders after this date are not available.`
-                : "You are not an active member for this date."}
+                ? t("day.leftEvent", { date: new Date(meMember.left_at).toLocaleDateString() })
+                : t("day.notActiveMember")}
             </div>
           )}
           <table className="table">
             <thead>
               <tr>
-                <th>Item</th>
-                <th style={{ textAlign: "right" }}>Unit</th>
-                <th style={{ textAlign: "right" }}>Qty</th>
-                <th style={{ textAlign: "right" }}>Total</th>
+                <th>{t("day.item")}</th>
+                <th style={{ textAlign: "right" }}>{t("day.unit")}</th>
+                <th style={{ textAlign: "right" }}>{t("day.qty")}</th>
+                <th style={{ textAlign: "right" }}>{t("day.total")}</th>
               </tr>
             </thead>
             <tbody>
@@ -353,7 +355,7 @@ export default function DayTab({
             }
             return (
               <div className="sticky-total">
-                <strong>Your total: {formatMoney(subtotal, currency)}</strong>
+                <strong>{t("day.yourTotal", { amount: formatMoney(subtotal, currency) })}</strong>
               </div>
             );
           })()}
@@ -363,12 +365,16 @@ export default function DayTab({
             className="btn primary"
             style={{ marginTop: 10 }}
           >
-            {purchase.data ? "Finalized" : upsert.isPending ? "Saving…" : "Save Order"}
+            {purchase.data
+              ? t("day.finalized")
+              : upsert.isPending
+                ? t("day.saving")
+                : t("day.saveOrder")}
           </button>
           {upsert.error && <div className="danger">{String(upsert.error)}</div>}
           {lockInfo.locked && (
             <div className="muted" style={{ marginTop: 6 }}>
-              Orders are locked since {String(ev.data.cutoff_time || "").slice(0, 5)}.
+              {t("day.lockedSince", { time: String(ev.data.cutoff_time || "").slice(0, 5) })}
             </div>
           )}
           {(() => {
@@ -379,8 +385,7 @@ export default function DayTab({
             if (inactive.length === 0) return null;
             return (
               <div className="muted" style={{ marginTop: 8 }}>
-                Note: {inactive.length} item(s) in your saved order are no longer available and will
-                be ignored when saving.
+                {t("day.inactiveItems", { count: inactive.length })}
               </div>
             );
           })()}
@@ -390,23 +395,25 @@ export default function DayTab({
       {/* Aggregated For Date */}
       <section className="section">
         <div className="card">
-          <h3>Aggregated For Date</h3>
-          {agg.isLoading && <p>Loading aggregate…</p>}
+          <h3>{t("day.aggregated")}</h3>
+          {agg.isLoading && <p>{t("day.loadingAggregate")}</p>}
           {agg.error && <p className="danger">{String(agg.error)}</p>}
           {agg.data && (
             <div>
               <div className="row" style={{ justifyContent: "flex-end", marginBottom: 8 }}>
                 <strong>
-                  Group Total: {formatMoney(Number(agg.data.total_minor || 0), currency)}
+                  {t("day.groupTotal", {
+                    amount: formatMoney(Number(agg.data.total_minor || 0), currency),
+                  })}
                 </strong>
               </div>
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Item</th>
-                    <th style={{ textAlign: "right" }}>Qty</th>
-                    <th style={{ textAlign: "right" }}>Unit</th>
-                    <th style={{ textAlign: "right" }}>Total</th>
+                    <th>{t("day.item")}</th>
+                    <th style={{ textAlign: "right" }}>{t("day.qty")}</th>
+                    <th style={{ textAlign: "right" }}>{t("day.unit")}</th>
+                    <th style={{ textAlign: "right" }}>{t("day.total")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -445,12 +452,12 @@ export default function DayTab({
                 if (rows.length === 0) return null;
                 return (
                   <div style={{ marginTop: 14 }}>
-                    <h4 style={{ margin: "8px 0" }}>Per-member delivery</h4>
+                    <h4 style={{ margin: "8px 0" }}>{t("day.perMember")}</h4>
                     <table className="table">
                       <thead>
                         <tr>
-                          <th>Member</th>
-                          <th>Items</th>
+                          <th>{t("day.member")}</th>
+                          <th>{t("day.items")}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -479,14 +486,18 @@ export default function DayTab({
       {/* Purchase Finalization */}
       <section className="section">
         <div className="card">
-          <h3>Purchase Finalization</h3>
-          {purchase.isLoading && <p>Checking purchase…</p>}
+          <h3>{t("day.purchaseFinalization")}</h3>
+          {purchase.isLoading && <p>{t("day.checkingPurchase")}</p>}
           {purchase.data && (
             <div className="vstack">
-              <div>Buyer: {memberLabel(purchase.data.buyer_id)}</div>
-              <div>Total: {formatMoney(Number(purchase.data.total_minor || 0), currency)}</div>
+              <div>
+                {t("day.buyer")}: {memberLabel(purchase.data.buyer_id)}
+              </div>
+              <div>
+                {t("day.total")}: {formatMoney(Number(purchase.data.total_minor || 0), currency)}
+              </div>
               <details style={{ marginTop: 8 }}>
-                <summary>Lines</summary>
+                <summary>{t("day.lines")}</summary>
                 <ul>
                   {purchase.data.lines.map((ln, idx) => {
                     const label = ln.name || priceName(ln.price_item_id) || ln.price_item_id;
@@ -505,9 +516,9 @@ export default function DayTab({
             <div>
               {!agg.data || (agg.data.items || []).length === 0 ? (
                 <p className="muted">
-                  Nothing to finalize yet.{" "}
+                  {t("day.nothingToFinalize")}{" "}
                   <button className="btn ghost" onClick={() => onSetTab("day")}>
-                    Go to Day
+                    {t("day.goToDay")}
                   </button>
                 </p>
               ) : (
@@ -516,7 +527,7 @@ export default function DayTab({
                   disabled={finalize.isPending}
                   className="btn primary"
                 >
-                  {finalize.isPending ? "Finalizing…" : "Finalize from Aggregate"}
+                  {finalize.isPending ? t("day.finalizing") : t("day.finalizeFromAggregate")}
                 </button>
               )}
               {finalize.error && <div className="danger">{String(finalize.error)}</div>}
@@ -532,17 +543,17 @@ export default function DayTab({
               top
             >
               <ModalBody>
-                <h3>Finalize purchase</h3>
+                <h3>{t("day.finalizePurchase")}</h3>
                 <div className="muted" style={{ marginBottom: 8 }}>
-                  {forDate} • Buyer: {memberLabel(meQ.data?.id)}
+                  {forDate} • {t("day.buyer")}: {memberLabel(meQ.data?.id)}
                 </div>
                 <table className="table">
                   <thead>
                     <tr>
-                      <th>Item</th>
-                      <th style={{ textAlign: "right" }}>Qty</th>
-                      <th style={{ textAlign: "right" }}>Unit</th>
-                      <th style={{ textAlign: "right" }}>Total</th>
+                      <th>{t("day.item")}</th>
+                      <th style={{ textAlign: "right" }}>{t("day.qty")}</th>
+                      <th style={{ textAlign: "right" }}>{t("day.unit")}</th>
+                      <th style={{ textAlign: "right" }}>{t("day.total")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -564,7 +575,7 @@ export default function DayTab({
                   <tfoot>
                     <tr>
                       <td colSpan={3} style={{ textAlign: "right" }}>
-                        <strong>Total</strong>
+                        <strong>{t("day.total")}</strong>
                       </td>
                       <td style={{ textAlign: "right" }}>
                         <strong>{formatMoney(Number(agg.data.total_minor || 0), currency)}</strong>
@@ -579,14 +590,14 @@ export default function DayTab({
                   onClick={() => setModal("closed")}
                   disabled={finalize.isPending}
                 >
-                  Cancel
+                  {t("app.cancel")}
                 </button>
                 <button
                   className="btn primary"
                   onClick={() => finalize.mutate()}
                   disabled={finalize.isPending}
                 >
-                  {finalize.isPending ? "Finalizing…" : "Confirm finalize"}
+                  {finalize.isPending ? t("day.finalizing") : t("day.confirmFinalize")}
                 </button>
               </ModalActions>
             </Modal>
@@ -596,15 +607,12 @@ export default function DayTab({
           {modal === "precheck" && (
             <Modal open={true} onClose={() => setModal("closed")} size="sm" top>
               <ModalBody>
-                <h3>Everything bought as ordered?</h3>
-                <p className="muted">
-                  Did you buy all items as requested, or do you need to record adjustments
-                  (shortages or substitutions)?
-                </p>
+                <h3>{t("day.everythingAsOrdered")}</h3>
+                <p className="muted">{t("day.everythingAsOrderedDesc")}</p>
               </ModalBody>
               <ModalActions>
                 <button className="btn" onClick={() => setModal("closed")}>
-                  Cancel
+                  {t("app.cancel")}
                 </button>
                 <button
                   className="btn primary"
@@ -612,10 +620,10 @@ export default function DayTab({
                     setModal("finalize");
                   }}
                 >
-                  Yes, finalize as is
+                  {t("day.yesFinalizeAsIs")}
                 </button>
                 <button className="btn" onClick={openWorksheetFromAggregate}>
-                  No, make adjustments
+                  {t("day.noMakeAdjustments")}
                 </button>
               </ModalActions>
             </Modal>
@@ -625,13 +633,13 @@ export default function DayTab({
           {modal === "worksheet" && (
             <Modal open={true} onClose={() => setModal("closed")} size="lg" top dim>
               <ModalBody>
-                <h3>Finalize with adjustments</h3>
+                <h3>{t("day.finalizeWithAdjustments")}</h3>
                 <div className="muted" style={{ marginBottom: 8 }}>
-                  {forDate} • Buyer: {memberLabel(meQ.data?.id)}
+                  {forDate} • {t("day.buyer")}: {memberLabel(meQ.data?.id)}
                 </div>
-                {!ws.length && <div className="muted">No lines to adjust.</div>}
+                {!ws.length && <div className="muted">{t("day.noLinesToAdjust")}</div>}
                 <div className="worksheet-row" style={{ marginBottom: 8 }}>
-                  <strong>Add price list item</strong>
+                  <strong>{t("day.addPriceListItem")}</strong>
                   <div className="row" style={{ marginTop: 6, alignItems: "center", gap: 8 }}>
                     {(() => {
                       const wsIds = new Set(ws.map((w) => w.price_item_id));
@@ -646,7 +654,7 @@ export default function DayTab({
                             onChange={(e) => setAddItemId(e.target.value)}
                             style={{ minWidth: 280 }}
                           >
-                            <option value="">-- choose item --</option>
+                            <option value="">{t("day.chooseItem")}</option>
                             {items.map((pi) => (
                               <option key={pi.id} value={pi.id}>
                                 {pi.name} •{" "}
@@ -676,7 +684,7 @@ export default function DayTab({
                               setAddItemId("");
                             }}
                           >
-                            Add
+                            {t("app.add")}
                           </button>
                         </>
                       );
@@ -697,14 +705,14 @@ export default function DayTab({
                           </span>
                         </div>
                         <div className="row" style={{ alignItems: "center", gap: 8 }}>
-                          <span className="mini">Delivered total: {sum}</span>
+                          <span className="mini">{t("day.deliveredTotal", { count: sum })}</span>
                         </div>
                       </div>
                       <table className="table" style={{ marginTop: 6 }}>
                         <thead>
                           <tr>
-                            <th>Member</th>
-                            <th style={{ textAlign: "right" }}>Delivered</th>
+                            <th>{t("day.member")}</th>
+                            <th style={{ textAlign: "right" }}>{t("day.delivered")}</th>
                             <th></th>
                           </tr>
                         </thead>
@@ -774,7 +782,7 @@ export default function DayTab({
                                     )
                                   }
                                 >
-                                  Remove
+                                  {t("app.remove")}
                                 </button>
                               </td>
                             </tr>
@@ -787,11 +795,13 @@ export default function DayTab({
                                   .map((m) => m.user_id)
                                   .filter((id) => id && !existing.has(id));
                                 if (candidates.length === 0)
-                                  return <div className="mini muted">All members included.</div>;
+                                  return (
+                                    <div className="mini muted">{t("day.allMembersIncluded")}</div>
+                                  );
                                 let local = "" as string;
                                 return (
                                   <div className="row">
-                                    <label className="muted mini">Add member</label>
+                                    <label className="muted mini">{t("day.addMember")}</label>
                                     <select
                                       className="input select"
                                       defaultValue=""
@@ -800,7 +810,7 @@ export default function DayTab({
                                       }}
                                       style={{ minWidth: 240 }}
                                     >
-                                      <option value="">-- choose member --</option>
+                                      <option value="">{t("day.chooseMember")}</option>
                                       {candidates.map((id) => (
                                         <option key={id} value={id}>
                                           {memberLabel(id)}
@@ -823,7 +833,7 @@ export default function DayTab({
                                           );
                                       }}
                                     >
-                                      Add
+                                      {t("app.add")}
                                     </button>
                                   </div>
                                 );
@@ -850,7 +860,7 @@ export default function DayTab({
                             )
                           }
                         >
-                          Set all 0
+                          {t("day.setAllZero")}
                         </button>
                       </div>
                     </div>
@@ -858,12 +868,12 @@ export default function DayTab({
                 })}
                 <div className="row" style={{ marginTop: 8, justifyContent: "space-between" }}>
                   <div className="row">
-                    <label className="muted">Notes</label>
+                    <label className="muted">{t("day.notes")}</label>
                     <input
                       className="input"
                       value={wsNotes}
                       onChange={(e) => setWsNotes(e.target.value)}
-                      placeholder="Notes (optional)"
+                      placeholder={t("day.notesPlaceholder")}
                       style={{ minWidth: 280 }}
                     />
                   </div>
@@ -871,10 +881,10 @@ export default function DayTab({
               </ModalBody>
               <ModalActions>
                 <button className="btn" onClick={() => setModal("closed")}>
-                  Close
+                  {t("app.close")}
                 </button>
                 <button className="btn primary" onClick={() => finalizeFromWorksheet()}>
-                  Submit adjustments
+                  {t("day.submitAdjustments")}
                 </button>
               </ModalActions>
             </Modal>

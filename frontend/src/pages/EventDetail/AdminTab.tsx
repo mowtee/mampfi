@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, type Event } from "../../lib/api";
 import { formatMoney, parseMoneyToMinor } from "../../lib/money";
@@ -12,24 +13,25 @@ type AdminTabProps = {
 };
 
 export default function AdminTab({ ctx, eventId, ev }: AdminTabProps) {
+  const { t } = useTranslation();
   const { invites } = ctx;
 
   return (
     <>
       <section className="section">
         <div className="card">
-          <h3>Price List (Owner)</h3>
+          <h3>{t("admin.priceList")}</h3>
           <div className="muted" style={{ marginTop: -6, marginBottom: 8 }}>
-            Prices are fixed; to change prices, add a new item and deactivate the old one.
+            {t("admin.priceListHint")}
           </div>
           <PriceListAdmin eventId={eventId} currency={ev.currency} />
         </div>
       </section>
       <section className="section">
         <div className="card">
-          <h3>Holidays</h3>
+          <h3>{t("admin.holidays")}</h3>
           <div className="muted" style={{ marginTop: -6, marginBottom: 8 }}>
-            Configure which public holidays to show in the calendar and day view.
+            {t("admin.holidaysHint")}
           </div>
           <EventHolidaysSettings
             eventId={eventId}
@@ -40,10 +42,10 @@ export default function AdminTab({ ctx, eventId, ev }: AdminTabProps) {
       </section>
       <section className="section">
         <div className="card">
-          <h3>Invites</h3>
-          {invites.isLoading && <p>Loading invites…</p>}
+          <h3>{t("admin.invites")}</h3>
+          {invites.isLoading && <p>{t("app.loading")}</p>}
           {invites.error && String(invites.error).includes("HTTP 403") && (
-            <p className="muted">Owner-only section.</p>
+            <p className="muted">{t("admin.ownerOnly")}</p>
           )}
           {!invites.error && invites.data && (
             <>
@@ -56,11 +58,11 @@ export default function AdminTab({ ctx, eventId, ev }: AdminTabProps) {
               <table className="table">
                 <thead>
                   <tr>
-                    <th>ID</th>
-                    <th>Expires</th>
-                    <th>Uses</th>
-                    <th>Revoked</th>
-                    <th>Actions</th>
+                    <th>{t("admin.id")}</th>
+                    <th>{t("admin.expires")}</th>
+                    <th>{t("admin.uses")}</th>
+                    <th>{t("admin.revoked")}</th>
+                    <th>{t("app.actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -93,6 +95,7 @@ export default function AdminTab({ ctx, eventId, ev }: AdminTabProps) {
 // --- Sub-components ---
 
 function PriceListAdmin({ eventId, currency }: { eventId: string; currency: string }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const items = useQuery({
     queryKey: ["priceAll", eventId],
@@ -134,41 +137,39 @@ function PriceListAdmin({ eventId, currency }: { eventId: string; currency: stri
       <div className="row" style={{ marginBottom: 8 }}>
         <input
           className="input"
-          placeholder="Item name"
+          placeholder={t("admin.itemName")}
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
         <input
           className="input"
-          placeholder="Price (e.g. 1,50)"
+          placeholder={t("admin.pricePlaceholder")}
           value={price}
           onChange={(e) => setPrice(e.target.value)}
           style={{ width: 160 }}
         />
         <span className="muted">{currency}</span>
         <button onClick={() => add.mutate()} disabled={add.isPending || disabled} className="btn">
-          {add.isPending ? "Adding…" : "Add Item"}
+          {add.isPending ? t("admin.adding") : t("admin.addItem")}
         </button>
         {add.error && <span className="danger">{String(add.error)}</span>}
       </div>
-      {!name.trim() && <div className="muted">Enter a name.</div>}
-      {(!price || !isFinite(priceMinor)) && (
-        <div className="muted">Enter a valid price, e.g. 1,50.</div>
-      )}
+      {!name.trim() && <div className="muted">{t("admin.enterName")}</div>}
+      {(!price || !isFinite(priceMinor)) && <div className="muted">{t("admin.enterPrice")}</div>}
       {isFinite(priceMinor) && priceMinor <= 0 && (
-        <div className="muted">Price must be greater than 0.</div>
+        <div className="muted">{t("admin.pricePositive")}</div>
       )}
 
-      {items.isLoading && <p className="muted">Loading items…</p>}
+      {items.isLoading && <p className="muted">{t("admin.loadingItems")}</p>}
       {items.error && <p className="danger">{String(items.error)}</p>}
       {items.data && (
         <table className="table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th style={{ textAlign: "right" }}>Unit</th>
-              <th>Active</th>
-              <th>Actions</th>
+              <th>{t("admin.name")}</th>
+              <th style={{ textAlign: "right" }}>{t("admin.unit")}</th>
+              <th>{t("admin.active")}</th>
+              <th>{t("app.actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -176,7 +177,7 @@ function PriceListAdmin({ eventId, currency }: { eventId: string; currency: stri
               <tr key={pi.id}>
                 <td>{pi.name}</td>
                 <td style={{ textAlign: "right" }}>{formatMoney(pi.unit_price_minor, currency)}</td>
-                <td>{pi.active ? "Yes" : "No"}</td>
+                <td>{pi.active ? t("app.yes") : t("app.no")}</td>
                 <td>
                   {pi.active ? (
                     <button
@@ -184,7 +185,7 @@ function PriceListAdmin({ eventId, currency }: { eventId: string; currency: stri
                       onClick={() => deactivate.mutate(pi.id)}
                       disabled={deactivate.isPending}
                     >
-                      Deactivate
+                      {t("admin.deactivate")}
                     </button>
                   ) : (
                     <button
@@ -192,7 +193,7 @@ function PriceListAdmin({ eventId, currency }: { eventId: string; currency: stri
                       onClick={() => activate.mutate(pi.id)}
                       disabled={activate.isPending}
                     >
-                      Activate
+                      {t("admin.activate")}
                     </button>
                   )}
                 </td>
@@ -214,6 +215,7 @@ function EventHolidaysSettings({
   country?: string | null;
   region?: string | null;
 }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [c, setC] = React.useState(country || "");
   const [r, setR] = React.useState(region || "");
@@ -232,7 +234,7 @@ function EventHolidaysSettings({
     <div className="vstack">
       <div className="row">
         <div className="field">
-          <label className="muted">Country</label>
+          <label className="muted">{t("admin.country")}</label>
           <input
             className="input"
             placeholder="DE"
@@ -242,7 +244,7 @@ function EventHolidaysSettings({
           />
         </div>
         <div className="field">
-          <label className="muted">Region (optional)</label>
+          <label className="muted">{t("admin.regionOptional")}</label>
           <input
             className="input"
             placeholder="DE-BE"
@@ -252,16 +254,17 @@ function EventHolidaysSettings({
           />
         </div>
         <button className="btn" onClick={() => update.mutate()} disabled={update.isPending}>
-          Save
+          {t("app.save")}
         </button>
       </div>
       {update.error && <span className="danger">{String(update.error)}</span>}
-      {update.isSuccess && <span className="ok">Saved.</span>}
+      {update.isSuccess && <span className="ok">{t("admin.saved")}</span>}
     </div>
   );
 }
 
 function CreateGroupInviteButton({ eventId }: { eventId: string }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [created, setCreated] = React.useState<{ token: string; invite_url: string } | null>(null);
   const create = useMutation({
@@ -274,7 +277,7 @@ function CreateGroupInviteButton({ eventId }: { eventId: string }) {
   return (
     <div>
       <button onClick={() => create.mutate()} disabled={create.isPending} className="btn">
-        Create/Rotate Group Invite
+        {t("admin.createGroupInvite")}
       </button>
       {create.error && (
         <span className="danger" style={{ marginLeft: 8 }}>
@@ -287,20 +290,20 @@ function CreateGroupInviteButton({ eventId }: { eventId: string }) {
             const absolute = new URL(created.invite_url, window.location.origin).toString();
             return (
               <div className="row" style={{ alignItems: "center" }}>
-                <strong>Invite URL:</strong>{" "}
+                <strong>{t("admin.inviteUrl")}</strong>{" "}
                 <span className="code" style={{ overflowWrap: "anywhere" }}>
                   {absolute}
                 </span>
                 <button className="btn" onClick={() => navigator.clipboard?.writeText(absolute)}>
-                  Copy URL
+                  {t("admin.copyUrl")}
                 </button>
               </div>
             );
           })()}
           <div>
-            <strong>Token:</strong> <span className="code">{created.token}</span>
+            <strong>{t("admin.token")}</strong> <span className="code">{created.token}</span>
           </div>
-          <div className="muted">Share either the URL or token. Users can redeem at /join.</div>
+          <div className="muted">{t("admin.shareHint")}</div>
         </div>
       )}
     </div>
@@ -308,6 +311,7 @@ function CreateGroupInviteButton({ eventId }: { eventId: string }) {
 }
 
 function RevokeInviteButton({ eventId, inviteId }: { eventId: string; inviteId: string }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const revoke = useMutation({
     mutationFn: () => api.revokeInvite(eventId, inviteId),
@@ -315,12 +319,13 @@ function RevokeInviteButton({ eventId, inviteId }: { eventId: string; inviteId: 
   });
   return (
     <button onClick={() => revoke.mutate()} disabled={revoke.isPending} className="btn">
-      Revoke
+      {t("admin.revoke")}
     </button>
   );
 }
 
 function CreateSingleInviteForm({ eventId }: { eventId: string }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [email, setEmail] = React.useState("");
   const [ttl, setTtl] = React.useState(14);
@@ -335,14 +340,14 @@ function CreateSingleInviteForm({ eventId }: { eventId: string }) {
   });
   return (
     <div className="row">
-      <label className="muted">Single-use Invite</label>
+      <label className="muted">{t("admin.singleInvite")}</label>
       <input
         className="input"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="email (optional)"
+        placeholder={t("admin.emailOptional")}
       />
-      <label className="muted">TTL days</label>
+      <label className="muted">{t("admin.ttlDays")}</label>
       <input
         className="input"
         type="number"
@@ -352,7 +357,7 @@ function CreateSingleInviteForm({ eventId }: { eventId: string }) {
         style={{ width: 100 }}
       />
       <button onClick={() => create.mutate()} disabled={create.isPending} className="btn">
-        Create
+        {t("app.create")}
       </button>
       {create.error && <span className="danger">{String(create.error)}</span>}
       {created && (
@@ -361,18 +366,18 @@ function CreateSingleInviteForm({ eventId }: { eventId: string }) {
             const absolute = new URL(created.invite_url, window.location.origin).toString();
             return (
               <div className="row" style={{ alignItems: "center" }}>
-                <strong>Invite URL:</strong>{" "}
+                <strong>{t("admin.inviteUrl")}</strong>{" "}
                 <span className="code" style={{ overflowWrap: "anywhere" }}>
                   {absolute}
                 </span>
                 <button className="btn" onClick={() => navigator.clipboard?.writeText(absolute)}>
-                  Copy URL
+                  {t("admin.copyUrl")}
                 </button>
               </div>
             );
           })()}
           <div>
-            <strong>Token:</strong> <span className="code">{created.token}</span>
+            <strong>{t("admin.token")}</strong> <span className="code">{created.token}</span>
           </div>
         </div>
       )}

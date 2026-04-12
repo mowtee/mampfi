@@ -1,5 +1,6 @@
 import React from "react";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { api } from "../../lib/api";
 import { formatMoney, parseMoneyToMinor } from "../../lib/money";
 import type { EventContextType } from "../../hooks/useEventContext";
@@ -11,6 +12,7 @@ type PaymentsTabProps = {
 };
 
 export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
+  const { t } = useTranslation();
   const { balances, payments, meQ, members, memberLabel, qc } = ctx;
   const meId = meQ.data?.id;
   const currency = balances.data?.currency || "";
@@ -67,8 +69,8 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
       {/* Balances */}
       <section className="section">
         <div className="card">
-          <h3>Balances</h3>
-          {balances.isLoading && <p>Loading balances…</p>}
+          <h3>{t("payments.balances")}</h3>
+          {balances.isLoading && <p>{t("payments.loadingBalances")}</p>}
           {balances.error && <p className="danger">{String(balances.error)}</p>}
           {balances.data && (
             <>
@@ -77,16 +79,17 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
                 if (leavers.length === 0) return null;
                 return (
                   <div className="muted" style={{ marginBottom: 8 }}>
-                    Members preparing to leave:{" "}
-                    {leavers.map((t) => memberLabel(t.user_id)).join(", ")}
+                    {t("payments.leaversHint", {
+                      names: leavers.map((l) => memberLabel(l.user_id)).join(", "),
+                    })}
                   </div>
                 );
               })()}
               <table className="table" style={{ maxWidth: 520 }}>
                 <thead>
                   <tr>
-                    <th>User</th>
-                    <th style={{ textAlign: "right" }}>Balance</th>
+                    <th>{t("payments.user")}</th>
+                    <th style={{ textAlign: "right" }}>{t("payments.balance")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -98,7 +101,7 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
                           {memberLabel(b.user_id)}
                           {b.wants_to_leave && (
                             <span className="chip warn" style={{ marginLeft: 6 }}>
-                              Leaving
+                              {t("payments.leaving")}
                             </span>
                           )}
                         </td>
@@ -136,13 +139,11 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
                   <div className="card" style={{ marginTop: 12 }}>
                     <div className="row" style={{ justifyContent: "space-between" }}>
                       <div>
-                        <strong>Leaving the event</strong>
-                        <div className="muted">
-                          Mark your intent and settle your balance to leave.
-                        </div>
+                        <strong>{t("payments.leavingEvent")}</strong>
+                        <div className="muted">{t("payments.leaveHint")}</div>
                       </div>
                       <div className="row">
-                        <label className="muted">Preparing to leave</label>
+                        <label className="muted">{t("payments.preparingToLeave")}</label>
                         <input
                           type="checkbox"
                           checked={wants}
@@ -156,7 +157,7 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
                         onClick={() => leave.mutate()}
                         disabled={leave.isPending}
                       >
-                        {myBal === 0 ? "Leave event" : "Try leave (show payout plan)"}
+                        {myBal === 0 ? t("payments.leaveEvent") : t("payments.tryLeave")}
                       </button>
                     </div>
                     {leave.error && (
@@ -169,7 +170,7 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
                             createPay.mutate({
                               to_user_id: to,
                               amount_minor: amt,
-                              note: "Balance settlement",
+                              note: t("payments.balanceSettlement"),
                             })
                           }
                           creating={createPay.isPending}
@@ -187,8 +188,8 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
       {/* Payments list */}
       <section className="section">
         <div className="card">
-          <h3>Payments</h3>
-          {payments.isLoading && <p>Loading payments…</p>}
+          <h3>{t("payments.paymentsTitle")}</h3>
+          {payments.isLoading && <p>{t("payments.loadingPayments")}</p>}
           {payments.error && <p className="danger">{String(payments.error)}</p>}
           {(() => {
             let list = (payments.data || []).filter(
@@ -206,11 +207,11 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
               <table className="table">
                 <thead>
                   <tr>
-                    <th>From → To</th>
-                    <th>Note</th>
-                    <th style={{ textAlign: "right" }}>Amount</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th>{t("payments.fromTo")}</th>
+                    <th>{t("payments.note")}</th>
+                    <th style={{ textAlign: "right" }}>{t("payments.amount")}</th>
+                    <th>{t("payments.status")}</th>
+                    <th>{t("app.actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -220,14 +221,14 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
                     const statusLabel =
                       p.status === "pending"
                         ? isRecipient
-                          ? "Awaiting you"
-                          : "Awaiting recipient"
+                          ? t("payments.awaitingYou")
+                          : t("payments.awaitingRecipient")
                         : p.status === "confirmed"
-                          ? "Confirmed"
+                          ? t("payments.confirmed")
                           : p.status === "declined"
-                            ? "Declined"
+                            ? t("payments.declined")
                             : p.status === "canceled"
-                              ? "Canceled"
+                              ? t("payments.canceled")
                               : p.status;
                     const statusClass =
                       p.status === "pending"
@@ -272,18 +273,18 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
                                 className="btn"
                                 style={{ marginRight: 8 }}
                               >
-                                Confirm
+                                {t("payments.confirmBtn")}
                               </button>
                               <button
                                 onClick={() => {
                                   const reason =
-                                    window.prompt("Decline reason (optional)") || undefined;
+                                    window.prompt(t("payments.declineReason")) || undefined;
                                   declinePay.mutate({ id: p.id, reason });
                                 }}
                                 disabled={declinePay.isPending}
                                 className="btn"
                               >
-                                Decline
+                                {t("payments.declineBtn")}
                               </button>
                             </>
                           )}
@@ -293,7 +294,7 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
                               disabled={cancelPay.isPending}
                               className="btn"
                             >
-                              Cancel
+                              {t("payments.cancelBtn")}
                             </button>
                           )}
                         </td>
@@ -313,7 +314,7 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
               .filter((id) => id && id !== meId);
             return (
               <div style={{ marginTop: 12 }}>
-                <h4 style={{ margin: "6px 0" }}>Log a payment</h4>
+                <h4 style={{ margin: "6px 0" }}>{t("payments.logPayment")}</h4>
                 <NewPaymentForm
                   key={paymentFormKey}
                   currency={currency}
@@ -352,6 +353,7 @@ function NewPaymentForm({
   label: (id?: string) => string;
   onSubmit: (to: string, amount_minor: number, note?: string) => void;
 }) {
+  const { t } = useTranslation();
   const [payTo, setPayTo] = React.useState("");
   const [payAmount, setPayAmount] = React.useState("");
   const [payNote, setPayNote] = React.useState("");
@@ -374,28 +376,28 @@ function NewPaymentForm({
 
   return (
     <div style={{ marginTop: 16, borderTop: "1px solid var(--border)", paddingTop: 12 }}>
-      <h4 style={{ margin: 0, marginBottom: 8 }}>New Payment</h4>
+      <h4 style={{ margin: 0, marginBottom: 8 }}>{t("payments.newPayment")}</h4>
       <div className="row">
-        <label className="muted">To</label>
+        <label className="muted">{t("payments.to")}</label>
         <select
           className="input select"
           value={payTo}
           onChange={(e) => setPayTo(e.target.value)}
           style={{ width: 320 }}
         >
-          <option value="">-- choose recipient --</option>
+          <option value="">{t("payments.chooseRecipient")}</option>
           {filtered.map((id) => (
             <option key={id} value={id}>
               {label(id)}
             </option>
           ))}
         </select>
-        <label className="muted">Amount</label>
+        <label className="muted">{t("payments.amount")}</label>
         <input
           className="input"
           value={payAmount}
           onChange={(e) => setPayAmount(e.target.value)}
-          placeholder={`0,00`}
+          placeholder={t("payments.amountPlaceholder")}
           inputMode="decimal"
           style={{ width: 140 }}
         />
@@ -407,7 +409,7 @@ function NewPaymentForm({
               className="btn"
               onClick={() => setPayAmount((Math.min(-myBal, toBal) / 100).toFixed(2))}
             >
-              Exact my balance
+              {t("payments.exactMyBalance")}
             </button>
           </div>
         )}
@@ -415,7 +417,7 @@ function NewPaymentForm({
           className="input"
           value={payNote}
           onChange={(e) => setPayNote(e.target.value)}
-          placeholder="Note (optional)"
+          placeholder={t("payments.notePlaceholder")}
           style={{ minWidth: 240 }}
         />
         <button
@@ -428,7 +430,7 @@ function NewPaymentForm({
           }}
           disabled={disabled}
         >
-          Create
+          {t("app.create")}
         </button>
       </div>
     </div>
@@ -450,13 +452,14 @@ function SettleMyBalance({
   onCreatePayment: (to: string, amount_minor: number, note?: string) => void;
   isCreating?: boolean;
 }) {
+  const { t } = useTranslation();
   const my = totals.find((t) => t.user_id === me);
   if (!me || !my) return null;
   const myBal = Number(my.balance_minor || 0);
   if (myBal === 0)
     return (
       <p className="ok" style={{ marginTop: 8 }}>
-        You are even.
+        {t("payments.youAreEven")}
       </p>
     );
 
@@ -483,21 +486,25 @@ function SettleMyBalance({
     }
     return (
       <div style={{ marginTop: 12 }}>
-        <h4 style={{ margin: "6px 0" }}>Settle my balance</h4>
+        <h4 style={{ margin: "6px 0" }}>{t("payments.settleMyBalance")}</h4>
         <p className="muted">
-          You owe {(-myBal / 100).toFixed(2)} {currency}. Pay the following to get even:
+          {t("payments.youOwe", { amount: (-myBal / 100).toFixed(2), currency })}
         </p>
         <ul>
           {plan.map((p, i) => (
             <li key={i}>
-              Pay {(p.amount / 100).toFixed(2)} {currency} to {label(p.to)}
+              {t("payments.payTo", {
+                amount: (p.amount / 100).toFixed(2),
+                currency,
+                name: label(p.to),
+              })}
               <button
                 className="btn"
                 style={{ marginLeft: 8 }}
-                onClick={() => onCreatePayment(p.to, p.amount, "Balance settlement")}
+                onClick={() => onCreatePayment(p.to, p.amount, t("payments.balanceSettlement"))}
                 disabled={!!isCreating}
               >
-                Create payment
+                {t("payments.createPayment")}
               </button>
             </li>
           ))}
@@ -524,14 +531,18 @@ function SettleMyBalance({
     }
     return (
       <div style={{ marginTop: 12 }}>
-        <h4 style={{ margin: "6px 0" }}>Settle my balance</h4>
+        <h4 style={{ margin: "6px 0" }}>{t("payments.settleMyBalance")}</h4>
         <p className="muted">
-          You should receive {(myBal / 100).toFixed(2)} {currency}. Ask the following to pay you:
+          {t("payments.youShouldReceive", { amount: (myBal / 100).toFixed(2), currency })}
         </p>
         <ul>
           {plan.map((p, i) => (
             <li key={i}>
-              {label(p.from)} should pay you {(p.amount / 100).toFixed(2)} {currency}
+              {t("payments.shouldPayYou", {
+                name: label(p.from),
+                amount: (p.amount / 100).toFixed(2),
+                currency,
+              })}
             </li>
           ))}
         </ul>
@@ -553,6 +564,7 @@ function LeavePlanView({
   onCreatePayment: (to: string, amount_minor: number) => void;
   creating?: boolean;
 }) {
+  const { t } = useTranslation();
   const payload: LeaveErrorPayload | undefined =
     detail && typeof detail === "object" && "detail" in detail
       ? (detail as { detail: LeaveErrorPayload }).detail
@@ -560,9 +572,9 @@ function LeavePlanView({
   const [dismissed, setDismissed] = React.useState(false);
   const isValid = !!payload && payload.reason === "balance_not_zero";
   if (!isValid) {
-    return <div className="danger">Unable to leave.</div>;
+    return <div className="danger">{t("payments.unableToLeave")}</div>;
   }
-  if (dismissed) return <div className="muted">Dismissed.</div>;
+  if (dismissed) return <div className="muted">{t("payments.dismissed")}</div>;
   const bal = Number(payload.balance_minor || 0);
   const plan = Array.isArray(payload.plan) ? payload.plan : [];
   return (
@@ -570,9 +582,9 @@ function LeavePlanView({
       {bal < 0 ? (
         <div>
           <div className="danger">
-            Your balance is not zero. You owe {(-bal / 100).toFixed(2)} {currency}.
+            {t("payments.balanceNotZeroOwe", { amount: (-bal / 100).toFixed(2), currency })}
           </div>
-          <div className="muted">Pay the following to get even:</div>
+          <div className="muted">{t("payments.payToGetEven")}</div>
           <ul>
             {plan.map((p, i) => {
               const toId = "to_user_id" in p ? p.to_user_id : "";
@@ -580,29 +592,33 @@ function LeavePlanView({
               return (
                 <li key={i}>
                   <input type="checkbox" readOnly style={{ marginRight: 6 }} />
-                  Pay {(amt / 100).toFixed(2)} {currency} to {label(toId)}
+                  {t("payments.payTo", {
+                    amount: (amt / 100).toFixed(2),
+                    currency,
+                    name: label(toId),
+                  })}
                   <button
                     className="btn"
                     style={{ marginLeft: 8 }}
                     onClick={() => onCreatePayment(toId, amt)}
                     disabled={!!creating}
                   >
-                    Create payment
+                    {t("payments.createPayment")}
                   </button>
                 </li>
               );
             })}
           </ul>
           <button className="btn" onClick={() => setDismissed(true)}>
-            Dismiss
+            {t("payments.dismiss")}
           </button>
         </div>
       ) : (
         <div>
           <div className="danger">
-            Your balance is not zero. You should receive {(bal / 100).toFixed(2)} {currency}.
+            {t("payments.balanceNotZeroReceive", { amount: (bal / 100).toFixed(2), currency })}
           </div>
-          <div className="muted">Ask the following to pay you:</div>
+          <div className="muted">{t("payments.askToPayYou")}</div>
           <ul>
             {plan.map((p, i) => {
               const fromId = "from_user_id" in p ? p.from_user_id : "";
@@ -610,13 +626,17 @@ function LeavePlanView({
               return (
                 <li key={i}>
                   <input type="checkbox" readOnly style={{ marginRight: 6 }} />
-                  {label(fromId)} should pay you {(amt / 100).toFixed(2)} {currency}
+                  {t("payments.shouldPayYou", {
+                    name: label(fromId),
+                    amount: (amt / 100).toFixed(2),
+                    currency,
+                  })}
                 </li>
               );
             })}
           </ul>
           <button className="btn" onClick={() => setDismissed(true)}>
-            Dismiss
+            {t("payments.dismiss")}
           </button>
         </div>
       )}

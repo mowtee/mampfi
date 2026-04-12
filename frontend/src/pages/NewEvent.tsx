@@ -1,11 +1,13 @@
 import React from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { parseMoneyToMinor } from "../lib/money";
 import DateField from "../components/DateField";
 
 export default function NewEvent() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const nav = useNavigate();
   const [name, setName] = React.useState("");
@@ -73,14 +75,14 @@ export default function NewEvent() {
   return (
     <div>
       <div className="card" style={{ maxWidth: 700 }}>
-        <h2>New Event</h2>
+        <h2>{t("newEvent.title")}</h2>
         <div className="vstack">
           <div className="field">
-            <label className="muted">Name</label>
+            <label className="muted">{t("newEvent.name")}</label>
             <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div className="field">
-            <label className="muted">Description</label>
+            <label className="muted">{t("newEvent.description")}</label>
             <textarea
               className="textarea"
               value={description}
@@ -89,17 +91,17 @@ export default function NewEvent() {
           </div>
           <div className="row">
             <div className="field">
-              <label className="muted">Start</label>
+              <label className="muted">{t("newEvent.start")}</label>
               <DateField value={start} onChange={setStart} max={end} />
             </div>
             <div className="field">
-              <label className="muted">End</label>
+              <label className="muted">{t("newEvent.end")}</label>
               <DateField value={end} onChange={setEnd} min={start} />
             </div>
           </div>
           <div className="row">
             <div className="field">
-              <label className="muted">Timezone</label>
+              <label className="muted">{t("newEvent.timezone")}</label>
               <input
                 className="input"
                 value={timezone}
@@ -107,7 +109,7 @@ export default function NewEvent() {
               />
             </div>
             <div className="field">
-              <label className="muted">Cutoff</label>
+              <label className="muted">{t("newEvent.cutoff")}</label>
               <input
                 className="input"
                 type="time"
@@ -116,7 +118,7 @@ export default function NewEvent() {
               />
             </div>
             <div className="field" style={{ maxWidth: 120 }}>
-              <label className="muted">Currency</label>
+              <label className="muted">{t("newEvent.currency")}</label>
               <input
                 className="input"
                 value={currency}
@@ -126,7 +128,7 @@ export default function NewEvent() {
           </div>
           <div className="row">
             <div className="field">
-              <label className="muted">Holiday Country</label>
+              <label className="muted">{t("newEvent.holidayCountry")}</label>
               <input
                 className="input"
                 placeholder="DE"
@@ -135,7 +137,7 @@ export default function NewEvent() {
               />
             </div>
             <div className="field">
-              <label className="muted">Holiday Region (optional)</label>
+              <label className="muted">{t("newEvent.holidayRegion")}</label>
               <input
                 className="input"
                 placeholder="DE-BE"
@@ -146,31 +148,31 @@ export default function NewEvent() {
           </div>
           <div>
             <div style={{ margin: "8px 0" }}>
-              <strong>Price Items</strong>
+              <strong>{t("newEvent.priceItems")}</strong>
             </div>
             {items.map((it, idx) => (
               <div key={idx} className="row" style={{ marginBottom: 6 }}>
                 <input
                   className="input"
-                  placeholder="Name"
+                  placeholder={t("newEvent.name")}
                   value={it.name}
                   onChange={(e) => updateItem(idx, "name", e.target.value)}
                 />
                 <input
                   className="input"
-                  placeholder="Price (e.g. 1,50)"
+                  placeholder={t("newEvent.pricePlaceholder")}
                   value={it.price}
                   onChange={(e) => updateItem(idx, "price", e.target.value)}
                   style={{ width: 160 }}
                 />
                 <span className="muted">{currency}</span>
                 <button onClick={() => removeItem(idx)} className="btn">
-                  Remove
+                  {t("app.remove")}
                 </button>
               </div>
             ))}
             <button onClick={addItem} className="btn" style={{ marginTop: 4 }}>
-              Add Item
+              {t("newEvent.addItem")}
             </button>
           </div>
 
@@ -180,7 +182,7 @@ export default function NewEvent() {
               disabled={create.isPending || disabled}
               className="btn primary"
             >
-              {create.isPending ? "Creating…" : "Create Event"}
+              {create.isPending ? t("newEvent.creating") : t("newEvent.createEvent")}
             </button>
             {create.error && <span className="danger">{String(create.error)}</span>}
           </div>

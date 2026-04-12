@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { formatMoney } from "../../lib/money";
@@ -12,13 +13,14 @@ type HistoryTabProps = {
 };
 
 export default function HistoryTab({ ctx, eventId, onPickDate }: HistoryTabProps) {
+  const { t } = useTranslation();
   const { ev, memberLabel, priceName } = ctx;
   if (!ev.data) return null;
 
   return (
     <section className="section">
       <div className="card">
-        <h3>Purchases History</h3>
+        <h3>{t("history.title")}</h3>
         <PurchasesHistory
           eventId={eventId}
           currency={ev.data.currency}
@@ -44,23 +46,25 @@ function PurchasesHistory({
   label: (id?: string) => string;
   itemName: (id?: string) => string;
 }) {
+  const { t } = useTranslation();
   const list = useQuery({
     queryKey: ["purchases", eventId],
     queryFn: () => api.listPurchases(eventId),
     enabled: !!eventId,
   });
-  if (list.isLoading) return <p className="muted">Loading purchases…</p>;
+  if (list.isLoading) return <p className="muted">{t("history.loadingPurchases")}</p>;
   if (list.error) return <p className="danger">{String(list.error)}</p>;
-  if (!list.data || list.data.length === 0) return <p className="muted">No purchases yet.</p>;
+  if (!list.data || list.data.length === 0)
+    return <p className="muted">{t("history.noPurchases")}</p>;
   return (
     <table className="table">
       <thead>
         <tr>
           <th></th>
-          <th>Date</th>
-          <th>Buyer</th>
-          <th style={{ textAlign: "right" }}>Total</th>
-          <th>Actions</th>
+          <th>{t("history.date")}</th>
+          <th>{t("history.buyer")}</th>
+          <th style={{ textAlign: "right" }}>{t("history.total")}</th>
+          <th>{t("app.actions")}</th>
         </tr>
       </thead>
       <tbody>
@@ -95,6 +99,7 @@ function PurchaseRow({
   itemName: (id?: string) => string;
   onPickDate: (d: string) => void;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const details = useQuery({
     queryKey: ["purchase", eventId, row.date],
@@ -117,7 +122,7 @@ function PurchaseRow({
         </td>
         <td>
           <button className="btn" onClick={() => onPickDate(row.date)}>
-            View
+            {t("history.view")}
           </button>
         </td>
       </tr>
@@ -125,18 +130,18 @@ function PurchaseRow({
         <tr>
           <td></td>
           <td colSpan={4}>
-            {details.isLoading && <div className="muted">Loading…</div>}
+            {details.isLoading && <div className="muted">{t("app.loading")}</div>}
             {details.error && <div className="danger">{String(details.error)}</div>}
             {details.data && (
               <div style={{ marginTop: 4 }}>
-                <div style={{ fontWeight: 600, marginBottom: 4 }}>Aggregate</div>
+                <div style={{ fontWeight: 600, marginBottom: 4 }}>{t("history.aggregate")}</div>
                 <table className="table">
                   <thead>
                     <tr>
-                      <th>Item</th>
-                      <th style={{ textAlign: "right" }}>Qty</th>
-                      <th style={{ textAlign: "right" }}>Unit</th>
-                      <th style={{ textAlign: "right" }}>Total</th>
+                      <th>{t("history.item")}</th>
+                      <th style={{ textAlign: "right" }}>{t("history.qty")}</th>
+                      <th style={{ textAlign: "right" }}>{t("history.unit")}</th>
+                      <th style={{ textAlign: "right" }}>{t("history.total")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -179,12 +184,14 @@ function PurchaseRow({
                   rows.sort((a, b) => a[1].name.localeCompare(b[1].name));
                   return (
                     <div style={{ marginTop: 10 }}>
-                      <div style={{ fontWeight: 600, marginBottom: 4 }}>Per member</div>
+                      <div style={{ fontWeight: 600, marginBottom: 4 }}>
+                        {t("history.perMember")}
+                      </div>
                       <table className="table">
                         <thead>
                           <tr>
-                            <th>Member</th>
-                            <th>Items</th>
+                            <th>{t("history.member")}</th>
+                            <th>{t("history.items")}</th>
                           </tr>
                         </thead>
                         <tbody>

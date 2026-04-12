@@ -35,16 +35,18 @@ export default function Join() {
   return (
     <div>
       <div className="card" style={{ maxWidth: 700 }}>
-        <h2>{t("app.name")} — Join</h2>
+        <h2>
+          {t("app.name")} — {t("join.title")}
+        </h2>
         {!hasToken && (
           <>
-            <p className="muted">Paste your invite token below to join the event.</p>
+            <p className="muted">{t("join.pasteToken")}</p>
             <div className="row">
               <input
                 className="input"
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
-                placeholder="Invite token"
+                placeholder={t("join.inviteToken")}
                 style={{ width: 400 }}
               />
               <button
@@ -52,7 +54,7 @@ export default function Join() {
                 disabled={!token || redeem.isPending}
                 className="btn primary"
               >
-                Redeem
+                {t("join.redeem")}
               </button>
             </div>
           </>
@@ -63,16 +65,14 @@ export default function Join() {
             {preview.error && <p className="danger">{errorMessage(preview.error)}</p>}
             {ok && (
               <div className="vstack">
-                <p>
-                  Invite to: <strong>{eventName}</strong>
-                </p>
+                <p dangerouslySetInnerHTML={{ __html: t("join.inviteTo", { name: eventName }) }} />
                 <div className="row">
                   <button
                     onClick={() => redeem.mutate()}
                     disabled={redeem.isPending}
                     className="btn primary"
                   >
-                    {redeem.isPending ? t("app.loading") : `Join ${eventName}`}
+                    {redeem.isPending ? t("app.loading") : t("join.joinEvent", { name: eventName })}
                   </button>
                 </div>
               </div>
