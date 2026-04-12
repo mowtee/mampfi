@@ -1,0 +1,10 @@
+{% extends "email/base.txt" %}
+{% block content %}
+{{ greeting }} {{ name }},
+
+{{ body }}
+
+{{ link }}
+
+{{ expiry_note }}
+{% endblock %}

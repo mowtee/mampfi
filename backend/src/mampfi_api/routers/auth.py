@@ -23,6 +23,7 @@ def _user_out(user) -> AuthUserOut:
         id=user.id,
         email=user.email,
         name=user.name,
+        locale=user.locale,
         email_verified=user.email_verified_at is not None,
     )
 
@@ -61,7 +62,7 @@ def signup(
     session: Session = Depends(session_dep),
     settings: Settings = Depends(get_settings),
 ) -> dict:
-    auth_svc.signup(session, data.email, data.password, data.name, settings)
+    auth_svc.signup(session, data.email, data.password, data.name, settings, locale=data.locale)
     return {"message": "Account created. Check your email to verify."}
 
 

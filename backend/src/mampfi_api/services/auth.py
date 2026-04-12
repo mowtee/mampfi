@@ -181,13 +181,18 @@ def revoke_all_user_tokens(session: Session, user_id: uuid.UUID) -> None:
 
 
 def signup(
-    session: Session, email: str, password: str, name: str | None, settings: Settings
+    session: Session,
+    email: str,
+    password: str,
+    name: str | None,
+    settings: Settings,
+    locale: str | None = None,
 ) -> User:
     existing = session.exec(select(User).where(User.email == email)).first()
     if existing:
         raise Conflict("email already registered")
 
-    user = User(email=email, name=name, password_hash=hash_password(password))
+    user = User(email=email, name=name, password_hash=hash_password(password), locale=locale)
     session.add(user)
     session.flush()  # get user.id before building token
 

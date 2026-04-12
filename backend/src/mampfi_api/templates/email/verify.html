@@ -1,0 +1,8 @@
+{% extends "email/base.html" %}
+{% block content %}
+<p>{{ greeting }} {{ name }},</p>
+<p>{{ body }}</p>
+<p><a href="{{ link }}" class="btn">{{ cta }}</a></p>
+<p style="font-size: 13px; color: #6b7280;">{{ fallback }}<br><a href="{{ link }}">{{ link }}</a></p>
+<p>{{ expiry_note }}</p>
+{% endblock %}

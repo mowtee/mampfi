@@ -7,6 +7,7 @@ class SignupIn(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
     name: str | None = Field(default=None, max_length=200)
+    locale: str | None = Field(default=None, max_length=10)
 
 
 class LoginIn(BaseModel):
@@ -31,4 +32,5 @@ class AuthUserOut(BaseModel):
     id: uuid.UUID
     email: str
     name: str | None = None
+    locale: str | None = None
     email_verified: bool

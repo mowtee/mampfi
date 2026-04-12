@@ -16,6 +16,7 @@ dependencies = [
     "pydantic[email]>=2.12.5",
     "argon2-cffi>=24.0",
     "pyjwt>=2.10",
+    "jinja2>=3.1.6",
 ]
 
 [dependency-groups]

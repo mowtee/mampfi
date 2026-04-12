@@ -1,0 +1,82 @@
+"""Internationalization: string catalogs for emails and backend messages.
+
+Each catalog is a dict keyed by language code. Default language is "de".
+Add new languages by extending the dicts.
+"""
+
+DEFAULT_LANG = "de"
+SUPPORTED_LANGS = ("de", "en")
+
+
+def get_lang(lang: str | None) -> str:
+    if lang and lang.lower()[:2] in SUPPORTED_LANGS:
+        return lang.lower()[:2]
+    return DEFAULT_LANG
+
+
+# ---------------------------------------------------------------------------
+# Email strings
+# ---------------------------------------------------------------------------
+
+EMAIL_STRINGS: dict[str, dict[str, str]] = {
+    "de": {
+        # Common
+        "greeting": "Hallo",
+        "footer": "— Mampfi",
+        # Verify email
+        "verify_subject": "Bestaetige dein Mampfi-Konto",
+        "verify_body": "Klicke auf den Link, um deine E-Mail-Adresse zu bestaetigen:",
+        "verify_cta": "E-Mail bestaetigen",
+        "verify_fallback": "Falls der Button nicht funktioniert, kopiere diesen Link:",
+        "verify_expiry": "Dieser Link ist 24 Stunden gueltig.",
+        # Password reset
+        "reset_subject": "Mampfi-Passwort zuruecksetzen",
+        "reset_body": "Klicke auf den Link, um dein Passwort zurueckzusetzen:",
+        "reset_cta": "Passwort zuruecksetzen",
+        "reset_fallback": "Falls der Button nicht funktioniert, kopiere diesen Link:",
+        "reset_expiry": "Dieser Link ist 1 Stunde gueltig.",
+        "reset_ignore": "Falls du das nicht angefordert hast, ignoriere diese E-Mail.",
+        # Payment notifications
+        "payment_created_subject": "Neue Zahlung in {event_name}",
+        "payment_created_body": "{from_name} hat eine Zahlung ueber {amount} an dich erstellt.",
+        "payment_created_cta": "Zahlung ansehen",
+        "payment_confirmed_subject": "Zahlung bestaetigt in {event_name}",
+        "payment_confirmed_body": "Deine Zahlung ueber {amount} an {to_name} wurde bestaetigt.",
+        "purchase_finalized_subject": "Einkauf abgeschlossen fuer {date}",
+        "purchase_finalized_body": "{buyer_name} hat den Einkauf fuer {date} abgeschlossen. Gesamtsumme: {total}.",
+    },
+    "en": {
+        # Common
+        "greeting": "Hi",
+        "footer": "— Mampfi",
+        # Verify email
+        "verify_subject": "Verify your Mampfi account",
+        "verify_body": "Click the link below to verify your email address:",
+        "verify_cta": "Verify email",
+        "verify_fallback": "If the button doesn't work, copy this link:",
+        "verify_expiry": "This link expires in 24 hours.",
+        # Password reset
+        "reset_subject": "Reset your Mampfi password",
+        "reset_body": "Click the link below to reset your password:",
+        "reset_cta": "Reset password",
+        "reset_fallback": "If the button doesn't work, copy this link:",
+        "reset_expiry": "This link expires in 1 hour.",
+        "reset_ignore": "If you didn't request this, ignore this email.",
+        # Payment notifications
+        "payment_created_subject": "New payment in {event_name}",
+        "payment_created_body": "{from_name} created a payment of {amount} to you.",
+        "payment_created_cta": "View payment",
+        "payment_confirmed_subject": "Payment confirmed in {event_name}",
+        "payment_confirmed_body": "Your payment of {amount} to {to_name} was confirmed.",
+        "purchase_finalized_subject": "Purchase finalized for {date}",
+        "purchase_finalized_body": "{buyer_name} finalized the purchase for {date}. Total: {total}.",
+    },
+}
+
+
+def t(key: str, lang: str | None = None, **kwargs: str) -> str:
+    """Look up a translated string, with optional format substitution."""
+    resolved = get_lang(lang)
+    strings = EMAIL_STRINGS.get(resolved, EMAIL_STRINGS[DEFAULT_LANG])
+    template = strings.get(key) or EMAIL_STRINGS[DEFAULT_LANG].get(key, key)
+    return template.format(**kwargs) if kwargs else template
