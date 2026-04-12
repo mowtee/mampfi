@@ -3,7 +3,7 @@ import type { Aggregate, Balances, Invite, Payment, Purchase, PurchaseSummary } 
 export type UUID = string;
 
 // Use nullish coalescing so an intentional empty string ('') is respected for same-origin setups
-const API_URL = (import.meta.env.VITE_API_URL || "").trim();
+const API_URL = import.meta.env.VITE_API_URL || "";
 const DEV_EMAIL_FALLBACK = import.meta.env.VITE_DEV_EMAIL || "";
 
 function devHeaders() {
