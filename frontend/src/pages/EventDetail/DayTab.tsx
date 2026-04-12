@@ -278,7 +278,7 @@ export default function DayTab({
         </div>
       </div>
       <div className="muted" style={{ marginTop: 6 }}>
-        {t("day.rolloverHint")}
+        {rolloverEnabled ? t("day.rolloverHintOn") : t("day.rolloverHintOff")}
       </div>
 
       {/* Your Order */}
