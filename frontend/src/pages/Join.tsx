@@ -1,9 +1,12 @@
 import React from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
+import { errorMessage } from "../lib/errors";
 
 export default function Join() {
+  const { t } = useTranslation();
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const [token, setToken] = React.useState<string>(() => params.get("token") || "");
@@ -21,7 +24,6 @@ export default function Join() {
   const redeem = useMutation({
     mutationFn: () => api.redeemInvite(token.trim()),
     onSuccess: () => {
-      // go to events list after joining
       navigate("/");
     },
   });
@@ -33,7 +35,7 @@ export default function Join() {
   return (
     <div>
       <div className="card" style={{ maxWidth: 700 }}>
-        <h2>Join Event</h2>
+        <h2>{t("app.name")} — Join</h2>
         {!hasToken && (
           <>
             <p className="muted">Paste your invite token below to join the event.</p>
@@ -57,8 +59,8 @@ export default function Join() {
         )}
         {hasToken && (
           <>
-            {preview.isLoading && <p className="muted">Checking invite…</p>}
-            {preview.error && <p className="danger">{String(preview.error)}</p>}
+            {preview.isLoading && <p className="muted">{t("app.loading")}</p>}
+            {preview.error && <p className="danger">{errorMessage(preview.error)}</p>}
             {ok && (
               <div className="vstack">
                 <p>
@@ -70,7 +72,7 @@ export default function Join() {
                     disabled={redeem.isPending}
                     className="btn primary"
                   >
-                    Join {eventName}
+                    {redeem.isPending ? t("app.loading") : `Join ${eventName}`}
                   </button>
                 </div>
               </div>
@@ -79,7 +81,7 @@ export default function Join() {
         )}
         {redeem.error && (
           <div className="danger" style={{ marginTop: 8 }}>
-            {String(redeem.error)}
+            {errorMessage(redeem.error)}
           </div>
         )}
       </div>

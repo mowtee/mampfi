@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
+import { errorMessage } from "../lib/errors";
 
 export default function VerifyEmail() {
   const { t } = useTranslation();
@@ -21,7 +22,7 @@ export default function VerifyEmail() {
       .then(() => setStatus("ok"))
       .catch((err) => {
         setStatus("error");
-        setError(String(err));
+        setError(errorMessage(err));
       });
   }, [token, t]);
 

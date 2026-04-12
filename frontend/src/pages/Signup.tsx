@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
+import { errorMessage } from "../lib/errors";
 
 export default function Signup() {
   const { t, i18n } = useTranslation();
@@ -22,7 +23,7 @@ export default function Signup() {
       await api.signup(email, password, name || undefined, i18n.language);
       setDone(true);
     } catch (err) {
-      setError(String(err));
+      setError(errorMessage(err));
     } finally {
       setLoading(false);
     }

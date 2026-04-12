@@ -30,7 +30,8 @@ async function http<T>(path: string, init?: RequestInit): Promise<T> {
     if (refreshed) {
       return http<T>(path, init);
     }
-    window.location.href = "/login";
+    const next = window.location.pathname + window.location.search;
+    window.location.href = `/login?next=${encodeURIComponent(next)}`;
     throw new Error("Session expired");
   }
 

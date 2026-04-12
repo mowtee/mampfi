@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
+import { errorMessage } from "../lib/errors";
 
 export default function ResetPassword() {
   const { t } = useTranslation();
@@ -20,7 +21,7 @@ export default function ResetPassword() {
       await api.resetPassword(token, password);
       setDone(true);
     } catch (err) {
-      setError(String(err));
+      setError(errorMessage(err));
     } finally {
       setLoading(false);
     }

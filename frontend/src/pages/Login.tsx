@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
+import { errorMessage } from "../lib/errors";
 
 export default function Login() {
   const { t } = useTranslation();
@@ -24,7 +25,7 @@ export default function Login() {
       qc.invalidateQueries({ queryKey: ["auth", "me"] });
       navigate(next, { replace: true });
     } catch (err) {
-      setError(String(err));
+      setError(errorMessage(err));
     } finally {
       setLoading(false);
     }
