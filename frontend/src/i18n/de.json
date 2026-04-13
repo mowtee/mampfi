@@ -296,6 +296,7 @@
     "inviteToken": "Einladungstoken",
     "redeem": "Einlösen",
     "inviteTo": "Einladung zu: <strong>{{name}}</strong>",
+    "loginRequired": "Melde dich an oder erstelle ein Konto, um beizutreten.",
     "joinEvent": "{{name}} beitreten"
   }
 }

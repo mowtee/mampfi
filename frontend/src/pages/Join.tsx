@@ -1,12 +1,14 @@
 import React from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { errorMessage } from "../lib/errors";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Join() {
   const { t } = useTranslation();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const [token, setToken] = React.useState<string>(() => params.get("token") || "");
@@ -31,14 +33,16 @@ export default function Join() {
   const hasToken = !!token;
   const ok = preview.data && !preview.error;
   const eventName = preview.data?.event?.name;
+  const joinUrl = `/join?token=${encodeURIComponent(token)}`;
 
   return (
-    <div>
-      <div className="card" style={{ maxWidth: 700 }}>
+    <div style={{ maxWidth: 500, margin: "40px auto", padding: "0 16px" }}>
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
+        <img src="/logo.png" alt="Mampfi" style={{ height: 100 }} />
+      </div>
+      <div className="card">
         <h2>
-          <strong>
-            {t("app.name")} — {t("join.title")}
-          </strong>
+          <strong>{t("join.title")}</strong>
         </h2>
         {!hasToken && (
           <>
@@ -49,11 +53,10 @@ export default function Join() {
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
                 placeholder={t("join.inviteToken")}
-                style={{ width: 400 }}
               />
               <button
                 onClick={() => redeem.mutate()}
-                disabled={!token || redeem.isPending}
+                disabled={!token || redeem.isPending || !isAuthenticated}
                 className="btn primary"
               >
                 {t("join.redeem")}
@@ -68,15 +71,39 @@ export default function Join() {
             {ok && (
               <div className="vstack">
                 <p dangerouslySetInnerHTML={{ __html: t("join.inviteTo", { name: eventName }) }} />
-                <div className="row">
-                  <button
-                    onClick={() => redeem.mutate()}
-                    disabled={redeem.isPending}
-                    className="btn primary"
-                  >
-                    {redeem.isPending ? t("app.loading") : t("join.joinEvent", { name: eventName })}
-                  </button>
-                </div>
+
+                {authLoading && <p className="muted">{t("app.loading")}</p>}
+
+                {isAuthenticated && (
+                  <div className="row">
+                    <button
+                      onClick={() => redeem.mutate()}
+                      disabled={redeem.isPending}
+                      className="btn primary"
+                    >
+                      {redeem.isPending
+                        ? t("app.loading")
+                        : t("join.joinEvent", { name: eventName })}
+                    </button>
+                  </div>
+                )}
+
+                {!authLoading && !isAuthenticated && (
+                  <div className="vstack" style={{ marginTop: 8 }}>
+                    <p className="muted">{t("join.loginRequired")}</p>
+                    <div className="row" style={{ gap: 8 }}>
+                      <Link
+                        to={`/login?next=${encodeURIComponent(joinUrl)}`}
+                        className="btn primary"
+                      >
+                        {t("auth.login")}
+                      </Link>
+                      <Link to={`/signup?next=${encodeURIComponent(joinUrl)}`} className="btn">
+                        {t("auth.createAccount")}
+                      </Link>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </>

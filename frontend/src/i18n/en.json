@@ -296,6 +296,7 @@
     "inviteToken": "Invite token",
     "redeem": "Redeem",
     "inviteTo": "Invite to: <strong>{{name}}</strong>",
+    "loginRequired": "Log in or create an account to join.",
     "joinEvent": "Join {{name}}"
   }
 }

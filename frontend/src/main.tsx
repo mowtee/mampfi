@@ -50,13 +50,13 @@ createRoot(el).render(
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/join" element={<Join />} />
 
           {/* Protected routes */}
           <Route element={<RequireAuth />}>
             <Route element={<App />}>
               <Route index element={<EventsList />} />
               <Route path="/events/:eventId" element={<EventDetail />} />
-              <Route path="/join" element={<Join />} />
               <Route path="/events/new" element={<NewEvent />} />
             </Route>
           </Route>
