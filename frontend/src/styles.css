@@ -129,13 +129,7 @@ a:hover {
   align-items: center;
   gap: 8px;
 }
-.brand:before {
-  content: "";
-  display: inline-block;
-  width: 22px;
-  height: 22px;
-  background: url("/logo.png") center/contain no-repeat;
-}
+/* Logo is rendered via <img> in App.tsx — no CSS pseudo-element needed */
 .spacer {
   flex: 1;
 }
