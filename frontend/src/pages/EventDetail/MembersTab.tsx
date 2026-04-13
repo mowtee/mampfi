@@ -60,7 +60,7 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
                           {t("members.owner")}
                         </span>
                       ) : (
-                        <span className="muted">{t("members.member")}</span>
+                        <span className="chip muted">{t("members.member")}</span>
                       )}
                     </td>
                     <td>
