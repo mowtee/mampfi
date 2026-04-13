@@ -14,7 +14,7 @@ export default function Login() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [search] = useSearchParams();
-  const next = search.get("next") || "/";
+  const next = search.get("next") || localStorage.getItem("authNext") || "/";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -22,6 +22,7 @@ export default function Login() {
     setLoading(true);
     try {
       await api.login(email, password);
+      localStorage.removeItem("authNext");
       qc.invalidateQueries({ queryKey: ["auth", "me"] });
       navigate(next, { replace: true });
     } catch (err) {

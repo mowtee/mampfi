@@ -35,7 +35,13 @@ export default function VerifyEmail() {
       {status === "ok" && (
         <div className="vstack">
           <p className="ok">{t("auth.verified")}</p>
-          <Link to="/login" className="btn primary">
+          <Link
+            to={(() => {
+              const next = localStorage.getItem("authNext");
+              return next ? `/login?next=${encodeURIComponent(next)}` : "/login";
+            })()}
+            className="btn primary"
+          >
             {t("auth.login")}
           </Link>
         </div>

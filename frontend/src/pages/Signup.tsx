@@ -21,6 +21,7 @@ export default function Signup() {
     setLoading(true);
     try {
       await api.signup(email, password, name || undefined, i18n.language);
+      if (next !== "/") localStorage.setItem("authNext", next);
       setDone(true);
     } catch (err) {
       setError(errorMessage(err));
