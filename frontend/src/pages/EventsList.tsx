@@ -11,7 +11,9 @@ export default function EventsList() {
   return (
     <div>
       <div className="row" style={{ alignItems: "center", margin: "8px 0 12px" }}>
-        <h2 style={{ margin: 0 }}>{t("events.title")}</h2>
+        <h2 style={{ margin: 0 }}>
+          <strong>{t("events.title")}</strong>
+        </h2>
         <span className="spacer" />
         <Link to="/events/new" className="btn">
           {t("events.create")}

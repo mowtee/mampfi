@@ -28,7 +28,9 @@ export default function VerifyEmail() {
 
   return (
     <div style={{ maxWidth: 400, margin: "40px auto", padding: "0 16px" }}>
-      <h2>{t("auth.verifyEmail")}</h2>
+      <h2>
+        <strong>{t("auth.verifyEmail")}</strong>
+      </h2>
       {status === "loading" && <p className="muted">{t("auth.verifying")}</p>}
       {status === "ok" && (
         <div className="vstack">

@@ -32,7 +32,9 @@ export default function Signup() {
   if (done) {
     return (
       <div style={{ maxWidth: 400, margin: "40px auto", padding: "0 16px" }}>
-        <h2>{t("auth.checkEmail")}</h2>
+        <h2>
+          <strong>{t("auth.checkEmail")}</strong>
+        </h2>
         <p
           dangerouslySetInnerHTML={{
             __html:

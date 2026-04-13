@@ -92,7 +92,9 @@ export default function EventDetail() {
           ← {t("app.back")}
         </Link>
       </p>
-      <h2 style={{ margin: "8px 0 4px" }}>{ev.data.name}</h2>
+      <h2 style={{ margin: "8px 0 4px" }}>
+        <strong>{ev.data.name}</strong>
+      </h2>
       <div className="row" style={{ alignItems: "center" }}>
         <div className="muted">
           {formatYMDToLocale(ev.data.start_date)} → {formatYMDToLocale(ev.data.end_date)} •{" "}

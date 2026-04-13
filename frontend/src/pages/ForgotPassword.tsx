@@ -24,7 +24,9 @@ export default function ForgotPassword() {
   if (done) {
     return (
       <div style={{ maxWidth: 400, margin: "40px auto", padding: "0 16px" }}>
-        <h2>{t("auth.checkEmail")}</h2>
+        <h2>
+          <strong>{t("auth.checkEmail")}</strong>
+        </h2>
         <p className="muted">{t("auth.checkEmailResetBody")}</p>
         <Link to="/login">{t("auth.backToLogin")}</Link>
       </div>
@@ -33,7 +35,9 @@ export default function ForgotPassword() {
 
   return (
     <div style={{ maxWidth: 400, margin: "40px auto", padding: "0 16px" }}>
-      <h2>{t("auth.forgotPasswordTitle")}</h2>
+      <h2>
+        <strong>{t("auth.forgotPasswordTitle")}</strong>
+      </h2>
       <form onSubmit={handleSubmit}>
         <div className="vstack">
           <div className="field">

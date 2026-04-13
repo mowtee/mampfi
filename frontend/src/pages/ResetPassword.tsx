@@ -39,7 +39,9 @@ export default function ResetPassword() {
   if (done) {
     return (
       <div style={{ maxWidth: 400, margin: "40px auto", padding: "0 16px" }}>
-        <h2>{t("auth.passwordUpdated")}</h2>
+        <h2>
+          <strong>{t("auth.passwordUpdated")}</strong>
+        </h2>
         <p className="ok">{t("auth.passwordUpdatedBody")}</p>
         <Link to="/login" className="btn primary">
           {t("auth.login")}
@@ -50,7 +52,9 @@ export default function ResetPassword() {
 
   return (
     <div style={{ maxWidth: 400, margin: "40px auto", padding: "0 16px" }}>
-      <h2>{t("auth.resetPassword")}</h2>
+      <h2>
+        <strong>{t("auth.resetPassword")}</strong>
+      </h2>
       <form onSubmit={handleSubmit}>
         <div className="vstack">
           <div className="field">

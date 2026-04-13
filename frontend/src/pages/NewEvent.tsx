@@ -75,7 +75,9 @@ export default function NewEvent() {
   return (
     <div>
       <div className="card" style={{ maxWidth: 700 }}>
-        <h2 style={{ fontSize: 22, marginBottom: 16 }}>{t("newEvent.title")}</h2>
+        <h2>
+          <strong>{t("newEvent.title")}</strong>
+        </h2>
         <div className="vstack">
           <div className="field">
             <label className="muted">{t("newEvent.name")}</label>

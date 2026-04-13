@@ -36,7 +36,9 @@ export default function Join() {
     <div>
       <div className="card" style={{ maxWidth: 700 }}>
         <h2>
-          {t("app.name")} — {t("join.title")}
+          <strong>
+            {t("app.name")} — {t("join.title")}
+          </strong>
         </h2>
         {!hasToken && (
           <>
