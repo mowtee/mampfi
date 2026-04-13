@@ -75,7 +75,7 @@ export default function NewEvent() {
   return (
     <div>
       <div className="card" style={{ maxWidth: 700 }}>
-        <h2>{t("newEvent.title")}</h2>
+        <h2 style={{ fontSize: 22, marginBottom: 16 }}>{t("newEvent.title")}</h2>
         <div className="vstack">
           <div className="field">
             <label className="muted">{t("newEvent.name")}</label>
@@ -188,7 +188,7 @@ export default function NewEvent() {
             </button>
           </div>
 
-          <div className="row" style={{ gap: 8 }}>
+          <div className="row" style={{ gap: 8, marginTop: 16 }}>
             <button
               onClick={() => create.mutate()}
               disabled={create.isPending || disabled}
