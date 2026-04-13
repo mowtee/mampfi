@@ -37,8 +37,8 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
             <thead>
               <tr>
                 <th style={{ width: "100%" }}>{t("members.name")}</th>
-                <th style={{ whiteSpace: "nowrap" }}>{t("members.role")}</th>
-                <th style={{ whiteSpace: "nowrap" }}>{t("members.status")}</th>
+                <th style={{ whiteSpace: "nowrap", textAlign: "center" }}>{t("members.role")}</th>
+                <th style={{ whiteSpace: "nowrap", textAlign: "center" }}>{t("members.status")}</th>
                 <th style={{ whiteSpace: "nowrap" }}>{t("members.joined")}</th>
                 {isOwner && <th style={{ whiteSpace: "nowrap" }}>{t("app.actions")}</th>}
               </tr>
@@ -54,7 +54,7 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
                       {name}
                       {isMe && <span className="muted"> ({t("app.you")})</span>}
                     </td>
-                    <td>
+                    <td style={{ textAlign: "center" }}>
                       {m.role === "owner" ? (
                         <span className="chip" style={{ background: "#e5e7eb", fontWeight: 600 }}>
                           {t("members.owner")}
@@ -63,7 +63,7 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
                         <span className="chip muted">{t("members.member")}</span>
                       )}
                     </td>
-                    <td>
+                    <td style={{ textAlign: "center" }}>
                       {isActive ? (
                         <span className="chip open">{t("members.active")}</span>
                       ) : (
