@@ -74,7 +74,12 @@
     "payments": "Payments & balances",
     "paymentsText": "The Payments tab shows your balance. Create payments to other members — the recipient must confirm each payment. Once your balance is 0, you can leave the event.",
     "language": "Language",
-    "languageText": "Switch the language using the dropdown in the top right. Your choice is saved."
+    "languageText": "Switch the language using the dropdown in the top right. Your choice is saved.",
+    "glossary": "Glossary",
+    "glossaryCutoff": "Cutoff time — After this time on the previous day, orders for the next day can no longer be changed.",
+    "glossaryRollover": "Rollover — Your last order is automatically carried over to the next day unless you change it. Can be toggled per person.",
+    "glossaryFinalize": "Finalize purchase — The buyer records what was actually purchased. Quantities can be adjusted (e.g. for shortages or substitutions).",
+    "glossaryBalance": "Balance — Your personal account balance in the event. Positive = you are owed money, negative = you owe money."
   },
   "members": {
     "title": "Members",
@@ -131,6 +136,8 @@
     "perMember": "Per-member delivery",
     "member": "Member",
     "items": "Items",
+    "forBuyer": "For the buyer",
+    "forBuyerHint": "Did you handle today's purchase? Record your expenses now!",
     "purchaseFinalization": "Purchase Finalization",
     "checkingPurchase": "Checking purchase…",
     "buyer": "Buyer",

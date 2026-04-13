@@ -74,7 +74,12 @@
     "payments": "Zahlungen & Salden",
     "paymentsText": "Im Zahlungen-Tab siehst du deinen Saldo. Erstelle Zahlungen an andere Mitglieder — der Empfänger muss jede Zahlung bestätigen. Bei Saldo 0 kannst du das Event verlassen.",
     "language": "Sprache",
-    "languageText": "Wechsle die Sprache oben rechts über das Dropdown. Deine Wahl wird gespeichert."
+    "languageText": "Wechsle die Sprache oben rechts über das Dropdown. Deine Wahl wird gespeichert.",
+    "glossary": "Begriffe",
+    "glossaryCutoff": "Sperrzeit — Ab diesem Zeitpunkt am Vortag können Bestellungen für den nächsten Tag nicht mehr geändert werden.",
+    "glossaryRollover": "Übernehmen — Deine letzte Bestellung wird automatisch für den nächsten Tag übernommen, sofern du sie nicht änderst. Kann pro Person ein-/ausgeschaltet werden.",
+    "glossaryFinalize": "Einkauf abschließen — Der Einkäufer erfasst, was tatsächlich gekauft wurde. Dabei können Mengen angepasst werden (z.B. bei Fehlmengen oder Ersatz).",
+    "glossaryBalance": "Saldo — Dein persönlicher Kontostand im Event. Positiv = dir wird geschuldet, negativ = du schuldest."
   },
   "members": {
     "title": "Mitglieder",
@@ -131,6 +136,8 @@
     "perMember": "Pro Mitglied",
     "member": "Mitglied",
     "items": "Artikel",
+    "forBuyer": "Für den Einkäufer",
+    "forBuyerHint": "Du hast den Einkauf übernommen? Erfasse jetzt deine Auslage!",
     "purchaseFinalization": "Einkaufsabschluss",
     "checkingPurchase": "Einkauf prüfen…",
     "buyer": "Käufer",

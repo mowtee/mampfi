@@ -135,6 +135,16 @@ export default function App() {
               </p>
             </div>
           </div>
+          <h4 style={{ marginTop: 24, marginBottom: 8 }}>{t("help.glossary")}</h4>
+          <ul
+            className="muted"
+            style={{ margin: 0, paddingLeft: 18, fontSize: 14, lineHeight: 1.7 }}
+          >
+            <li>{t("help.glossaryCutoff")}</li>
+            <li>{t("help.glossaryRollover")}</li>
+            <li>{t("help.glossaryFinalize")}</li>
+            <li>{t("help.glossaryBalance")}</li>
+          </ul>
         </ModalBody>
         <ModalActions>
           <button className="btn primary" onClick={() => setHelpOpen(false)}>

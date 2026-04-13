@@ -117,6 +117,22 @@ export default function DayTab({
     if (Object.keys(mine).length > 0) setQuantities(mine);
   }, [agg.data, myOrder.data, meQ.data?.id]);
 
+  // Check if quantities differ from saved order
+  const orderUnchanged = React.useMemo(() => {
+    const saved: Record<string, number> = {};
+    (myOrder.data?.items || []).forEach((it) => {
+      saved[it.price_item_id] = it.qty;
+    });
+    const activeIds = new Set((price.data || []).map((pi) => pi.id));
+    // Compare only active items
+    for (const id of activeIds) {
+      const q = quantities[id] || 0;
+      const s = saved[id] || 0;
+      if (q !== s) return false;
+    }
+    return true;
+  }, [quantities, myOrder.data, price.data]);
+
   // --- Mutations ---
   const upsert = useMutation({
     mutationFn: () => {
@@ -375,7 +391,13 @@ export default function DayTab({
           })()}
           <button
             onClick={() => upsert.mutate()}
-            disabled={upsert.isPending || !!purchase.data || lockInfo.locked || inactiveForDate}
+            disabled={
+              upsert.isPending ||
+              !!purchase.data ||
+              lockInfo.locked ||
+              inactiveForDate ||
+              orderUnchanged
+            }
             className="btn primary"
             style={{ marginTop: 10 }}
           >
@@ -500,7 +522,10 @@ export default function DayTab({
       {/* Purchase Finalization */}
       <section className="section">
         <div className="card">
-          <h3 style={{ marginBottom: 12 }}>{t("day.purchaseFinalization")}</h3>
+          <h3>{t("day.forBuyer")}</h3>
+          <p className="muted" style={{ marginTop: -4, marginBottom: 12 }}>
+            {t("day.forBuyerHint")}
+          </p>
           {purchase.isLoading && <p>{t("day.checkingPurchase")}</p>}
           {purchase.data && (
             <div className="vstack">
