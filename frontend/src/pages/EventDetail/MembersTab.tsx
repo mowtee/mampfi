@@ -70,9 +70,7 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
                         <span className="chip muted">{t("members.left")}</span>
                       )}
                     </td>
-                    <td className="muted">
-                      {formatYMDToLocale(m.joined_at?.slice(0, 10) || "")}
-                    </td>
+                    <td className="muted">{formatYMDToLocale(m.joined_at?.slice(0, 10) || "")}</td>
                     {isOwner && (
                       <td>
                         {isActive && !isMe && m.role !== "owner" && (
