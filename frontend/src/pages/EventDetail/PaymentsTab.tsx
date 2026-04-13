@@ -64,6 +64,12 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
     },
   });
 
+  // Clear stale leave error when balances update
+  React.useEffect(() => {
+    if (leave.error) leave.reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [balances.data]);
+
   return (
     <>
       {/* Balances */}
