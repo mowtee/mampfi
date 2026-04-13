@@ -9,10 +9,9 @@ import type { PurchaseLine, PurchaseSummary } from "../../lib/types";
 type HistoryTabProps = {
   ctx: EventContextType;
   eventId: string;
-  onPickDate: (d: string) => void;
 };
 
-export default function HistoryTab({ ctx, eventId, onPickDate }: HistoryTabProps) {
+export default function HistoryTab({ ctx, eventId }: HistoryTabProps) {
   const { t } = useTranslation();
   const { ev, memberLabel, priceName } = ctx;
   if (!ev.data) return null;
@@ -24,7 +23,6 @@ export default function HistoryTab({ ctx, eventId, onPickDate }: HistoryTabProps
         <PurchasesHistory
           eventId={eventId}
           currency={ev.data.currency}
-          onPickDate={onPickDate}
           label={memberLabel}
           itemName={priceName}
         />
@@ -36,13 +34,11 @@ export default function HistoryTab({ ctx, eventId, onPickDate }: HistoryTabProps
 function PurchasesHistory({
   eventId,
   currency,
-  onPickDate,
   label,
   itemName,
 }: {
   eventId: string;
   currency: string;
-  onPickDate: (d: string) => void;
   label: (id?: string) => string;
   itemName: (id?: string) => string;
 }) {
@@ -64,7 +60,6 @@ function PurchasesHistory({
           <th>{t("history.date")}</th>
           <th>{t("history.buyer")}</th>
           <th style={{ textAlign: "right" }}>{t("history.total")}</th>
-          <th>{t("app.actions")}</th>
         </tr>
       </thead>
       <tbody>
@@ -76,7 +71,6 @@ function PurchasesHistory({
             currency={currency}
             label={label}
             itemName={itemName}
-            onPickDate={onPickDate}
           />
         ))}
       </tbody>
@@ -90,14 +84,12 @@ function PurchaseRow({
   currency,
   label,
   itemName,
-  onPickDate,
 }: {
   eventId: string;
   row: PurchaseSummary;
   currency: string;
   label: (id?: string) => string;
   itemName: (id?: string) => string;
-  onPickDate: (d: string) => void;
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
@@ -120,16 +112,11 @@ function PurchaseRow({
         <td style={{ textAlign: "right" }}>
           {formatMoney(Number(row.total_minor || 0), currency)}
         </td>
-        <td>
-          <button className="btn" onClick={() => onPickDate(row.date)}>
-            {t("history.view")}
-          </button>
-        </td>
       </tr>
       {open && (
         <tr>
           <td></td>
-          <td colSpan={4}>
+          <td colSpan={3}>
             {details.isLoading && <div className="muted">{t("app.loading")}</div>}
             {details.error && <div className="danger">{String(details.error)}</div>}
             {details.data && (
@@ -166,17 +153,20 @@ function PurchaseRow({
                 {(() => {
                   const per: Map<
                     string,
-                    { name: string; items: { label: string; qty: number }[] }
+                    { name: string; items: { label: string; qty: number }[]; totalMinor: number }
                   > = new Map();
                   for (const ln of details.data.lines) {
                     const lbl = ln.name || itemName(ln.price_item_id) || ln.price_item_id || "";
+                    const unitPrice = Number(ln.unit_price_minor || 0);
                     const allocs = Array.isArray(ln.allocations) ? ln.allocations : [];
                     for (const a of allocs) {
                       const id = String(a.user_id);
                       const qty = Number(a.qty || 0);
                       if (qty <= 0) continue;
-                      if (!per.has(id)) per.set(id, { name: label(id), items: [] });
-                      per.get(id)!.items.push({ label: lbl, qty });
+                      if (!per.has(id)) per.set(id, { name: label(id), items: [], totalMinor: 0 });
+                      const entry = per.get(id)!;
+                      entry.items.push({ label: lbl, qty });
+                      entry.totalMinor += qty * unitPrice;
                     }
                   }
                   const rows = Array.from(per.entries());
@@ -192,6 +182,7 @@ function PurchaseRow({
                           <tr>
                             <th>{t("history.member")}</th>
                             <th>{t("history.items")}</th>
+                            <th style={{ textAlign: "right" }}>{t("history.total")}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -204,6 +195,9 @@ function PurchaseRow({
                                     {it.qty}× {it.label}
                                   </span>
                                 ))}
+                              </td>
+                              <td style={{ textAlign: "right" }}>
+                                {formatMoney(v.totalMinor, currency)}
                               </td>
                             </tr>
                           ))}

@@ -177,9 +177,7 @@ export default function EventDetail() {
           onSetTab={setTab}
         />
       )}
-      {activeTab === "history" && (
-        <HistoryTab ctx={ctx} eventId={eventId} onPickDate={(d) => setForDate(d)} />
-      )}
+      {activeTab === "history" && <HistoryTab ctx={ctx} eventId={eventId} />}
       {activeTab === "payments" && <PaymentsTab ctx={ctx} eventId={eventId} />}
       {activeTab === "members" && <MembersTab ctx={ctx} eventId={eventId} />}
       {isOwner && activeTab === "admin" && <AdminTab ctx={ctx} eventId={eventId} ev={ev.data} />}
