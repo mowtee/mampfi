@@ -64,11 +64,11 @@
   "help": {
     "title": "So funktioniert Mampfi",
     "close": "Schließen",
-    "intro": "Mampfi hilft Gruppen, tägliche Sammelbestellungen zu organisieren — z.B. Frühstück im Büro. Ein Mitglied kauft ein, alle anderen bestellen vorab und die Kosten werden fair verteilt.",
+    "intro": "Mampfi hilft Gruppen, tägliche Sammelbestellungen zu organisieren — z.B. Frühstück im Büro. Ein Mitglied kauft ein, alle anderen bestellen vorab und die Auslagen werden später transparent beglichen.",
     "createEvent": "Event erstellen",
     "createEventText": "Erstelle ein Event mit Name, Zeitraum und Preisliste. Du wirst automatisch Admin. Lade andere per Einladungslink ein (Admin-Tab).",
     "placeOrders": "Bestellen",
-    "placeOrdersText": "Wähle im Tag-Tab den gewünschten Tag und stelle deine Menge pro Artikel ein. Bestellungen sperren am Vortag zur eingestellten Sperrzeit. Deine letzte Bestellung wird automatisch für den nächsten Tag übernommen.",
+    "placeOrdersText": "Wähle im Tag-Tab den gewünschten Tag und stelle deine Menge pro Artikel ein. Bestellungen sperren am Vortag zur eingestellten Sperrzeit. Deine letzte Bestellung wird automatisch für den nächsten Tag übernommen, wenn du das möchtest.",
     "finalize": "Einkauf abschließen",
     "finalizeText": "Der Käufer schließt den Einkauf über \"Einkauf abschließen\" ab. Falls die tatsächlichen Mengen abweichen, können Anpassungen vorgenommen werden.",
     "payments": "Zahlungen & Salden",

@@ -64,11 +64,11 @@
   "help": {
     "title": "How Mampfi works",
     "close": "Close",
-    "intro": "Mampfi helps groups coordinate daily group orders — e.g. breakfast at the office. One member buys, everyone else orders ahead, and costs are split fairly.",
+    "intro": "Mampfi helps groups coordinate daily group orders — e.g. breakfast at the office. One member buys, all others pre-order and expenses are settled transparently afterwards.",
     "createEvent": "Create an event",
     "createEventText": "Create an event with a name, date range, and price list. You become the admin automatically. Invite others via invite link (Admin tab).",
     "placeOrders": "Place orders",
-    "placeOrdersText": "In the Day tab, pick a date and set your quantities per item. Orders lock on the previous day at the configured cutoff time. Your last order rolls over to the next day automatically.",
+    "placeOrdersText": "In the Day tab, pick a date and set your quantities per item. Orders lock on the previous day at the configured cutoff time. Your last order rolls over to the next day automatically, if you want.",
     "finalize": "Finalize a purchase",
     "finalizeText": "The buyer finalizes the purchase via \"Finalize from Aggregate\". If actual quantities differ, adjustments can be made before submitting.",
     "payments": "Payments & balances",
