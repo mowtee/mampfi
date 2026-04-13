@@ -611,7 +611,9 @@ tr.needs-action:hover td {
   );
 }
 .modal-body {
-  overflow: auto;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .modal-footer {
   position: sticky;
