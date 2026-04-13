@@ -99,14 +99,16 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
                           {isActive && !isMe && m.role !== "owner" && (
                             <button
                               className="btn"
+                              title={t("members.remove")}
                               disabled={remove.isPending}
                               onClick={() => {
                                 if (window.confirm(t("members.confirmRemove", { name }))) {
                                   remove.mutate(m.user_id);
                                 }
                               }}
+                              style={{ padding: "4px 8px", fontSize: 16 }}
                             >
-                              {t("members.remove")}
+                              ✕
                             </button>
                           )}
                         </div>
