@@ -1,8 +1,58 @@
 # Beta Feedback Backlog
 
-Issues and feature requests collected from beta testing. Roughly prioritized by area.
+Issues and feature requests collected from beta testing.
 
 Status: `[ ]` open · `[~]` in progress · `[x]` done
+
+---
+
+## Implementation Plan
+
+Work is organized into batches. Complete each batch before starting the next.
+
+### Batch 1 — Critical mobile fixes & quick UI wins
+*Fix issues actively hitting beta users. All are small, independent changes.*
+
+1. Mobile: Date picker Android issues (empty field, 1900 default, fragile on touch)
+2. Mobile: Horizontal scroll overflow on order cards (Android)
+3. Mobile: Date field truncation on iOS
+4. Help modal spacing (margin before step list)
+5. Help button styling (round, visible border)
+6. Einkaufsabschluss section spacing
+7. Members list role column alignment
+8. 404 on /assets/mampfi-logo.png
+9. Language picker styling (Chrome/macOS select)
+10. Frontend price validation on event creation
+11. Item name length limit (36 chars, frontend + backend)
+
+### Batch 2 — Finalize UX & order improvements
+*Touches DayTab finalize section and order saving logic.*
+
+12. Finalize button UX (explanatory text + "Für den Einkäufer" sub-heading)
+13. Save order button: disable when unchanged
+14. Help content: add glossary (Sperrzeit, Übernahme, Abschluss)
+
+### Batch 3 — Admin capabilities & members
+*Touches MembersTab and Admin area.*
+
+15. Admin: promote members to admin (icon button in members list)
+16. Admin: change cutoff time in Admin tab
+17. Personal order history section in History tab
+
+### Batch 4 — Purchase management
+*Depends on Batch 2 (finalize UX). Touches purchase finalization flow.*
+
+18. Admin: revert/invalidate purchase finalization
+19. Receipt photo upload during finalization + view in history
+    - *Architectural decision needed: file storage (local volume vs S3 vs DB blob)*
+
+### Batch 5 — Advanced features
+*Larger features, not blocking beta. Can be deferred.*
+
+20. Delivery fee ("Bring-Pauschale") — event setting + finalization checkbox
+21. Member notes (allergies) — per-event note + modal in members list
+22. Admin: delete events with email notification
+23. Event name/description editing in Admin tab
 
 ---
 
