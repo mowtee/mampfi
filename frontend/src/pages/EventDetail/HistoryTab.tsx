@@ -61,6 +61,8 @@ function PurchasesHistory({
     queryKey: ["purchases", eventId],
     queryFn: () => api.listPurchases(eventId),
     enabled: !!eventId,
+    refetchInterval: 30_000,
+    refetchIntervalInBackground: false,
   });
   if (list.isLoading) return <p className="muted">{t("history.loadingPurchases")}</p>;
   if (list.error) return <p className="danger">{String(list.error)}</p>;
@@ -248,8 +250,9 @@ function PersonalHistory({
   });
 
   // Fetch all purchase details to extract personal allocations
+  // Refetch when purchase list changes (dataUpdatedAt as part of key)
   const details = useQuery({
-    queryKey: ["personalHistory", eventId, meId],
+    queryKey: ["personalHistory", eventId, meId, list.dataUpdatedAt],
     queryFn: async () => {
       if (!list.data || !meId) return [];
       const results = await Promise.all(list.data.map((p) => api.getPurchase(eventId, p.date)));

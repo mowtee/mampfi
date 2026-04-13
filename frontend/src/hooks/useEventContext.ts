@@ -7,6 +7,8 @@ export function useEventContext(eventId: string, forDate: string, activeTab: str
   const qc = useQueryClient();
   const isDay = activeTab === "day";
   const isPayments = activeTab === "payments";
+  const isMembers = activeTab === "members";
+  const isHistory = activeTab === "history";
 
   // Static or slow-changing data gets longer staleTime to reduce refetches
   const STATIC = 5 * 60_000; // 5 min — event metadata, price items
@@ -17,6 +19,8 @@ export function useEventContext(eventId: string, forDate: string, activeTab: str
     queryFn: () => api.getEvent(eventId),
     enabled: !!eventId,
     staleTime: STATIC,
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
   });
   const meQ = useQuery({ queryKey: ["me"], queryFn: () => api.getMe(), staleTime: STATIC });
   const price = useQuery({
@@ -36,6 +40,8 @@ export function useEventContext(eventId: string, forDate: string, activeTab: str
     queryFn: () => api.listMembers(eventId),
     enabled: !!eventId,
     staleTime: MODERATE,
+    refetchInterval: isMembers ? 30_000 : false,
+    refetchIntervalInBackground: false,
   });
 
   const meId = meQ.data?.id;
@@ -201,6 +207,11 @@ export function useEventContext(eventId: string, forDate: string, activeTab: str
     } else if (isPayments) {
       qc.invalidateQueries({ queryKey: ["payments", eventId] });
       qc.invalidateQueries({ queryKey: ["balances", eventId] });
+    } else if (isHistory) {
+      qc.invalidateQueries({ queryKey: ["purchases", eventId] });
+      qc.invalidateQueries({ queryKey: ["personalHistory", eventId] });
+    } else if (isMembers) {
+      qc.invalidateQueries({ queryKey: ["members", eventId] });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
