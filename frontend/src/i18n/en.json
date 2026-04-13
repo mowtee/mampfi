@@ -158,7 +158,8 @@
     "notes": "Notes",
     "notesPlaceholder": "Notes (optional)",
     "submitAdjustments": "Submit adjustments",
-    "noDeliveredItems": "No delivered items to finalize."
+    "noDeliveredItems": "No delivered items to finalize.",
+    "cannotFinalizeFuture": "Purchases can only be finalized from the respective day onwards."
   },
   "payments": {
     "balances": "Balances",

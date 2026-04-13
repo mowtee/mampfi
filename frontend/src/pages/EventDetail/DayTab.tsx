@@ -536,13 +536,20 @@ export default function DayTab({
                   </button>
                 </p>
               ) : (
-                <button
-                  onClick={() => setModal("precheck")}
-                  disabled={finalize.isPending}
-                  className="btn primary"
-                >
-                  {finalize.isPending ? t("day.finalizing") : t("day.finalizeFromAggregate")}
-                </button>
+                <>
+                  <button
+                    onClick={() => setModal("precheck")}
+                    disabled={finalize.isPending || forDate > new Date().toISOString().slice(0, 10)}
+                    className="btn primary"
+                  >
+                    {finalize.isPending ? t("day.finalizing") : t("day.finalizeFromAggregate")}
+                  </button>
+                  {forDate > new Date().toISOString().slice(0, 10) && (
+                    <p className="muted" style={{ marginTop: 4 }}>
+                      {t("day.cannotFinalizeFuture")}
+                    </p>
+                  )}
+                </>
               )}
               {finalize.error && <div className="danger">{String(finalize.error)}</div>}
             </div>

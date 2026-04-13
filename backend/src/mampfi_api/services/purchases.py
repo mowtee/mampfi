@@ -20,6 +20,9 @@ def finalize_purchase(
         raise NotFound("event")
     require_member(session, ev.id, user.id)
 
+    if data.date > dt.date.today():
+        raise DomainError("cannot finalize a purchase for a future date")
+
     existing = session.exec(
         select(Purchase).where(Purchase.event_id == ev.id, Purchase.date == data.date)
     ).first()
