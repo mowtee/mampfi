@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     smtp_password: str | None = None
     smtp_use_tls: bool = True
     mail_from: str | None = None
+    mail_from_name: str | None = None  # e.g. "Mampfi"
 
 
 @lru_cache

@@ -28,7 +28,10 @@ def send_email(
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
-    msg["From"] = settings.mail_from
+    if settings.mail_from_name:
+        msg["From"] = f"{settings.mail_from_name} <{settings.mail_from}>"
+    else:
+        msg["From"] = settings.mail_from
     msg["To"] = to
     if body_text:
         msg.attach(MIMEText(body_text, "plain"))
