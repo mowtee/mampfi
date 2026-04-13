@@ -49,12 +49,12 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
                 const isMe = m.user_id === meId;
                 const isActive = !m.left_at;
                 return (
-                  <tr key={m.user_id}>
+                  <tr key={m.user_id} style={{ verticalAlign: "middle" }}>
                     <td>
                       {name}
                       {isMe && <span className="muted"> ({t("app.you")})</span>}
                     </td>
-                    <td style={{ verticalAlign: "middle" }}>
+                    <td>
                       {m.role === "owner" ? (
                         <span className="chip" style={{ background: "#e5e7eb", fontWeight: 600 }}>
                           {t("members.owner")}
@@ -70,7 +70,9 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
                         <span className="chip muted">{t("members.left")}</span>
                       )}
                     </td>
-                    <td className="muted">{formatYMDToLocale(m.joined_at?.slice(0, 10) || "")}</td>
+                    <td className="muted" style={{ whiteSpace: "nowrap" }}>
+                      {formatYMDToLocale(m.joined_at?.slice(0, 10) || "")}
+                    </td>
                     {isOwner && (
                       <td>
                         {isActive && !isMe && m.role !== "owner" && (
