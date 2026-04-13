@@ -54,7 +54,7 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
                       {name}
                       {isMe && <span className="muted"> ({t("app.you")})</span>}
                     </td>
-                    <td>
+                    <td style={{ verticalAlign: "middle" }}>
                       {m.role === "owner" ? (
                         <span className="chip" style={{ background: "#e5e7eb", fontWeight: 600 }}>
                           {t("members.owner")}

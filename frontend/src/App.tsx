@@ -44,10 +44,20 @@ export default function App() {
           <option value="en">EN</option>
         </select>
         <button
-          className="btn ghost"
+          className="btn"
           onClick={() => setHelpOpen(true)}
           aria-label="Help"
-          style={{ fontSize: 18, padding: "4px 8px" }}
+          style={{
+            fontSize: 16,
+            fontWeight: 700,
+            width: 32,
+            height: 32,
+            borderRadius: "50%",
+            padding: 0,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
           ?
         </button>
@@ -92,7 +102,7 @@ export default function App() {
             <img src="/logo.png" alt="Mampfi" style={{ height: 48, width: 48 }} />
             <h2 style={{ margin: 0 }}>{t("help.title")}</h2>
           </div>
-          <p>{t("help.intro")}</p>
+          <p style={{ marginBottom: 20 }}>{t("help.intro")}</p>
           <div className="vstack" style={{ gap: 16 }}>
             <div>
               <h4 style={{ margin: "0 0 4px" }}>1. {t("help.createEvent")}</h4>

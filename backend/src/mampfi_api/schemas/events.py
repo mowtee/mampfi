@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class PriceItemCreate(BaseModel):
-    name: str = Field(min_length=1, max_length=200)
+    name: str = Field(min_length=1, max_length=36)
     unit_price_minor: int = Field(gt=0)
     active: bool | None = True
 
@@ -62,7 +62,7 @@ class EventWithMe(BaseModel):
 
 
 class PriceItemAdd(BaseModel):
-    name: str = Field(min_length=1, max_length=200)
+    name: str = Field(min_length=1, max_length=36)
     unit_price_minor: int = Field(gt=0)
 
 

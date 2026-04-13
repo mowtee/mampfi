@@ -165,24 +165,32 @@ export default function NewEvent() {
               <strong>{t("newEvent.priceItems")}</strong>
             </div>
             {items.map((it, idx) => (
-              <div key={idx} className="row" style={{ marginBottom: 6 }}>
-                <input
-                  className="input"
-                  placeholder={t("newEvent.name")}
-                  value={it.name}
-                  onChange={(e) => updateItem(idx, "name", e.target.value)}
-                />
-                <input
-                  className="input"
-                  placeholder={t("newEvent.pricePlaceholder")}
-                  value={it.price}
-                  onChange={(e) => updateItem(idx, "price", e.target.value)}
-                  style={{ width: 160 }}
-                />
-                <span className="muted">{currency}</span>
-                <button onClick={() => removeItem(idx)} className="btn">
-                  {t("app.remove")}
-                </button>
+              <div key={idx} style={{ marginBottom: 6 }}>
+                <div className="row">
+                  <input
+                    className="input"
+                    placeholder={t("newEvent.name")}
+                    value={it.name}
+                    maxLength={36}
+                    onChange={(e) => updateItem(idx, "name", e.target.value)}
+                  />
+                  <input
+                    className="input"
+                    placeholder={t("newEvent.pricePlaceholder")}
+                    value={it.price}
+                    onChange={(e) => updateItem(idx, "price", e.target.value)}
+                    style={{ width: 160 }}
+                  />
+                  <span className="muted">{currency}</span>
+                  <button onClick={() => removeItem(idx)} className="btn">
+                    {t("app.remove")}
+                  </button>
+                </div>
+                {it.name && it.price && !(parseMoneyToMinor(it.price) > 0) && (
+                  <div className="muted" style={{ fontSize: 13, marginTop: 2 }}>
+                    {t("admin.enterPrice")}
+                  </div>
+                )}
               </div>
             ))}
             <button onClick={addItem} className="btn" style={{ marginTop: 4 }}>

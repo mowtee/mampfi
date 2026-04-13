@@ -500,7 +500,7 @@ export default function DayTab({
       {/* Purchase Finalization */}
       <section className="section">
         <div className="card">
-          <h3>{t("day.purchaseFinalization")}</h3>
+          <h3 style={{ marginBottom: 12 }}>{t("day.purchaseFinalization")}</h3>
           {purchase.isLoading && <p>{t("day.checkingPurchase")}</p>}
           {purchase.data && (
             <div className="vstack">

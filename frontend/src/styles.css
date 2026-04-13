@@ -134,7 +134,7 @@ a:hover {
   display: inline-block;
   width: 22px;
   height: 22px;
-  background: url("/assets/mampfi-logo.png") center/contain no-repeat;
+  background: url("/logo.png") center/contain no-repeat;
 }
 .spacer {
   flex: 1;
@@ -188,6 +188,15 @@ a:hover {
   max-width: 100%;
   backdrop-filter: blur(calc(var(--glass-blur) / 2));
 }
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 28px;
+  cursor: pointer;
+}
 .date-field {
   position: relative;
   display: inline-flex;
@@ -221,10 +230,23 @@ a:hover {
   opacity: 0.6;
   cursor: default;
 }
-/* Hide default icon space in WebKit to avoid double affordance */
-.date-input::-webkit-calendar-picker-indicator {
-  opacity: 0;
-  display: none;
+/* Hide default icon in WebKit on desktop to avoid double affordance.
+   On mobile (coarse pointer) keep native behavior visible. */
+@media (pointer: fine) {
+  .date-input::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    display: none;
+  }
+}
+/* On mobile, hide our custom calendar button and let native input work */
+@media (pointer: coarse) {
+  .date-button {
+    display: none;
+  }
+  .date-input {
+    padding-right: 10px;
+    min-width: 140px;
+  }
 }
 
 /* Calendar dropdown (desktop) */
@@ -317,6 +339,7 @@ a:hover {
   box-shadow: var(--glass-shadow);
   padding: 14px;
   backdrop-filter: blur(var(--glass-blur));
+  overflow-x: auto;
 }
 .card h3 {
   margin-top: 0;
