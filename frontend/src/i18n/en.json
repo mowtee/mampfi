@@ -138,6 +138,8 @@
     "items": "Items",
     "forBuyer": "For the buyer",
     "forBuyerHint": "Did you handle today's purchase? Record your expenses now!",
+    "purchaseCompleted": "Purchase completed",
+    "purchaseCompletedHint": "The purchase for this day has already been recorded.",
     "purchaseFinalization": "Purchase Finalization",
     "checkingPurchase": "Checking purchase…",
     "buyer": "Buyer",

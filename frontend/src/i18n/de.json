@@ -138,6 +138,8 @@
     "items": "Artikel",
     "forBuyer": "Für den Einkäufer",
     "forBuyerHint": "Du hast den Einkauf übernommen? Erfasse jetzt deine Auslage!",
+    "purchaseCompleted": "Einkauf abgeschlossen",
+    "purchaseCompletedHint": "Der Einkauf für diesen Tag wurde bereits erfasst.",
     "purchaseFinalization": "Einkaufsabschluss",
     "checkingPurchase": "Einkauf prüfen…",
     "buyer": "Käufer",

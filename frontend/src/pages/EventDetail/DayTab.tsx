@@ -522,9 +522,9 @@ export default function DayTab({
       {/* Purchase Finalization */}
       <section className="section">
         <div className="card">
-          <h3>{t("day.forBuyer")}</h3>
+          <h3>{purchase.data ? t("day.purchaseCompleted") : t("day.forBuyer")}</h3>
           <p className="muted" style={{ marginTop: -4, marginBottom: 12 }}>
-            {t("day.forBuyerHint")}
+            {purchase.data ? t("day.purchaseCompletedHint") : t("day.forBuyerHint")}
           </p>
           {purchase.isLoading && <p>{t("day.checkingPurchase")}</p>}
           {purchase.data && (
