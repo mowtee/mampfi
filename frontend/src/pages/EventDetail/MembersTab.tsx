@@ -49,7 +49,7 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
                 const isMe = m.user_id === meId;
                 const isActive = !m.left_at;
                 return (
-                  <tr key={m.user_id} style={{ verticalAlign: "middle" }}>
+                  <tr key={m.user_id}>
                     <td>
                       {name}
                       {isMe && <span className="muted"> ({t("app.you")})</span>}
