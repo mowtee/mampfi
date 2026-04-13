@@ -60,11 +60,16 @@ export default function DayTab({
   const statusChip = React.useMemo(() => {
     if (purchase.data) return { className: "chip finalized", text: t("day.finalized") };
     if (lockInfo.locked) return { className: "chip locked", text: t("day.locked") };
-    return {
-      className: "chip open",
-      text: t("day.openUntil", { time: lockInfo.cutoffTime }),
-    };
-  }, [purchase.data, lockInfo, t]);
+    // Show cutoff time only for tomorrow (the next lockable date)
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    if (forDate === tomorrow) {
+      return {
+        className: "chip open",
+        text: t("day.openUntil", { time: lockInfo.cutoffTime }),
+      };
+    }
+    return { className: "chip open", text: t("day.open") };
+  }, [purchase.data, lockInfo, t, forDate]);
 
   // --- Local state ---
   const [quantities, setQuantities] = React.useState<Record<string, number>>({});

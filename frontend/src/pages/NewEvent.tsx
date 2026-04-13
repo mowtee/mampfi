@@ -20,7 +20,7 @@ export default function NewEvent() {
   const [cutoff, setCutoff] = React.useState("20:00");
   const [currency, setCurrency] = React.useState("EUR");
   const [holidayCountry, setHolidayCountry] = React.useState("DE");
-  const [holidayRegion, setHolidayRegion] = React.useState("");
+  const [holidayRegion, setHolidayRegion] = React.useState("DE-BW");
   const [items, setItems] = React.useState<{ name: string; price: string }[]>([
     { name: "", price: "" },
   ]);
@@ -146,12 +146,18 @@ export default function NewEvent() {
               <label className="muted">{t("newEvent.holidayRegion")}</label>
               <input
                 className="input"
-                placeholder="DE-BE"
+                placeholder="DE-BW"
                 value={holidayRegion}
                 onChange={(e) => setHolidayRegion(e.target.value)}
               />
             </div>
           </div>
+          <p className="muted" style={{ fontSize: 13, marginTop: -4 }}>
+            {t("newEvent.holidayHelp")}{" "}
+            <a href="https://date.nager.at/Country" target="_blank" rel="noopener noreferrer">
+              date.nager.at
+            </a>
+          </p>
           <div>
             <div style={{ margin: "8px 0" }}>
               <strong>{t("newEvent.priceItems")}</strong>
@@ -182,13 +188,16 @@ export default function NewEvent() {
             </button>
           </div>
 
-          <div className="row">
+          <div className="row" style={{ gap: 8 }}>
             <button
               onClick={() => create.mutate()}
               disabled={create.isPending || disabled}
               className="btn primary"
             >
               {create.isPending ? t("newEvent.creating") : t("newEvent.createEvent")}
+            </button>
+            <button onClick={() => nav("/")} className="btn" disabled={create.isPending}>
+              {t("app.cancel")}
             </button>
             {create.error && <span className="danger">{String(create.error)}</span>}
           </div>
