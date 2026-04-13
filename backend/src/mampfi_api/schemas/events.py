@@ -44,6 +44,7 @@ class EventCreate(BaseModel):
 class EventUpdate(BaseModel):
     holiday_country_code: str | None = Field(default=None, max_length=10)
     holiday_region_code: str | None = Field(default=None, max_length=20)
+    cutoff_time: dt.time | None = None
 
 
 class EventWithMe(BaseModel):

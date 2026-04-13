@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
+import { formatYMDToLocale } from "../../lib/date";
 import { formatMoney } from "../../lib/money";
 import type { EventContextType } from "../../hooks/useEventContext";
 import type { PurchaseLine, PurchaseSummary } from "../../lib/types";
@@ -13,21 +14,34 @@ type HistoryTabProps = {
 
 export default function HistoryTab({ ctx, eventId }: HistoryTabProps) {
   const { t } = useTranslation();
-  const { ev, memberLabel, priceName } = ctx;
+  const { ev, meId, memberLabel, priceName } = ctx;
   if (!ev.data) return null;
 
   return (
-    <section className="section">
-      <div className="card">
-        <h3>{t("history.title")}</h3>
-        <PurchasesHistory
-          eventId={eventId}
-          currency={ev.data.currency}
-          label={memberLabel}
-          itemName={priceName}
-        />
-      </div>
-    </section>
+    <>
+      <section className="section">
+        <div className="card">
+          <h3>{t("history.personalHistory")}</h3>
+          <PersonalHistory
+            eventId={eventId}
+            meId={meId}
+            currency={ev.data.currency}
+            priceName={priceName}
+          />
+        </div>
+      </section>
+      <section className="section">
+        <div className="card">
+          <h3>{t("history.title")}</h3>
+          <PurchasesHistory
+            eventId={eventId}
+            currency={ev.data.currency}
+            label={memberLabel}
+            itemName={priceName}
+          />
+        </div>
+      </section>
+    </>
   );
 }
 
@@ -212,5 +226,92 @@ function PurchaseRow({
         </tr>
       )}
     </>
+  );
+}
+
+function PersonalHistory({
+  eventId,
+  meId,
+  currency,
+  priceName,
+}: {
+  eventId: string;
+  meId: string | undefined;
+  currency: string;
+  priceName: (id?: string) => string;
+}) {
+  const { t } = useTranslation();
+  const list = useQuery({
+    queryKey: ["purchases", eventId],
+    queryFn: () => api.listPurchases(eventId),
+    enabled: !!eventId,
+  });
+
+  // Fetch all purchase details to extract personal allocations
+  const details = useQuery({
+    queryKey: ["personalHistory", eventId, meId],
+    queryFn: async () => {
+      if (!list.data || !meId) return [];
+      const results = await Promise.all(list.data.map((p) => api.getPurchase(eventId, p.date)));
+      return results
+        .map((purchase) => {
+          const myItems: { label: string; qty: number; subtotal: number }[] = [];
+          let total = 0;
+          for (const ln of purchase.lines) {
+            const allocs = ln.allocations || [];
+            const mine = allocs.find((a) => a.user_id === meId);
+            if (mine && Number(mine.qty) > 0) {
+              const qty = Number(mine.qty);
+              const unit = Number(ln.unit_price_minor || 0);
+              const sub = qty * unit;
+              myItems.push({
+                label: ln.name || priceName(ln.price_item_id) || ln.price_item_id || "",
+                qty,
+                subtotal: sub,
+              });
+              total += sub;
+            }
+          }
+          if (myItems.length === 0) return null;
+          return { date: purchase.date, items: myItems, totalMinor: total };
+        })
+        .filter(Boolean) as {
+        date: string;
+        items: { label: string; qty: number; subtotal: number }[];
+        totalMinor: number;
+      }[];
+    },
+    enabled: !!list.data && !!meId,
+  });
+
+  if (list.isLoading || details.isLoading) return <p className="muted">{t("app.loading")}</p>;
+  if (!details.data || details.data.length === 0)
+    return <p className="muted">{t("history.noPurchases")}</p>;
+
+  return (
+    <table className="table">
+      <thead>
+        <tr>
+          <th>{t("history.date")}</th>
+          <th>{t("history.order")}</th>
+          <th style={{ textAlign: "right" }}>{t("history.total")}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {details.data.map((row) => (
+          <tr key={row.date}>
+            <td>{formatYMDToLocale(row.date)}</td>
+            <td>
+              {row.items.map((it, i) => (
+                <span key={i} style={{ marginRight: 10 }}>
+                  {it.qty}× {it.label}
+                </span>
+              ))}
+            </td>
+            <td style={{ textAlign: "right" }}>{formatMoney(row.totalMinor, currency)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }

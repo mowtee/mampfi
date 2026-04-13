@@ -93,6 +93,8 @@
     "member": "Member",
     "joined": "Joined",
     "remove": "Remove",
+    "promote": "Promote to admin",
+    "confirmPromote": "Promote {{name}} to admin?",
     "confirmRemove": "Really remove {{name}}?",
     "noMembers": "No members."
   },
@@ -228,6 +230,8 @@
     "buyer": "Buyer",
     "total": "Total",
     "view": "View",
+    "personalHistory": "Personal History",
+    "order": "Order",
     "aggregate": "Aggregate",
     "perMember": "Per member",
     "item": "Item",
@@ -239,6 +243,8 @@
   "admin": {
     "priceList": "Price List (Owner)",
     "priceListHint": "Prices are fixed; to change prices, add a new item and deactivate the old one.",
+    "cutoff": "Cutoff Time",
+    "cutoffHint": "Orders for the next day lock at this time on the previous day.",
     "holidays": "Holidays",
     "holidaysHint": "Configure which public holidays to show in the calendar and day view.",
     "invites": "Invites",

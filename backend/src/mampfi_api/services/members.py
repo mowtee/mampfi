@@ -116,3 +116,30 @@ def remove_member(
     mem.wants_to_leave = False
     session.add(mem)
     session.commit()
+
+
+def promote_member(
+    session: Session, event_id: uuid.UUID, target_user_id: uuid.UUID, user: User
+) -> None:
+    ev = get_event(session, event_id)
+    require_owner(session, ev.id, user.id)
+
+    if target_user_id == user.id:
+        raise DomainError("you are already an admin")
+
+    mem = session.exec(
+        select(Membership).where(
+            Membership.event_id == ev.id,
+            Membership.user_id == target_user_id,
+        )
+    ).first()
+    if not mem:
+        raise NotFound("member")
+    if mem.left_at:
+        raise DomainError("member already left")
+    if mem.role == "owner":
+        raise DomainError("member is already an admin")
+
+    mem.role = "owner"
+    session.add(mem)
+    session.commit()

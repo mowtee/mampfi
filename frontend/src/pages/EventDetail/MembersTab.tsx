@@ -23,6 +23,13 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
     },
   });
 
+  const promote = useMutation({
+    mutationFn: (userId: string) => api.promoteMember(eventId, userId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["members", eventId] });
+    },
+  });
+
   return (
     <section className="section">
       <div className="card">
@@ -73,19 +80,36 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
                     <td className="muted">{formatYMDToLocale(m.joined_at?.slice(0, 10) || "")}</td>
                     {isOwner && (
                       <td>
-                        {isActive && !isMe && m.role !== "owner" && (
-                          <button
-                            className="btn"
-                            disabled={remove.isPending}
-                            onClick={() => {
-                              if (window.confirm(t("members.confirmRemove", { name }))) {
-                                remove.mutate(m.user_id);
-                              }
-                            }}
-                          >
-                            {t("members.remove")}
-                          </button>
-                        )}
+                        <div className="row" style={{ gap: 4, flexWrap: "nowrap" }}>
+                          {isActive && !isMe && m.role !== "owner" && (
+                            <button
+                              className="btn"
+                              title={t("members.promote")}
+                              disabled={promote.isPending}
+                              onClick={() => {
+                                if (window.confirm(t("members.confirmPromote", { name }))) {
+                                  promote.mutate(m.user_id);
+                                }
+                              }}
+                              style={{ padding: "4px 8px", fontSize: 16 }}
+                            >
+                              ⬆
+                            </button>
+                          )}
+                          {isActive && !isMe && m.role !== "owner" && (
+                            <button
+                              className="btn"
+                              disabled={remove.isPending}
+                              onClick={() => {
+                                if (window.confirm(t("members.confirmRemove", { name }))) {
+                                  remove.mutate(m.user_id);
+                                }
+                              }}
+                            >
+                              {t("members.remove")}
+                            </button>
+                          )}
+                        </div>
                       </td>
                     )}
                   </tr>

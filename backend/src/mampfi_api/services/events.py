@@ -116,6 +116,8 @@ def update_event(session: Session, event_id: uuid.UUID, data: EventUpdate, user:
         ev.holiday_country_code = data.holiday_country_code or None
     if data.holiday_region_code is not None:
         ev.holiday_region_code = data.holiday_region_code or None
+    if data.cutoff_time is not None:
+        ev.cutoff_time = data.cutoff_time
     session.add(ev)
     session.commit()
     session.refresh(ev)

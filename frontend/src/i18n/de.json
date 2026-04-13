@@ -93,6 +93,8 @@
     "member": "Mitglied",
     "joined": "Beigetreten",
     "remove": "Entfernen",
+    "promote": "Zum Admin ernennen",
+    "confirmPromote": "{{name}} zum Admin ernennen?",
     "confirmRemove": "{{name}} wirklich entfernen?",
     "noMembers": "Keine Mitglieder."
   },
@@ -228,6 +230,8 @@
     "buyer": "Käufer",
     "total": "Summe",
     "view": "Ansehen",
+    "personalHistory": "Persönlicher Verlauf",
+    "order": "Bestellung",
     "aggregate": "Aggregiert",
     "perMember": "Pro Mitglied",
     "item": "Artikel",
@@ -239,6 +243,8 @@
   "admin": {
     "priceList": "Preisliste (Eigentümer)",
     "priceListHint": "Preise sind fest; um Preise zu ändern, füge einen neuen Artikel hinzu und deaktiviere den alten.",
+    "cutoff": "Sperrzeit",
+    "cutoffHint": "Bestellungen für den nächsten Tag sperren am Vortag zu dieser Uhrzeit.",
     "holidays": "Feiertage",
     "holidaysHint": "Konfiguriere, welche Feiertage im Kalender und in der Tagesansicht angezeigt werden.",
     "invites": "Einladungen",

@@ -243,6 +243,8 @@ export const api = {
   listMembers: (eventId: UUID) => http<Member[]>(`/v1/events/${eventId}/members`),
   removeMember: (eventId: UUID, userId: UUID) =>
     http<void>(`/v1/events/${eventId}/members/${userId}/remove`, { method: "POST" }),
+  promoteMember: (eventId: UUID, userId: UUID) =>
+    http<void>(`/v1/events/${eventId}/members/${userId}/promote`, { method: "POST" }),
   // Holidays
   getHolidays: (country: string, year: number, region?: string) =>
     http<
@@ -259,7 +261,11 @@ export const api = {
     ),
   updateEvent: (
     eventId: UUID,
-    data: { holiday_country_code?: string | null; holiday_region_code?: string | null },
+    data: {
+      holiday_country_code?: string | null;
+      holiday_region_code?: string | null;
+      cutoff_time?: string;
+    },
   ) => http(`/v1/events/${eventId}`, { method: "PATCH", body: JSON.stringify(data) }),
 
   // Auth

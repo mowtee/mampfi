@@ -29,6 +29,15 @@ export default function AdminTab({ ctx, eventId, ev }: AdminTabProps) {
       </section>
       <section className="section">
         <div className="card">
+          <h3>{t("admin.cutoff")}</h3>
+          <div className="muted" style={{ marginTop: -6, marginBottom: 8 }}>
+            {t("admin.cutoffHint")}
+          </div>
+          <CutoffEditor eventId={eventId} currentCutoff={ev.cutoff_time} />
+        </div>
+      </section>
+      <section className="section">
+        <div className="card">
           <h3>{t("admin.holidays")}</h3>
           <div className="muted" style={{ marginTop: -6, marginBottom: 8 }}>
             {t("admin.holidaysHint")}
@@ -421,6 +430,39 @@ function SendEmailInvites({ eventId }: { eventId: string }) {
           {t("admin.sentCount", { count: result.sent })}
         </div>
       )}
+    </div>
+  );
+}
+
+function CutoffEditor({ eventId, currentCutoff }: { eventId: string; currentCutoff: string }) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [cutoff, setCutoff] = React.useState(String(currentCutoff || "20:00").slice(0, 5));
+  const update = useMutation({
+    mutationFn: () => api.updateEvent(eventId, { cutoff_time: cutoff + ":00" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["event", eventId] });
+    },
+  });
+  const unchanged = cutoff === String(currentCutoff || "20:00").slice(0, 5);
+  return (
+    <div className="row">
+      <input
+        className="input"
+        type="time"
+        value={cutoff}
+        onChange={(e) => setCutoff(e.target.value)}
+        style={{ width: 120 }}
+      />
+      <button
+        className="btn"
+        onClick={() => update.mutate()}
+        disabled={update.isPending || unchanged}
+      >
+        {t("app.save")}
+      </button>
+      {update.error && <span className="danger">{String(update.error)}</span>}
+      {update.isSuccess && !unchanged && <span className="ok">{t("admin.saved")}</span>}
     </div>
   );
 }
