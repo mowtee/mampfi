@@ -260,8 +260,8 @@ a:hover {
 .calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  padding: 4px 2px;
+  gap: 6px;
+  text-align: center;
 }
 .calendar-grid {
   display: grid;
@@ -272,13 +272,14 @@ a:hover {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: 8px;
-  padding: 6px 0 10px;
+  height: 40px;
   text-align: center;
   cursor: pointer;
   color: var(--text);
-  display: grid;
-  place-items: center;
-  gap: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 .calendar-day:hover {
   background: color-mix(in oklab, var(--surface) 85%, var(--accent) 8%);
@@ -299,11 +300,14 @@ a:hover {
   cursor: default;
 }
 .calendar-day .day-dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 999px;
   background: var(--accent);
-  display: inline-block;
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 .calendar-footer {
   display: flex;
