@@ -36,11 +36,11 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
           <table className="table">
             <thead>
               <tr>
-                <th>{t("members.name")}</th>
-                <th>{t("members.role")}</th>
-                <th>{t("members.status")}</th>
-                <th>{t("members.joined")}</th>
-                {isOwner && <th>{t("app.actions")}</th>}
+                <th style={{ width: "100%" }}>{t("members.name")}</th>
+                <th style={{ whiteSpace: "nowrap" }}>{t("members.role")}</th>
+                <th style={{ whiteSpace: "nowrap" }}>{t("members.status")}</th>
+                <th style={{ whiteSpace: "nowrap" }}>{t("members.joined")}</th>
+                {isOwner && <th style={{ whiteSpace: "nowrap" }}>{t("app.actions")}</th>}
               </tr>
             </thead>
             <tbody>
