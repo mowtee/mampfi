@@ -36,7 +36,7 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
           <table className="table">
             <thead>
               <tr>
-                <th style={{ width: "100%" }}>{t("members.name")}</th>
+                <th>{t("members.name")}</th>
                 <th style={{ whiteSpace: "nowrap", textAlign: "center" }}>{t("members.role")}</th>
                 <th style={{ whiteSpace: "nowrap", textAlign: "center" }}>{t("members.status")}</th>
                 <th style={{ whiteSpace: "nowrap" }}>{t("members.joined")}</th>
