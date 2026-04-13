@@ -19,8 +19,8 @@ export default function NewEvent() {
   const [timezone, setTimezone] = React.useState("Europe/Berlin");
   const [cutoff, setCutoff] = React.useState("20:00");
   const [currency, setCurrency] = React.useState("EUR");
-  const [holidayCountry, setHolidayCountry] = React.useState("DE");
-  const [holidayRegion, setHolidayRegion] = React.useState("DE-BW");
+  const [holidayCountry, setHolidayCountry] = React.useState("");
+  const [holidayRegion, setHolidayRegion] = React.useState("");
   const [items, setItems] = React.useState<{ name: string; price: string }[]>([
     { name: "", price: "" },
   ]);
