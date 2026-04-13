@@ -93,6 +93,13 @@ Before touching a refactor item, mark it `[~]` in `docs/refactor.md`.
 - Use a real test database (no mocking the DB layer)
 - Integration tests via `httpx.AsyncClient` against the FastAPI app
 
+**Database migrations:**
+- The app is deployed in production — **never modify the init migration or existing migrations**
+- Any model change (new table, new column, altered column) **must** include a new Alembic migration
+- Generate with: `cd backend && uv run alembic revision --autogenerate -m "description"`
+- Review the generated migration before committing — autogenerate can miss things or produce incorrect ops
+- Migrations run automatically on deploy via `docker compose --profile migrate run --rm migrate`
+
 ---
 
 ## Frontend Conventions
