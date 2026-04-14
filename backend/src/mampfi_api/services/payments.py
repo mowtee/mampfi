@@ -15,6 +15,25 @@ def _fmt_money(minor: int, currency: str) -> str:
     return f"{minor / 100:.2f} {currency}"
 
 
+def _payment_out(session: Session, p: Payment) -> PaymentOut:
+    out = PaymentOut.model_validate(p, from_attributes=True)
+    if p.status == "declined":
+        evt = session.exec(
+            select(PaymentEvent).where(
+                PaymentEvent.payment_id == p.id,
+                PaymentEvent.event_type == "declined",
+            )
+        ).first()
+        if evt and evt.note:
+            out.decline_reason = evt.note
+    # Strip legacy "decline: " prefix from note if present
+    if out.note and out.note.startswith("decline: "):
+        out.note = out.note.split("\n")[0].removeprefix("decline: ").strip() or None
+    elif out.note and "\ndecline: " in out.note:
+        out.note = out.note.split("\ndecline: ")[0].strip() or None
+    return out
+
+
 def _get_payment(session: Session, event_id: uuid.UUID, payment_id: uuid.UUID) -> Payment:
     p = session.get(Payment, payment_id)
     if not p or p.event_id != event_id:
@@ -76,7 +95,7 @@ def create_payment(
         )
         session.commit()
 
-    return PaymentOut.model_validate(p, from_attributes=True)
+    return _payment_out(session, p)
 
 
 def list_payments(
@@ -93,7 +112,7 @@ def list_payments(
     stmt = select(Payment).where(Payment.event_id == ev.id)
     if status_eq:
         stmt = stmt.where(Payment.status == status_eq)
-    return [PaymentOut.model_validate(i, from_attributes=True) for i in session.exec(stmt).all()]
+    return [_payment_out(session, i) for i in session.exec(stmt).all()]
 
 
 def confirm_payment(
@@ -136,7 +155,7 @@ def confirm_payment(
         )
         session.commit()
 
-    return PaymentOut.model_validate(p, from_attributes=True)
+    return _payment_out(session, p)
 
 
 def decline_payment(
@@ -154,8 +173,6 @@ def decline_payment(
         raise Forbidden("only recipient can decline")
     p.status = "declined"
     p.decided_at = now
-    if data.reason:
-        p.note = (p.note or "") + ("\n" if p.note else "") + f"decline: {data.reason}"
     p.version = (p.version or 1) + 1
     session.add(p)
     session.commit()
@@ -171,7 +188,7 @@ def decline_payment(
     )
     session.commit()
     session.refresh(p)
-    return PaymentOut.model_validate(p, from_attributes=True)
+    return _payment_out(session, p)
 
 
 def cancel_payment(
@@ -199,7 +216,7 @@ def cancel_payment(
     )
     session.commit()
     session.refresh(p)
-    return PaymentOut.model_validate(p, from_attributes=True)
+    return _payment_out(session, p)
 
 
 def list_payment_events(

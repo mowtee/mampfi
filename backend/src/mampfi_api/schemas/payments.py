@@ -19,6 +19,7 @@ class PaymentOut(BaseModel):
     currency: str
     status: str
     note: str | None
+    decline_reason: str | None = None
     created_at: dt.datetime
     decided_at: dt.datetime | None
     version: int

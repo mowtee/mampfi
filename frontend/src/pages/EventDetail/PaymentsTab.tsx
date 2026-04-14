@@ -128,6 +128,7 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
                   totals={balances.data?.totals || []}
                   currency={balances.data?.currency}
                   label={memberLabel}
+                  payments={payments.data || []}
                   onCreatePayment={(to, amount, note) =>
                     createPay.mutate({ to_user_id: to, amount_minor: amount, note })
                   }
@@ -284,12 +285,25 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
                               {p.note}
                             </div>
                           )}
+                          {p.decline_reason && (
+                            <div
+                              className="muted show-mobile-only"
+                              style={{ fontSize: 12, fontStyle: "italic" }}
+                            >
+                              {t("payments.declineReason", { reason: p.decline_reason })}
+                            </div>
+                          )}
                         </td>
                         <td
                           className="hide-mobile"
                           style={{ maxWidth: 360, wordBreak: "break-word" }}
                         >
                           {p.note}
+                          {p.decline_reason && (
+                            <div className="muted" style={{ fontSize: 13, fontStyle: "italic" }}>
+                              {t("payments.declineReason", { reason: p.decline_reason })}
+                            </div>
+                          )}
                         </td>
                         <td style={{ textAlign: "right" }}>
                           {formatMoney(Number(p.amount_minor), p.currency)}
@@ -477,6 +491,7 @@ function SettleMyBalance({
   totals,
   currency,
   label,
+  payments,
   onCreatePayment,
   isCreating,
 }: {
@@ -484,6 +499,7 @@ function SettleMyBalance({
   totals: BalanceLine[];
   currency: string;
   label: (id?: string) => string;
+  payments: Payment[];
   onCreatePayment: (to: string, amount_minor: number, note?: string) => void;
   isCreating?: boolean;
 }) {
@@ -497,6 +513,9 @@ function SettleMyBalance({
         {t("payments.youAreEven")}
       </p>
     );
+
+  const hasPendingTo = (toId: string) =>
+    payments.some((p) => p.from_user_id === me && p.to_user_id === toId && p.status === "pending");
 
   const creditors = totals.filter((t) => Number(t.balance_minor) > 0 && t.user_id !== me);
   const debtors = totals.filter((t) => Number(t.balance_minor) < 0 && t.user_id !== me);
@@ -519,6 +538,17 @@ function SettleMyBalance({
         remaining -= canPay;
       }
     }
+
+    const allPending = plan.length > 0 && plan.every((p) => hasPendingTo(p.to));
+    if (allPending) {
+      return (
+        <div style={{ marginTop: 12 }}>
+          <h4 style={{ margin: "6px 0" }}>{t("payments.settleMyBalance")}</h4>
+          <p className="chip warn">{t("payments.allSettlementsPending")}</p>
+        </div>
+      );
+    }
+
     return (
       <div style={{ marginTop: 12 }}>
         <h4 style={{ margin: "6px 0" }}>{t("payments.settleMyBalance")}</h4>
@@ -533,14 +563,20 @@ function SettleMyBalance({
                 currency,
                 name: label(p.to),
               })}
-              <button
-                className="btn"
-                style={{ marginLeft: 8 }}
-                onClick={() => onCreatePayment(p.to, p.amount, t("payments.balanceSettlement"))}
-                disabled={!!isCreating}
-              >
-                {t("payments.createPayment")}
-              </button>
+              {hasPendingTo(p.to) ? (
+                <span className="chip warn" style={{ marginLeft: 8 }}>
+                  {t("payments.settlementPending")}
+                </span>
+              ) : (
+                <button
+                  className="btn"
+                  style={{ marginLeft: 8 }}
+                  onClick={() => onCreatePayment(p.to, p.amount, t("payments.balanceSettlement"))}
+                  disabled={!!isCreating}
+                >
+                  {t("payments.createPayment")}
+                </button>
+              )}
             </li>
           ))}
         </ul>

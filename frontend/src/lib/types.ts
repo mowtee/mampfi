@@ -68,6 +68,7 @@ export type Payment = {
   currency: string;
   status: string;
   note?: string | null;
+  decline_reason?: string | null;
   created_at: string;
   decided_at?: string | null;
   version: number;
