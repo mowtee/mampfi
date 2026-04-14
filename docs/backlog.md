@@ -6,89 +6,67 @@ Status: `[ ]` open · `[~]` in progress · `[x]` done
 
 ---
 
-## Implementation Plan
-
-Work is organized into batches. Complete each batch before starting the next.
+## Completed
 
 ### Batch 1 — Critical mobile fixes & quick UI wins
-*Fix issues actively hitting beta users. All are small, independent changes.*
-
-1. Mobile: Date picker Android issues (empty field, 1900 default, fragile on touch)
-2. Mobile: Horizontal scroll overflow on order cards (Android)
-3. Mobile: Date field truncation on iOS
-4. Help modal spacing (margin before step list)
-5. Help button styling (round, visible border)
-6. Einkaufsabschluss section spacing
-7. Members list role column alignment
-8. 404 on /assets/mampfi-logo.png
-9. Language picker styling (Chrome/macOS select)
-10. Frontend price validation on event creation
-11. Item name length limit (36 chars, frontend + backend)
+- [x] Mobile: Date picker Android issues
+- [x] Mobile: Horizontal scroll overflow on order cards
+- [x] Mobile: Date field truncation on iOS
+- [x] Help modal spacing
+- [x] Help button styling (round, visible border)
+- [x] Einkaufsabschluss section spacing
+- [x] Members list role column alignment
+- [x] 404 on /assets/mampfi-logo.png
+- [x] Language picker styling (Chrome/macOS select)
+- [x] Frontend price validation on event creation
+- [x] Item name length limit (36 chars)
 
 ### Batch 2 — Finalize UX & order improvements
-*Touches DayTab finalize section and order saving logic.*
-
-12. Finalize button UX (explanatory text + "Für den Einkäufer" sub-heading)
-13. Save order button: disable when unchanged
-14. Help content: add glossary (Sperrzeit, Übernahme, Abschluss)
+- [x] Finalize button UX (explanatory text + "Für den Einkäufer")
+- [x] Save order button: disable when unchanged
+- [x] Help content: add glossary
 
 ### Batch 3 — Admin capabilities & members
-*Touches MembersTab and Admin area.*
-
-15. Admin: promote members to admin (icon button in members list)
-16. Admin: change cutoff time in Admin tab
-17. Personal order history section in History tab
+- [x] Admin: promote members to admin
+- [x] Admin: change cutoff time in Admin tab
+- [x] Personal order history in History tab
 
 ### Batch 4 — Purchase management
-*Depends on Batch 2 (finalize UX). Touches purchase finalization flow.*
-
-18. Admin: revert/invalidate purchase finalization
-19. Receipt photo upload during finalization + view in history
-    - *Architectural decision needed: file storage (local volume vs S3 vs DB blob)*
+- [x] Admin: revert/invalidate purchase finalization
+- [x] Receipt photo upload + view in history (base64 in DB)
 
 ### Batch 5 — Advanced features
-*Larger features, not blocking beta. Can be deferred.*
+- [x] Delivery fee (Bring-Pauschale) — event setting + finalization checkbox
+- [x] Member notes (allergies) — per-event note in members list
+- [x] Admin: delete events with email notification
+- [x] Auto-delete events 90 days past end date (worker)
 
-20. Delivery fee ("Bring-Pauschale") — event setting + finalization checkbox
-21. Member notes (allergies) — per-event note + modal in members list
-22. Admin: delete events with email notification
-23. Event name/description editing in Admin tab
+### Rollover fix
+- [x] Server-side rollover preference (Membership.rollover_enabled)
+- [x] Filter inactive items consistently in get_my_order
+- [x] Three-state order indicator (explicit / rolled from [date] / no order)
+- [x] Aggregate respects rollover_enabled
 
 ---
 
-## UX / UI Fixes
+## Open — Bugs
 
-- [ ] **Help modal spacing** — Too little space between intro paragraph and first numbered item. Add margin-top before the step list.
-- [ ] **Help button styling** — The `?` button is not recognizable enough as a button. Make it round with a visible border/background.
-- [ ] **Help content: add glossary** — Explain potentially confusing terms (Sperrzeit/cutoff, Übernahme/rollover, Abschluss/finalize) in the help modal.
-- [ ] **Spacing: "Einkaufsabschluss" section** — Too little space between the heading and the "Einkauf abschließen" button. Add margin.
-- [ ] **Finalize button UX** — Not intuitive enough. Add explanatory text above: "Du hast den Einkauf übernommen? Erfasse jetzt deine Auslage!" and a sub-heading "Für den Einkäufer".
-- [ ] **Members list: role column alignment** — Admin/Member badges are not vertically centered in the table row. Fix vertical alignment.
-- [ ] **Save order button: disable when unchanged** — "Bestellung speichern" should be inactive when the current quantities match what's already saved in the DB.
-- [ ] **Language picker styling (Chrome/macOS)** — The `<select>` dropdown has inconsistent styling on Chrome. Consider a custom dropdown or improved native styling.
-- [ ] **404 on /assets/mampfi-logo.png** — Old reference to a non-existent path. Check where this is referenced and fix or remove.
+- [ ] **list_members missing note + rollover_enabled** — Backend `list_members` doesn't include `note` or `rollover_enabled` in response, so notes are invisible to other members and rollover toggle appears stuck. Root cause of both member note invisibility and rollover toggle bug.
+- [ ] **Rollover toggle UI stuck on "An"** — After toggling, the members query isn't refetched immediately. Even with the backend fix, need to ensure the toggle invalidates aggressively.
+- [ ] **Can't re-finalize after revert** — Frontend treats invalidated purchase as existing (returns 200, not 404). Need to check `invalidated_at` and show finalize button when purchase is invalidated.
+- [ ] **Finalize modal doesn't close on success** — The `finalize` mutation's `onSuccess` doesn't close the finalize confirmation modal.
+- [ ] **Delivery fee checkbox not visible** — Checkbox only shows in the "finalize as is" confirmation modal. Verify event has `delivery_fee_minor > 0` and that event data is fresh.
 
-## Mobile / Responsive
+## Open — UX Improvements
 
-- [ ] **Date picker: Android issues** — Multiple problems on Android devices:
-  - Date field shows empty/blank when not focused
-  - Clicking into the field shows 01.01.1900 as default
-  - Generally fragile on mobile — consider using native `<input type="date">` on touch devices more aggressively
-- [ ] **Horizontal scroll overflow on cards (Android)** — Order table overflows the card on narrow screens, causing unwanted horizontal scroll. The qty stepper and total column get cut off. Fix: make table responsive (e.g. reduce column widths, allow wrapping, or use a mobile-specific layout).
-- [ ] **Date field truncation (iOS)** — Date picker text gets cut off ("13.04.20...") on narrow screens. Ensure min-width or use shorter date format on mobile.
+- [ ] **Receipt upload during finalization** — Should be a step in the finalize modal flow, not only available after finalization. Add as last step before confirming.
+- [ ] **Revert button in history tab** — Currently only in Day tab. Add compact icon button per row in history (admin only).
+- [ ] **Event deletion: confirm with balance info** — Show balance summary in confirmation dialog. After deletion, email ALL members with ALL balances (not just personal). If settled, say so. If not, include full balance table.
+- [ ] **Member notes discoverability** — The note button only appears if a note exists, making it hard to discover. Consider always showing a "set note" option for the current user with a brief explanation of purpose.
 
-## Features
+## Open — Deferred
 
-- [ ] **Admin: change cutoff time** — Cutoff time should be editable in the Admin tab (currently only set at event creation).
-- [ ] **Admin: promote members to admin** — Admin should be able to promote other members to admin. Icon-only button in the members list, visible only to admins.
-- [ ] **Admin: revert/invalidate purchase finalization** — Admins should be able to invalidate a finalized purchase for a day so it can be re-finalized. The original finalization should be preserved but marked as invalidated. Show in history: who invalidated, reason (required note).
-- [ ] **Admin: delete events** — Ability to delete an event. All members receive an email notification: who deleted it, and what their personal settlement status was.
-- [ ] **Receipt photo upload during finalization** — During purchase finalization, allow the buyer to upload a photo of the receipt. Show receipt photos in the history tab via a button that opens a modal.
-- [ ] **Member notes (e.g. allergies)** — Members can set a per-event note visible to all members via a button in the members list (modal). Purpose: allergy info for buyers who may need to substitute items. Button only shown if a note exists. Open: where/how does a member configure this, and how to explain the purpose concisely.
-- [ ] **Delivery fee ("Bring-Pauschale")** — Optional per-event setting for a flat delivery/errand fee. The buyer can opt in/out during finalization (checkbox, default: yes if configured). The fee is split among all members who ordered that day.
-- [ ] **Personal order history** — New section in the History tab: "Persönlicher Verlauf" showing only the logged-in user's orders for finalized days. Columns: Date, Items received, Total. Example: `15.4. | 1× Kaffee, 2× Geiles Teil | 3,50 €`
-
-## Validation
-
-- [ ] **Item name length limit** — Restrict article names to 36 characters (frontend + backend).
-- [ ] **Frontend price validation on event creation** — The event creation form does not validate prices inline like the admin price list does. Add the same validation hints (enter a name, valid price, price > 0).
+- [ ] **Event name/description editing in Admin tab**
+- [ ] **PWA** — App Shell + offline fallback **(later)**
+- [ ] **Database backup strategy** **(later)**
+- [ ] **Post-deploy smoke test** **(later)**
