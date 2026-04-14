@@ -6,7 +6,7 @@ from sqlmodel import Session
 from ..auth import get_current_user
 from ..db import session_dep
 from ..models import User
-from ..schemas.members import LeaveIntentIn, LeaveIntentOut
+from ..schemas.members import LeaveIntentIn, LeaveIntentOut, MemberNoteIn
 from ..services import members as svc
 
 router = APIRouter(prefix="/v1/events/{event_id}/members", tags=["members"])
@@ -52,3 +52,13 @@ def promote_member(
 ) -> Response:
     svc.promote_member(session, event_id, user_id, user)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/me/note")
+def set_member_note(
+    event_id: uuid.UUID,
+    data: MemberNoteIn,
+    session: Session = Depends(session_dep),
+    user: User = Depends(get_current_user),
+) -> dict:
+    return svc.set_member_note(session, event_id, data.note, user)

@@ -45,6 +45,7 @@ class EventUpdate(BaseModel):
     holiday_country_code: str | None = Field(default=None, max_length=10)
     holiday_region_code: str | None = Field(default=None, max_length=20)
     cutoff_time: dt.time | None = None
+    delivery_fee_minor: int | None = None
 
 
 class EventWithMe(BaseModel):
@@ -58,6 +59,7 @@ class EventWithMe(BaseModel):
     currency: str
     holiday_country_code: str | None = None
     holiday_region_code: str | None = None
+    delivery_fee_minor: int | None = None
     left_at: dt.datetime | None = None
     role: str | None = None
 
@@ -74,3 +76,4 @@ class MemberOut(BaseModel):
     role: str
     joined_at: dt.datetime
     left_at: dt.datetime | None = None
+    note: str | None = None

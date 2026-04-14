@@ -21,6 +21,15 @@ def set_leave_intent(
     return LeaveIntentOut(status="ok", wants_to_leave=mem.wants_to_leave)
 
 
+def set_member_note(session: Session, event_id: uuid.UUID, note: str | None, user: User) -> dict:
+    ev = get_event(session, event_id)
+    mem = require_member(session, ev.id, user.id)
+    mem.note = note.strip() if note else None
+    session.add(mem)
+    session.commit()
+    return {"status": "ok", "note": mem.note}
+
+
 def leave_event(session: Session, event_id: uuid.UUID, user: User) -> None:
     ev = session.get(Event, event_id)
     if ev is None:

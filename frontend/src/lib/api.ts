@@ -73,6 +73,7 @@ export type Event = {
   currency: string;
   holiday_country_code?: string | null;
   holiday_region_code?: string | null;
+  delivery_fee_minor?: number | null;
   left_at?: string | null;
   role?: string | null;
 };
@@ -85,6 +86,7 @@ export type Member = {
   role: string;
   joined_at: string;
   left_at?: string | null;
+  note?: string | null;
 };
 
 export const api = {
@@ -284,9 +286,16 @@ export const api = {
       holiday_country_code?: string | null;
       holiday_region_code?: string | null;
       cutoff_time?: string;
+      delivery_fee_minor?: number | null;
     },
   ) => http(`/v1/events/${eventId}`, { method: "PATCH", body: JSON.stringify(data) }),
 
+  deleteEvent: (eventId: UUID) => http<void>(`/v1/events/${eventId}`, { method: "DELETE" }),
+  setMemberNote: (eventId: UUID, note: string | null) =>
+    http<{ status: string; note: string | null }>(`/v1/events/${eventId}/members/me/note`, {
+      method: "POST",
+      body: JSON.stringify({ note }),
+    }),
   // Auth
   signup: (email: string, password: string, name?: string, locale?: string) =>
     http<{ message: string }>(`/v1/auth/signup`, {

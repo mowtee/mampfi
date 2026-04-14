@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, type Event } from "../../lib/api";
 import { formatMoney, parseMoneyToMinor } from "../../lib/money";
@@ -34,6 +35,15 @@ export default function AdminTab({ ctx, eventId, ev }: AdminTabProps) {
             {t("admin.cutoffHint")}
           </div>
           <CutoffEditor eventId={eventId} currentCutoff={ev.cutoff_time} />
+        </div>
+      </section>
+      <section className="section">
+        <div className="card">
+          <h3>{t("admin.deliveryFee")}</h3>
+          <div className="muted" style={{ marginTop: -6, marginBottom: 8 }}>
+            {t("admin.deliveryFeeHint")}
+          </div>
+          <DeliveryFeeEditor eventId={eventId} currentFee={ev.delivery_fee_minor ?? null} />
         </div>
       </section>
       <section className="section">
@@ -108,6 +118,11 @@ export default function AdminTab({ ctx, eventId, ev }: AdminTabProps) {
               </table>
             </>
           )}
+        </div>
+      </section>
+      <section className="section">
+        <div className="card">
+          <DeleteEventButton eventId={eventId} />
         </div>
       </section>
     </>
@@ -463,6 +478,84 @@ function CutoffEditor({ eventId, currentCutoff }: { eventId: string; currentCuto
       </button>
       {update.error && <span className="danger">{String(update.error)}</span>}
       {update.isSuccess && !unchanged && <span className="ok">{t("admin.saved")}</span>}
+    </div>
+  );
+}
+
+function DeliveryFeeEditor({
+  eventId,
+  currentFee,
+}: {
+  eventId: string;
+  currentFee: number | null;
+}) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [fee, setFee] = React.useState(currentFee != null ? String(currentFee) : "");
+  const update = useMutation({
+    mutationFn: () => {
+      const trimmed = fee.trim();
+      const value = trimmed === "" ? null : Number(trimmed);
+      return api.updateEvent(eventId, { delivery_fee_minor: value });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["event", eventId] });
+      qc.invalidateQueries({ queryKey: ["events"] });
+    },
+  });
+  const currentStr = currentFee != null ? String(currentFee) : "";
+  const unchanged = fee.trim() === currentStr;
+  return (
+    <div className="row">
+      <input
+        className="input"
+        type="number"
+        min={0}
+        placeholder={t("admin.deliveryFeePlaceholder")}
+        value={fee}
+        onChange={(e) => setFee(e.target.value)}
+        style={{ width: 200 }}
+      />
+      <button
+        className="btn"
+        onClick={() => update.mutate()}
+        disabled={update.isPending || unchanged}
+      >
+        {t("app.save")}
+      </button>
+      {update.error && <span className="danger">{String(update.error)}</span>}
+      {update.isSuccess && !unchanged && <span className="ok">{t("admin.saved")}</span>}
+    </div>
+  );
+}
+
+function DeleteEventButton({ eventId }: { eventId: string }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const del = useMutation({
+    mutationFn: () => api.deleteEvent(eventId),
+    onSuccess: () => {
+      navigate("/");
+    },
+  });
+  return (
+    <div>
+      <button
+        className="btn danger"
+        onClick={() => {
+          if (window.confirm(t("admin.deleteEventConfirm"))) {
+            del.mutate();
+          }
+        }}
+        disabled={del.isPending}
+      >
+        {t("admin.deleteEvent")}
+      </button>
+      {del.error && (
+        <span className="danger" style={{ marginLeft: 8 }}>
+          {String(del.error)}
+        </span>
+      )}
     </div>
   );
 }

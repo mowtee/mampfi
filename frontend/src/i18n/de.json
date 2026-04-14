@@ -96,7 +96,12 @@
     "promote": "Zum Admin ernennen",
     "confirmPromote": "{{name}} zum Admin ernennen?",
     "confirmRemove": "{{name}} wirklich entfernen?",
-    "noMembers": "Keine Mitglieder."
+    "noMembers": "Keine Mitglieder.",
+    "noteBtn": "Hinweis",
+    "setNote": "Hinweis setzen",
+    "noteHint": "Hinweis für andere Mitglieder (z.B. Allergien)",
+    "notePlaceholder": "z.B. Laktoseintoleranz",
+    "noNote": "Kein Hinweis gesetzt."
   },
   "tabs": {
     "day": "Tag",
@@ -179,7 +184,9 @@
     "notesPlaceholder": "Notizen (optional)",
     "submitAdjustments": "Anpassungen übermitteln",
     "noDeliveredItems": "Keine gelieferten Artikel zum Abschließen.",
-    "cannotFinalizeFuture": "Einkäufe können erst ab dem jeweiligen Tag abgeschlossen werden."
+    "cannotFinalizeFuture": "Einkäufe können erst ab dem jeweiligen Tag abgeschlossen werden.",
+    "deliveryFee": "Bring-Pauschale",
+    "deliveryFeeApplied": "Bring-Pauschale: {{amount}}"
   },
   "payments": {
     "balances": "Salden",
@@ -295,7 +302,12 @@
     "createSingleInvite": "Einmal-Einladungslink erstellen",
     "singleInvite": "Einmaleinladung",
     "emailOptional": "E-Mail (optional)",
-    "ttlDays": "Gültigkeit (Tage)"
+    "ttlDays": "Gültigkeit (Tage)",
+    "deliveryFee": "Bring-Pauschale",
+    "deliveryFeeHint": "Optionale Pauschale für den Einkäufer (in Cent). Leer lassen um zu deaktivieren.",
+    "deliveryFeePlaceholder": "z.B. 200 für 2,00 €",
+    "deleteEvent": "Event löschen",
+    "deleteEventConfirm": "Event wirklich löschen? Alle Daten werden unwiderruflich entfernt."
   },
   "newEvent": {
     "title": "Neues Event",

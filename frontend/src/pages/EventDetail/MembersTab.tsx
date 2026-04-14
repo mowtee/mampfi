@@ -30,6 +30,13 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
     },
   });
 
+  const setNote = useMutation({
+    mutationFn: (note: string | null) => api.setMemberNote(eventId, note),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["members", eventId] });
+    },
+  });
+
   return (
     <section className="section">
       <div className="card">
@@ -60,6 +67,43 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
                     <td>
                       {name}
                       {isMe && <span className="muted"> ({t("app.you")})</span>}
+                      {m.note && (
+                        <button
+                          className="btn"
+                          title={m.note}
+                          onClick={() => window.alert(m.note)}
+                          style={{
+                            padding: "2px 4px",
+                            fontSize: 14,
+                            marginLeft: 4,
+                            verticalAlign: "middle",
+                          }}
+                        >
+                          {t("members.noteBtn")}
+                        </button>
+                      )}
+                      {isMe && (
+                        <button
+                          className="btn"
+                          title={t("members.setNote")}
+                          disabled={setNote.isPending}
+                          onClick={() => {
+                            const current = m.note || "";
+                            const input = window.prompt(t("members.noteHint"), current);
+                            if (input !== null) {
+                              setNote.mutate(input.trim() || null);
+                            }
+                          }}
+                          style={{
+                            padding: "2px 4px",
+                            fontSize: 12,
+                            marginLeft: 4,
+                            verticalAlign: "middle",
+                          }}
+                        >
+                          {t("members.setNote")}
+                        </button>
+                      )}
                     </td>
                     <td style={{ textAlign: "center" }}>
                       {m.role === "owner" ? (

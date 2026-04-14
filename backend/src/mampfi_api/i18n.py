@@ -50,6 +50,9 @@ EMAIL_STRINGS: dict[str, dict[str, str]] = {
         "invite_cta": "Einladung annehmen",
         "invite_fallback": "Falls der Button nicht funktioniert, kopiere diesen Link:",
         "invite_expiry": "Diese Einladung ist 14 Tage gültig.",
+        # Event deletion
+        "event_deleted_subject": "{event_name} wurde gelöscht",
+        "event_deleted_body": 'Das Event "{event_name}" wurde von {deleter} gelöscht. Dein Zahlungsstatus: {balance}.',
     },
     "en": {
         # Common
@@ -82,6 +85,9 @@ EMAIL_STRINGS: dict[str, dict[str, str]] = {
         "invite_cta": "Accept invitation",
         "invite_fallback": "If the button doesn't work, copy this link:",
         "invite_expiry": "This invitation expires in 14 days.",
+        # Event deletion
+        "event_deleted_subject": "{event_name} was deleted",
+        "event_deleted_body": 'The event "{event_name}" was deleted by {deleter}. Your balance status: {balance}.',
     },
 }
 

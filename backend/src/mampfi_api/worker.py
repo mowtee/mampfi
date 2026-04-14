@@ -13,7 +13,18 @@ from sqlmodel import Session, select
 
 from .config import Settings, get_settings
 from .logging import setup_logging
-from .models import EmailOutbox, RefreshToken
+from .models import (
+    DailyOrder,
+    EmailOutbox,
+    Event,
+    InviteToken,
+    Membership,
+    Payment,
+    PaymentEvent,
+    PriceItem,
+    Purchase,
+    RefreshToken,
+)
 from .timeutils import now_utc
 
 logger = logging.getLogger("mampfi_api.worker")
@@ -116,12 +127,30 @@ def cleanup(engine: Engine) -> None:
         for rt in expired:
             session.delete(rt)
 
+        # Auto-delete events that ended 90+ days ago
+        event_cutoff = (now_utc() - dt.timedelta(days=90)).date()
+        old_events = session.exec(select(Event).where(Event.end_date < event_cutoff)).all()
+        for ev in old_events:
+            for model in [
+                PaymentEvent,
+                Payment,
+                Purchase,
+                DailyOrder,
+                PriceItem,
+                InviteToken,
+                Membership,
+            ]:
+                for row in session.exec(select(model).where(model.event_id == ev.id)).all():
+                    session.delete(row)
+            session.delete(ev)
+
         session.commit()
-        if old_sent or expired:
+        if old_sent or expired or old_events:
             logger.info(
-                "Cleanup: removed %d old emails, %d expired tokens",
+                "Cleanup: removed %d old emails, %d expired tokens, %d expired events",
                 len(old_sent),
                 len(expired),
+                len(old_events),
             )
 
 

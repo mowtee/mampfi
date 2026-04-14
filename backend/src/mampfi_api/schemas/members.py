@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class LeaveIntentIn(BaseModel):
@@ -8,3 +8,7 @@ class LeaveIntentIn(BaseModel):
 class LeaveIntentOut(BaseModel):
     status: str
     wants_to_leave: bool
+
+
+class MemberNoteIn(BaseModel):
+    note: str | None = Field(default=None, max_length=500)

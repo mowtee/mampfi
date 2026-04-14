@@ -4,7 +4,17 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from sqlmodel import Session, select
 
 from ..exceptions import DomainError, Forbidden, NotFound
-from ..models import Event, Membership, PriceItem, User
+from ..models import (
+    DailyOrder,
+    Event,
+    InviteToken,
+    Membership,
+    Payment,
+    PaymentEvent,
+    PriceItem,
+    Purchase,
+    User,
+)
 from ..schemas.events import EventCreate, EventUpdate, EventWithMe, MemberOut, PriceItemAdd
 from ..timeutils import now_utc
 
@@ -102,6 +112,7 @@ def list_my_events(session: Session, user: User) -> list[EventWithMe]:
                 currency=ev.currency,
                 holiday_country_code=ev.holiday_country_code,
                 holiday_region_code=ev.holiday_region_code,
+                delivery_fee_minor=ev.delivery_fee_minor,
                 left_at=m.left_at if m else None,
                 role=m.role if m else None,
             )
@@ -118,6 +129,8 @@ def update_event(session: Session, event_id: uuid.UUID, data: EventUpdate, user:
         ev.holiday_region_code = data.holiday_region_code or None
     if data.cutoff_time is not None:
         ev.cutoff_time = data.cutoff_time
+    if data.delivery_fee_minor is not None:
+        ev.delivery_fee_minor = data.delivery_fee_minor if data.delivery_fee_minor > 0 else None
     session.add(ev)
     session.commit()
     session.refresh(ev)
@@ -200,3 +213,50 @@ def list_members(session: Session, event_id: uuid.UUID, user: User) -> list[Memb
         )
         for m in mems
     ]
+
+
+def delete_event(session: Session, event_id: uuid.UUID, user: User) -> None:
+    """Delete an event and all related data. Owner only."""
+    ev = get_event(session, event_id)
+    require_owner(session, ev.id, user.id)
+
+    # Collect member info before deletion for notifications
+    from ..services.balances import compute_balances
+    from ..services.email import enqueue_email
+
+    mems = session.exec(select(Membership).where(Membership.event_id == ev.id)).all()
+    balances = compute_balances(session, ev.id)
+    deleter_name = user.name or user.email
+
+    # Delete all related data
+    for model in [PaymentEvent, Payment, Purchase, DailyOrder, PriceItem, InviteToken, Membership]:
+        rows = session.exec(select(model).where(model.event_id == ev.id)).all()
+        for row in rows:
+            session.delete(row)
+
+    session.delete(ev)
+    session.flush()
+
+    # Enqueue notification emails to all members
+    from ..i18n import get_lang, t
+
+    for m in mems:
+        if m.user_id == user.id:
+            continue
+        member_user = session.get(User, m.user_id)
+        if not member_user:
+            continue
+        lang = get_lang(member_user.locale)
+        bal = balances.get(m.user_id, 0)
+        bal_str = f"{bal / 100:.2f} {ev.currency}" if bal != 0 else "0"
+        subject = t("event_deleted_subject", lang, event_name=ev.name)
+        body = t(
+            "event_deleted_body",
+            lang,
+            event_name=ev.name,
+            deleter=deleter_name,
+            balance=bal_str,
+        )
+        enqueue_email(session, member_user.email, subject, f"<p>{body}</p>", body)
+
+    session.commit()

@@ -96,7 +96,12 @@
     "promote": "Promote to admin",
     "confirmPromote": "Promote {{name}} to admin?",
     "confirmRemove": "Really remove {{name}}?",
-    "noMembers": "No members."
+    "noMembers": "No members.",
+    "noteBtn": "Note",
+    "setNote": "Set note",
+    "noteHint": "Note for other members (e.g. allergies)",
+    "notePlaceholder": "e.g. Lactose intolerant",
+    "noNote": "No note set."
   },
   "tabs": {
     "day": "Day",
@@ -179,7 +184,9 @@
     "notesPlaceholder": "Notes (optional)",
     "submitAdjustments": "Submit adjustments",
     "noDeliveredItems": "No delivered items to finalize.",
-    "cannotFinalizeFuture": "Purchases can only be finalized from the respective day onwards."
+    "cannotFinalizeFuture": "Purchases can only be finalized from the respective day onwards.",
+    "deliveryFee": "Delivery fee",
+    "deliveryFeeApplied": "Delivery fee: {{amount}}"
   },
   "payments": {
     "balances": "Balances",
@@ -295,7 +302,12 @@
     "createSingleInvite": "Create Single Use Invite Link",
     "singleInvite": "Single-use Invite",
     "emailOptional": "email (optional)",
-    "ttlDays": "TTL days"
+    "ttlDays": "TTL days",
+    "deliveryFee": "Delivery Fee",
+    "deliveryFeeHint": "Optional flat fee for the buyer (in cents). Leave empty to disable.",
+    "deliveryFeePlaceholder": "e.g. 200 for 2.00",
+    "deleteEvent": "Delete event",
+    "deleteEventConfirm": "Really delete this event? All data will be permanently removed."
   },
   "newEvent": {
     "title": "New Event",

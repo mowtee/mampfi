@@ -48,6 +48,7 @@ class Event(SQLModel, table=True):
     # Optional holiday configuration
     holiday_country_code: str | None = None  # e.g., 'DE'
     holiday_region_code: str | None = None  # e.g., 'DE-BE'
+    delivery_fee_minor: int | None = None  # optional flat fee for buyer (Bring-Pauschale)
     created_at: dt.datetime = Field(
         default_factory=now_utc,
         sa_column=Column(SADateTime(timezone=True), nullable=False),
@@ -69,6 +70,7 @@ class Membership(SQLModel, table=True):
         sa_column=Column(SADateTime(timezone=True), nullable=True),
     )
     wants_to_leave: bool = Field(default=False)
+    note: str | None = None  # e.g., allergy info
 
 
 class PriceItem(SQLModel, table=True):
@@ -139,6 +141,7 @@ class Purchase(SQLModel, table=True):
     )
     invalidated_by: uuid.UUID | None = Field(default=None, sa_type=UUID(as_uuid=True))
     invalidation_reason: str | None = None
+    delivery_fee_applied: bool = Field(default=False)
     # Receipt photo (base64 encoded, max ~10MB)
     receipt_data: str | None = Field(default=None, sa_type=Text)
 

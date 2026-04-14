@@ -107,3 +107,17 @@ def list_members(
     user: User = Depends(get_current_user),
 ) -> list[MemberOut]:
     return svc.list_members(session, event_id, user)
+
+
+@router.delete(
+    "/{event_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+)
+def delete_event(
+    event_id: uuid.UUID,
+    session: Session = Depends(session_dep),
+    user: User = Depends(get_current_user),
+) -> Response:
+    svc.delete_event(session, event_id, user)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
