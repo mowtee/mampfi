@@ -14,17 +14,14 @@ Internet → Traefik (ports 80/443, auto TLS)
 # 1. Install Docker (if not already)
 # https://docs.docker.com/engine/install/ubuntu/
 
-# 2. Login to GHCR (one-time)
-echo $PAT | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
-
-# 3. Start Traefik
+# 2. Start Traefik
 docker compose -f infra/traefik/docker-compose.yml up -d
 
-# 4. Create .env
+# 3. Create .env
 cp infra/.env.example infra/.env
 # Edit infra/.env with real values (DB password, SECRET_KEY, SMTP, etc.)
 
-# 5. Deploy Mampfi
+# 4. Deploy Mampfi
 ./infra/deploy.sh
 ```
 
