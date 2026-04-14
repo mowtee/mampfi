@@ -556,36 +556,17 @@ export default function DayTab({
                   })}
                 </ul>
               </details>
-              {/* Receipt upload / view */}
-              <div className="row" style={{ marginTop: 8, gap: 8 }}>
-                {activePurchase.has_receipt ? (
+              {/* Receipt view */}
+              {activePurchase.has_receipt && (
+                <div style={{ marginTop: 8 }}>
                   <button
                     className="btn"
                     onClick={() => window.open(api.getReceiptUrl(eventId, forDate), "_blank")}
                   >
                     {t("day.viewReceipt")}
                   </button>
-                ) : (
-                  <label className="btn" style={{ cursor: "pointer" }}>
-                    {t("day.uploadReceipt")}
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      style={{ display: "none" }}
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        try {
-                          await api.uploadReceipt(eventId, forDate, file);
-                          qc.invalidateQueries({ queryKey: ["purchase", eventId, forDate] });
-                        } catch (err) {
-                          alert(String(err));
-                        }
-                      }}
-                    />
-                  </label>
-                )}
-              </div>
+                </div>
+              )}
               {/* Admin: invalidate */}
               {isOwner && !activePurchase.invalidated_at && (
                 <div style={{ marginTop: 12 }}>
@@ -710,15 +691,18 @@ export default function DayTab({
                   </div>
                 )}
                 <div style={{ marginTop: 12 }}>
-                  <label className="muted" style={{ fontSize: 13 }}>
+                  <div className="muted" style={{ fontSize: 13, marginBottom: 4 }}>
                     {t("day.receiptHint")}
+                  </div>
+                  <label className="btn" style={{ cursor: "pointer" }}>
+                    {receiptFile ? `✓ ${receiptFile.name}` : t("day.uploadReceipt")}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      style={{ display: "none" }}
+                      onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
+                    />
                   </label>
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
-                    style={{ marginTop: 4, display: "block" }}
-                  />
                 </div>
               </ModalBody>
               <ModalActions>
