@@ -43,7 +43,11 @@ export default function AdminTab({ ctx, eventId, ev }: AdminTabProps) {
           <div className="muted" style={{ marginTop: -6, marginBottom: 8 }}>
             {t("admin.deliveryFeeHint")}
           </div>
-          <DeliveryFeeEditor eventId={eventId} currentFee={ev.delivery_fee_minor ?? null} />
+          <DeliveryFeeEditor
+            eventId={eventId}
+            currentFee={ev.delivery_fee_minor ?? null}
+            currency={ev.currency}
+          />
         </div>
       </section>
       <section className="section">
@@ -485,17 +489,21 @@ function CutoffEditor({ eventId, currentCutoff }: { eventId: string; currentCuto
 function DeliveryFeeEditor({
   eventId,
   currentFee,
+  currency,
 }: {
   eventId: string;
   currentFee: number | null;
+  currency: string;
 }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const [fee, setFee] = React.useState(currentFee != null ? String(currentFee) : "");
+  const [fee, setFee] = React.useState(
+    currentFee != null && currentFee > 0 ? (currentFee / 100).toFixed(2) : "",
+  );
   const update = useMutation({
     mutationFn: () => {
       const trimmed = fee.trim();
-      const value = trimmed === "" ? null : Number(trimmed);
+      const value = trimmed === "" ? 0 : parseMoneyToMinor(trimmed);
       return api.updateEvent(eventId, { delivery_fee_minor: value });
     },
     onSuccess: () => {
@@ -503,19 +511,19 @@ function DeliveryFeeEditor({
       qc.invalidateQueries({ queryKey: ["events"] });
     },
   });
-  const currentStr = currentFee != null ? String(currentFee) : "";
-  const unchanged = fee.trim() === currentStr;
+  const currentDisplay = currentFee != null && currentFee > 0 ? (currentFee / 100).toFixed(2) : "";
+  const unchanged = fee.trim() === currentDisplay;
   return (
     <div className="row">
       <input
         className="input"
-        type="number"
-        min={0}
         placeholder={t("admin.deliveryFeePlaceholder")}
         value={fee}
         onChange={(e) => setFee(e.target.value)}
-        style={{ width: 200 }}
+        inputMode="decimal"
+        style={{ width: 160 }}
       />
+      <span className="muted">{currency}</span>
       <button
         className="btn"
         onClick={() => update.mutate()}

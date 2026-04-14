@@ -306,8 +306,8 @@
     "emailOptional": "E-Mail (optional)",
     "ttlDays": "Gültigkeit (Tage)",
     "deliveryFee": "Bring-Pauschale",
-    "deliveryFeeHint": "Optionale Pauschale für den Einkäufer (in Cent). Leer lassen um zu deaktivieren.",
-    "deliveryFeePlaceholder": "z.B. 200 für 2,00 €",
+    "deliveryFeeHint": "Optionale Pauschale für den Einkäufer. Leer lassen um zu deaktivieren.",
+    "deliveryFeePlaceholder": "z.B. 2,00",
     "deleteEvent": "Event löschen",
     "deleteEventConfirm": "Event wirklich löschen? Alle Daten werden unwiderruflich entfernt."
   },

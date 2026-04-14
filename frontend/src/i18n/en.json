@@ -306,8 +306,8 @@
     "emailOptional": "email (optional)",
     "ttlDays": "TTL days",
     "deliveryFee": "Delivery Fee",
-    "deliveryFeeHint": "Optional flat fee for the buyer (in cents). Leave empty to disable.",
-    "deliveryFeePlaceholder": "e.g. 200 for 2.00",
+    "deliveryFeeHint": "Optional flat fee for the buyer. Leave empty to disable.",
+    "deliveryFeePlaceholder": "e.g. 2.00",
     "deleteEvent": "Delete event",
     "deleteEventConfirm": "Really delete this event? All data will be permanently removed."
   },
