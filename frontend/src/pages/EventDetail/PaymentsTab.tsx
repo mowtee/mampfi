@@ -13,7 +13,7 @@ type PaymentsTabProps = {
 
 export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
   const { t } = useTranslation();
-  const { balances, payments, meQ, members, memberLabel, qc } = ctx;
+  const { balances, payments, meQ, members, memberLabel, meMember, qc } = ctx;
   const meId = meQ.data?.id;
   const currency = balances.data?.currency || "";
 
@@ -135,11 +135,34 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
                 />
               )}
 
-              {/* Leave intent */}
+              {/* Leave intent / removed member message */}
               {(() => {
                 if (!meId || !balances.data) return null;
                 const my = (balances.data.totals || []).find((t) => t.user_id === meId);
                 const myBal = Number(my?.balance_minor || 0);
+
+                // Member was already removed by admin
+                if (meMember?.left_at) {
+                  return (
+                    <div className="card" style={{ marginTop: 12 }}>
+                      {myBal !== 0 ? (
+                        <div>
+                          <strong>{t("payments.removedByAdmin")}</strong>
+                          <div className="muted" style={{ marginTop: 4 }}>
+                            {t("payments.yourBalance", {
+                              amount: formatMoney(Math.abs(myBal), currency),
+                            })}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="ok">
+                          <strong>{t("payments.balanceSettledLeft")}</strong>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
                 const wants = !!my?.wants_to_leave;
                 return (
                   <div className="card" style={{ marginTop: 12 }}>
@@ -214,7 +237,7 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
                 <thead>
                   <tr>
                     <th>{t("payments.fromTo")}</th>
-                    <th>{t("payments.note")}</th>
+                    <th className="hide-mobile">{t("payments.note")}</th>
                     <th style={{ textAlign: "right" }}>{t("payments.amount")}</th>
                     <th>{t("payments.status")}</th>
                     <th>{t("app.actions")}</th>
@@ -253,8 +276,21 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
                       >
                         <td>
                           {memberLabel(p.from_user_id)} → {memberLabel(p.to_user_id)}
+                          {p.note && (
+                            <div
+                              className="muted show-mobile-only"
+                              style={{ fontSize: 12, wordBreak: "break-word" }}
+                            >
+                              {p.note}
+                            </div>
+                          )}
                         </td>
-                        <td style={{ maxWidth: 360, wordBreak: "break-word" }}>{p.note}</td>
+                        <td
+                          className="hide-mobile"
+                          style={{ maxWidth: 360, wordBreak: "break-word" }}
+                        >
+                          {p.note}
+                        </td>
                         <td style={{ textAlign: "right" }}>
                           {formatMoney(Number(p.amount_minor), p.currency)}
                         </td>

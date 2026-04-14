@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { formatYMDToLocale } from "../../lib/date";
+import { formatMoney } from "../../lib/money";
 import { useHolidays } from "../../lib/holidays";
 import { useEventContext } from "../../hooks/useEventContext";
 import DayTab from "./DayTab";
@@ -41,7 +42,7 @@ export default function EventDetail() {
 
   const { t } = useTranslation();
   const ctx = useEventContext(eventId, forDate, activeTab);
-  const { ev, meMember, isOwner, qc } = ctx;
+  const { ev, meMember, isOwner, qc, balances, meId } = ctx;
 
   const holidayCountry = ev.data?.holiday_country_code;
   const holidayRegion = ev.data?.holiday_region_code;
@@ -105,6 +106,19 @@ export default function EventDetail() {
           if (!m) return null;
           if (m.left_at) {
             const left = new Date(m.left_at);
+            const myBal = Number(
+              (balances.data?.totals || []).find((b) => b.user_id === meId)?.balance_minor || 0,
+            );
+            if (myBal !== 0) {
+              return (
+                <span className="chip warn" style={{ marginLeft: 8 }}>
+                  {t("events.removedNeedSettle", {
+                    date: left.toLocaleDateString(),
+                    amount: formatMoney(Math.abs(myBal), balances.data?.currency || ""),
+                  })}
+                </span>
+              );
+            }
             return (
               <span className="chip muted" style={{ marginLeft: 8 }}>
                 {t("events.youLeftOn", { date: left.toLocaleDateString() })}

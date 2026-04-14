@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
+import { formatMoney } from "../../lib/money";
 import type { EventContextType } from "../../hooks/useEventContext";
 import { formatYMDToLocale } from "../../lib/date";
 
@@ -12,7 +13,7 @@ type MembersTabProps = {
 
 export default function MembersTab({ ctx, eventId }: MembersTabProps) {
   const { t } = useTranslation();
-  const { members, meId, isOwner } = ctx;
+  const { members, meId, isOwner, balances } = ctx;
   const qc = useQueryClient();
 
   const remove = useMutation({
@@ -148,7 +149,19 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
                               title={t("members.remove")}
                               disabled={remove.isPending}
                               onClick={() => {
-                                if (window.confirm(t("members.confirmRemove", { name }))) {
+                                const bal = (balances.data?.totals || []).find(
+                                  (b) => b.user_id === m.user_id,
+                                );
+                                const balMinor = Number(bal?.balance_minor || 0);
+                                const currency = balances.data?.currency || "";
+                                const msg =
+                                  balMinor !== 0
+                                    ? t("members.confirmRemoveUnbalanced", {
+                                        name,
+                                        amount: formatMoney(Math.abs(balMinor), currency),
+                                      })
+                                    : t("members.confirmRemove", { name });
+                                if (window.confirm(msg)) {
                                   remove.mutate(m.user_id);
                                 }
                               }}

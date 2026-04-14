@@ -59,7 +59,8 @@
     "left": "Left",
     "open": "Open",
     "owner": "Owner",
-    "youLeftOn": "You left on {{date}}"
+    "youLeftOn": "You left on {{date}}",
+    "removedNeedSettle": "Removed on {{date}} — settle balance ({{amount}})"
   },
   "help": {
     "title": "How Mampfi works",
@@ -96,6 +97,7 @@
     "promote": "Promote to admin",
     "confirmPromote": "Promote {{name}} to admin?",
     "confirmRemove": "Really remove {{name}}?",
+    "confirmRemoveUnbalanced": "{{name}} has a balance of {{amount}}. Orders will be blocked but payments remain possible. Remove?",
     "noMembers": "No members.",
     "noteBtn": "Note",
     "setNote": "Set note",
@@ -203,6 +205,9 @@
     "leaveEvent": "Leave event",
     "tryLeave": "Try leave (show payout plan)",
     "balanceSettlement": "Balance settlement",
+    "removedByAdmin": "You were removed from this event. Please settle your outstanding balance.",
+    "yourBalance": "Your balance: {{amount}}",
+    "balanceSettledLeft": "Your balance is settled. You have fully left the event.",
     "paymentsTitle": "Payments",
     "loadingPayments": "Loading payments…",
     "fromTo": "From → To",

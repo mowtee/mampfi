@@ -683,6 +683,14 @@ body.modal-open {
   .toolbar {
     flex-wrap: wrap;
   }
+  .hide-mobile {
+    display: none !important;
+  }
+}
+@media (min-width: 701px) {
+  .show-mobile-only {
+    display: none !important;
+  }
 }
 
 /* Simple responsive utility classes */

@@ -112,7 +112,7 @@ def leave_event(session: Session, event_id: uuid.UUID, user: User) -> None:
 
 def remove_member(
     session: Session, event_id: uuid.UUID, target_user_id: uuid.UUID, user: User
-) -> None:
+) -> dict:
     ev = get_event(session, event_id)
     require_owner(session, ev.id, user.id)
 
@@ -130,10 +130,14 @@ def remove_member(
     if mem.left_at:
         raise DomainError("member already left")
 
+    balances = compute_balances(session, ev.id)
+    balance = int(balances.get(target_user_id, 0))
+
     mem.left_at = now_utc()
-    mem.wants_to_leave = False
+    mem.wants_to_leave = balance != 0
     session.add(mem)
     session.commit()
+    return {"status": "removed", "balance_minor": balance, "currency": ev.currency}
 
 
 def promote_member(

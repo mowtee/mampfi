@@ -262,6 +262,9 @@ def aggregate_orders(
         str(pi.id): {"name": pi.name, "unit_price_minor": pi.unit_price_minor} for pi in pi_rows
     }
 
+    # Filter out orders from inactive members (e.g. removed by admin)
+    orders = [o for o in orders if o.user_id in active_user_ids]
+
     totals: dict[str, int] = {}
     consumers: dict[str, list[AggregateConsumerOut]] = {}
     for o in orders:

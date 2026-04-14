@@ -59,7 +59,8 @@
     "left": "Verlassen",
     "open": "Öffnen",
     "owner": "Admin",
-    "youLeftOn": "Verlassen am {{date}}"
+    "youLeftOn": "Verlassen am {{date}}",
+    "removedNeedSettle": "Entfernt am {{date}} — Saldo ausgleichen ({{amount}})"
   },
   "help": {
     "title": "So funktioniert Mampfi",
@@ -96,6 +97,7 @@
     "promote": "Zum Admin ernennen",
     "confirmPromote": "{{name}} zum Admin ernennen?",
     "confirmRemove": "{{name}} wirklich entfernen?",
+    "confirmRemoveUnbalanced": "{{name}} hat einen Saldo von {{amount}}. Bestellungen werden gesperrt, Zahlungen bleiben möglich. Entfernen?",
     "noMembers": "Keine Mitglieder.",
     "noteBtn": "Hinweis",
     "setNote": "Hinweis setzen",
@@ -203,6 +205,9 @@
     "leaveEvent": "Event verlassen",
     "tryLeave": "Austritt versuchen (Zahlungsplan anzeigen)",
     "balanceSettlement": "Saldoausgleich",
+    "removedByAdmin": "Du wurdest aus diesem Event entfernt. Bitte gleiche deinen ausstehenden Saldo aus.",
+    "yourBalance": "Dein Saldo: {{amount}}",
+    "balanceSettledLeft": "Dein Saldo ist ausgeglichen. Du hast das Event vollständig verlassen.",
     "paymentsTitle": "Zahlungen",
     "loadingPayments": "Zahlungen laden…",
     "fromTo": "Von → An",
