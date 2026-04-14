@@ -76,11 +76,14 @@ export type Payment = {
 export type Invite = {
   id: string;
   event_id: string;
+  created_at: string;
   expires_at: string;
   revoked_at?: string | null;
   max_uses?: number | null;
   used_count: number;
   last_used_at?: string | null;
+  notes?: string | null;
+  token_raw?: string | null;
 };
 
 export type BalanceLine = {

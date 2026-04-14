@@ -203,6 +203,7 @@ class InviteToken(SQLModel, table=True):
     last_used_at: dt.datetime | None = Field(
         default=None, sa_column=Column(SADateTime(timezone=True), nullable=True)
     )
+    token_raw: str | None = None  # stored for link recovery (group invites)
     email_domain: str | None = None
     email_allowlist: list[str] | None = Field(default=None, sa_type=PgJSON)
     locale_hint: str | None = None

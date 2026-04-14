@@ -51,6 +51,7 @@ def create_group_invite(
     invite = InviteToken(
         event_id=ev.id,
         token_hash=_hash_token(raw),
+        token_raw=raw,
         created_by=user.id,
         created_at=now,
         expires_at=now + dt.timedelta(days=int(data.ttl_days)),
@@ -74,6 +75,7 @@ def create_single_invite(
     invite = InviteToken(
         event_id=ev.id,
         token_hash=_hash_token(raw),
+        token_raw=raw,
         created_by=user.id,
         created_at=now,
         expires_at=now + dt.timedelta(days=int(data.ttl_days)),

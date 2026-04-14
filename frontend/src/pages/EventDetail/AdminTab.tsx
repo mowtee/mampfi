@@ -90,36 +90,7 @@ export default function AdminTab({ ctx, eventId, ev }: AdminTabProps) {
                 <SendEmailInvites eventId={eventId} />
               </div>
 
-              <h4>{t("admin.invites")}</h4>
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>{t("admin.id")}</th>
-                    <th>{t("admin.expires")}</th>
-                    <th>{t("admin.uses")}</th>
-                    <th>{t("admin.revoked")}</th>
-                    <th>{t("app.actions")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {invites.data.map((inv: Invite) => (
-                    <tr key={inv.id}>
-                      <td className="code">{inv.id}</td>
-                      <td>{new Date(inv.expires_at).toLocaleString()}</td>
-                      <td>
-                        {inv.used_count}
-                        {inv.max_uses ? ` / ${inv.max_uses}` : ""}
-                      </td>
-                      <td>{inv.revoked_at ? new Date(inv.revoked_at).toLocaleString() : "-"}</td>
-                      <td>
-                        {!inv.revoked_at && (
-                          <RevokeInviteButton eventId={eventId} inviteId={inv.id} />
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <InvitesTable eventId={eventId} invites={invites.data} />
             </>
           )}
         </div>
@@ -134,6 +105,117 @@ export default function AdminTab({ ctx, eventId, ev }: AdminTabProps) {
 }
 
 // --- Sub-components ---
+
+function relativeExpiry(expiresAt: string, t: (key: string) => string): string {
+  const now = Date.now();
+  const exp = new Date(expiresAt).getTime();
+  const diffMs = exp - now;
+  if (diffMs <= 0) return t("admin.expired");
+  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays === 1) return t("admin.expiresIn1Day");
+  return t("admin.expiresInDays").replace("{{days}}", String(diffDays));
+}
+
+function inviteType(inv: Invite): "group" | "single" | "email" {
+  if (inv.max_uses === null || inv.max_uses === undefined) return "group";
+  if (inv.notes && inv.notes.includes("@")) return "email";
+  return "single";
+}
+
+function InvitesTable({ eventId, invites }: { eventId: string; invites: Invite[] }) {
+  const { t } = useTranslation();
+  const [showRevoked, setShowRevoked] = React.useState(false);
+  const [copied, setCopied] = React.useState<string | null>(null);
+
+  const now = Date.now();
+  const active = invites.filter((inv) => !inv.revoked_at);
+  const revoked = invites.filter((inv) => !!inv.revoked_at);
+  const visible = showRevoked ? invites : active;
+
+  // Sort: newest first
+  const sorted = [...visible].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
+
+  const copyInviteUrl = (inv: Invite) => {
+    if (!inv.token_raw) return;
+    const url = new URL(`/join?token=${inv.token_raw}`, window.location.origin).toString();
+    navigator.clipboard?.writeText(url);
+    setCopied(inv.id);
+    setTimeout(() => setCopied((prev) => (prev === inv.id ? null : prev)), 2000);
+  };
+
+  if (sorted.length === 0 && !showRevoked) {
+    return <p className="muted">{t("admin.noActiveInvites")}</p>;
+  }
+
+  return (
+    <div>
+      <table className="table">
+        <thead>
+          <tr>
+            <th>{t("admin.inviteType")}</th>
+            <th>{t("admin.inviteCreated")}</th>
+            <th>{t("admin.inviteExpiry")}</th>
+            <th>{t("admin.uses")}</th>
+            <th>{t("app.actions")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sorted.map((inv) => {
+            const typ = inviteType(inv);
+            const isExpired = new Date(inv.expires_at).getTime() <= now;
+            const isRevoked = !!inv.revoked_at;
+            const typeLabel =
+              typ === "group"
+                ? t("admin.typeGroup")
+                : typ === "email"
+                  ? inv.notes || t("admin.typeEmail")
+                  : t("admin.typeSingle");
+            return (
+              <tr key={inv.id} style={isRevoked || isExpired ? { opacity: 0.5 } : undefined}>
+                <td>{typeLabel}</td>
+                <td>{new Date(inv.created_at).toLocaleDateString()}</td>
+                <td>
+                  {isRevoked
+                    ? t("admin.revoked")
+                    : isExpired
+                      ? t("admin.expired")
+                      : relativeExpiry(inv.expires_at, t)}
+                </td>
+                <td>
+                  {inv.used_count}
+                  {inv.max_uses ? ` / ${inv.max_uses}` : ""}
+                </td>
+                <td style={{ whiteSpace: "nowrap" }}>
+                  {inv.token_raw && !isRevoked && !isExpired && (
+                    <button
+                      className="btn"
+                      style={{ marginRight: 4 }}
+                      onClick={() => copyInviteUrl(inv)}
+                    >
+                      {copied === inv.id ? t("admin.copied") : t("admin.copyUrl")}
+                    </button>
+                  )}
+                  {!isRevoked && !isExpired && (
+                    <RevokeInviteButton eventId={eventId} inviteId={inv.id} />
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      {revoked.length > 0 && (
+        <button className="btn" style={{ marginTop: 8 }} onClick={() => setShowRevoked((v) => !v)}>
+          {showRevoked
+            ? t("admin.hideRevoked")
+            : t("admin.showRevoked").replace("{{count}}", String(revoked.length))}
+        </button>
+      )}
+    </div>
+  );
+}
 
 function PriceListAdmin({ eventId, currency }: { eventId: string; currency: string }) {
   const { t } = useTranslation();

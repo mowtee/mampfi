@@ -17,11 +17,14 @@ class SingleInviteIn(BaseModel):
 class InviteOut(BaseModel):
     id: uuid.UUID
     event_id: uuid.UUID
+    created_at: dt.datetime
     expires_at: dt.datetime
     revoked_at: dt.datetime | None
     max_uses: int | None
     used_count: int
     last_used_at: dt.datetime | None
+    notes: str | None = None
+    token_raw: str | None = None
 
 
 class EmailInviteIn(BaseModel):
