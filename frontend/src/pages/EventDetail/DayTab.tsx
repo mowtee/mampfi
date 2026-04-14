@@ -730,6 +730,21 @@ export default function DayTab({
               <ModalBody>
                 <h3>{t("day.everythingAsOrdered")}</h3>
                 <p className="muted">{t("day.everythingAsOrderedDesc")}</p>
+                {hasDeliveryFee && (
+                  <div className="row" style={{ marginTop: 12, alignItems: "center", gap: 8 }}>
+                    <input
+                      type="checkbox"
+                      checked={deliveryFeeChecked}
+                      onChange={(e) => setDeliveryFeeChecked(e.target.checked)}
+                      id="precheck-delivery-fee"
+                    />
+                    <label htmlFor="precheck-delivery-fee">
+                      {t("day.deliveryFeeApplied", {
+                        amount: formatMoney(ev.data?.delivery_fee_minor || 0, currency),
+                      })}
+                    </label>
+                  </div>
+                )}
               </ModalBody>
               <ModalActions>
                 <button className="btn" onClick={() => setModal("closed")}>
@@ -752,7 +767,7 @@ export default function DayTab({
 
           {/* Worksheet modal */}
           {modal === "worksheet" && (
-            <Modal open={true} onClose={() => setModal("closed")} size="lg" top dim>
+            <Modal open={true} onClose={() => setModal("precheck")} size="lg" top dim>
               <ModalBody>
                 <h3>{t("day.finalizeWithAdjustments")}</h3>
                 <div className="muted" style={{ marginBottom: 8 }}>
@@ -1001,8 +1016,8 @@ export default function DayTab({
                 </div>
               </ModalBody>
               <ModalActions>
-                <button className="btn" onClick={() => setModal("closed")}>
-                  {t("app.close")}
+                <button className="btn" onClick={() => setModal("precheck")}>
+                  {t("app.cancel")}
                 </button>
                 <button className="btn primary" onClick={() => finalizeFromWorksheet()}>
                   {t("day.submitAdjustments")}

@@ -181,7 +181,8 @@ function PurchaseRow({
               <div style={{ marginTop: 4 }}>
                 {details.data.invalidated_at && (
                   <p className="muted" style={{ marginBottom: 10 }}>
-                    ↩ {t("day.invalidatedBy", {
+                    ↩{" "}
+                    {t("day.invalidatedBy", {
                       name: label(details.data.invalidated_by || undefined),
                       reason: details.data.invalidation_reason || "",
                     })}
