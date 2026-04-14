@@ -4,12 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import LegalFooter from "../components/LegalFooter";
 
-const TITLES: Record<string, { de: string; en: string }> = {
-  privacy: { de: "Datenschutzerklärung", en: "Privacy Policy" },
-  terms: { de: "Nutzungsbedingungen", en: "Terms of Use" },
-  "legal-notice": { de: "Impressum", en: "Legal Notice" },
-};
-
 const API_URL = import.meta.env.VITE_API_URL || "";
 
 export default function LegalPage() {
@@ -29,8 +23,6 @@ export default function LegalPage() {
     staleTime: 60_000,
   });
 
-  const title = TITLES[slug]?.[lang] || slug;
-
   return (
     <div className="site">
       <header className="topbar">
@@ -44,7 +36,6 @@ export default function LegalPage() {
             ← {lang === "de" ? "Zurück" : "Back"}
           </Link>
         </p>
-        <h1>{title}</h1>
         {isLoading && <p className="muted">Loading...</p>}
         {error && <p className="danger">Error loading content.</p>}
         {data === null && !isLoading && (
