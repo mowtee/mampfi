@@ -304,22 +304,18 @@ export default function DayTab({
       {/* Your Order */}
       <section className="section">
         <div className="card">
-          <h3>{t("day.yourOrder")}</h3>
-          {myOrder.data?.is_rolled_over && myOrder.data?.rolled_from_date && (
-            <div className="chip" style={{ marginBottom: 8, background: "#e5e7eb" }}>
-              {t("day.rolledOver", { date: formatYMDToLocale(myOrder.data.rolled_from_date) })}
-            </div>
-          )}
-          {myOrder.data?.is_explicit && (
-            <div className="chip open" style={{ marginBottom: 8 }}>
-              {t("day.explicitOrder")}
-            </div>
-          )}
-          {!myOrder.data?.is_rolled_over && !myOrder.data?.is_explicit && !myOrder.isLoading && (
-            <div className="chip muted" style={{ marginBottom: 8 }}>
-              {t("day.noOrder")}
-            </div>
-          )}
+          <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
+            <h3 style={{ margin: 0 }}>{t("day.yourOrder")}</h3>
+            {myOrder.data?.is_rolled_over && myOrder.data?.rolled_from_date && (
+              <div className="chip" style={{ background: "#e5e7eb" }}>
+                {t("day.rolledOver", { date: formatYMDToLocale(myOrder.data.rolled_from_date) })}
+              </div>
+            )}
+            {myOrder.data?.is_explicit && <div className="chip open">{t("day.explicitOrder")}</div>}
+            {!myOrder.data?.is_rolled_over && !myOrder.data?.is_explicit && !myOrder.isLoading && (
+              <div className="chip muted">{t("day.noOrder")}</div>
+            )}
+          </div>
           {price.isLoading && <p>{t("day.loadingPrice")}</p>}
           {myOrder.isLoading && <p>{t("day.loadingOrder")}</p>}
           {inactiveForDate && (
@@ -443,13 +439,6 @@ export default function DayTab({
           {agg.error && <p className="danger">{String(agg.error)}</p>}
           {agg.data && (
             <div>
-              <div className="row" style={{ justifyContent: "flex-end", marginBottom: 8 }}>
-                <strong>
-                  {t("day.groupTotal", {
-                    amount: formatMoney(Number(agg.data.total_minor || 0), currency),
-                  })}
-                </strong>
-              </div>
               <table className="table">
                 <thead>
                   <tr>
@@ -474,6 +463,13 @@ export default function DayTab({
                   ))}
                 </tbody>
               </table>
+              <div className="row" style={{ justifyContent: "flex-end", marginTop: 8 }}>
+                <strong>
+                  {t("day.groupTotal", {
+                    amount: formatMoney(Number(agg.data.total_minor || 0), currency),
+                  })}
+                </strong>
+              </div>
               {/* Per-member delivery overview */}
               {(() => {
                 const perMember = new Map<
@@ -494,8 +490,8 @@ export default function DayTab({
                 const rows = Array.from(perMember.entries());
                 if (rows.length === 0) return null;
                 return (
-                  <div style={{ marginTop: 14 }}>
-                    <h4 style={{ margin: "8px 0" }}>{t("day.perMember")}</h4>
+                  <div style={{ marginTop: 20 }}>
+                    <h4 style={{ margin: "12px 0 8px" }}>{t("day.perMember")}</h4>
                     <table className="table">
                       <thead>
                         <tr>
