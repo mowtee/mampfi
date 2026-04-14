@@ -44,6 +44,7 @@ export type Purchase = {
   invalidated_at?: string | null;
   invalidated_by?: string | null;
   invalidation_reason?: string | null;
+  delivery_fee_applied?: boolean;
   has_receipt?: boolean;
 };
 

@@ -26,6 +26,7 @@ export default function HistoryTab({ ctx, eventId }: HistoryTabProps) {
             eventId={eventId}
             meId={meId}
             currency={ev.data.currency}
+            deliveryFee={ev.data.delivery_fee_minor || 0}
             priceName={priceName}
           />
         </div>
@@ -36,6 +37,7 @@ export default function HistoryTab({ ctx, eventId }: HistoryTabProps) {
           <PurchasesHistory
             eventId={eventId}
             currency={ev.data.currency}
+            deliveryFee={ev.data.delivery_fee_minor || 0}
             label={memberLabel}
             itemName={priceName}
             isOwner={isOwner}
@@ -49,12 +51,14 @@ export default function HistoryTab({ ctx, eventId }: HistoryTabProps) {
 function PurchasesHistory({
   eventId,
   currency,
+  deliveryFee,
   label,
   itemName,
   isOwner,
 }: {
   eventId: string;
   currency: string;
+  deliveryFee: number;
   label: (id?: string) => string;
   itemName: (id?: string) => string;
   isOwner: boolean;
@@ -88,6 +92,7 @@ function PurchasesHistory({
             eventId={eventId}
             row={p}
             currency={currency}
+            deliveryFee={deliveryFee}
             label={label}
             isOwner={isOwner}
             itemName={itemName}
@@ -102,6 +107,7 @@ function PurchaseRow({
   eventId,
   row,
   currency,
+  deliveryFee,
   label,
   itemName,
   isOwner,
@@ -109,6 +115,7 @@ function PurchaseRow({
   eventId: string;
   row: PurchaseSummary;
   currency: string;
+  deliveryFee: number;
   label: (id?: string) => string;
   itemName: (id?: string) => string;
   isOwner: boolean;
@@ -236,6 +243,18 @@ function PurchaseRow({
                       entry.totalMinor += qty * unitPrice;
                     }
                   }
+                  // Compute delivery fee share per member
+                  const memberCount = per.size;
+                  const feeApplied = details.data.delivery_fee_applied;
+                  const eventFee = deliveryFee;
+                  const feePerMember =
+                    feeApplied && memberCount > 0 ? Math.round(eventFee / memberCount) : 0;
+                  if (feePerMember > 0) {
+                    for (const [, entry] of per) {
+                      entry.totalMinor += feePerMember;
+                    }
+                  }
+
                   const rows = Array.from(per.entries());
                   if (rows.length === 0) return null;
                   rows.sort((a, b) => a[1].name.localeCompare(b[1].name));
@@ -262,6 +281,11 @@ function PurchaseRow({
                                     {it.qty}× {it.label}
                                   </span>
                                 ))}
+                                {feePerMember > 0 && (
+                                  <span className="muted" style={{ marginRight: 10 }}>
+                                    + {t("day.deliveryFee")} ({formatMoney(feePerMember, currency)})
+                                  </span>
+                                )}
                               </td>
                               <td style={{ textAlign: "right" }}>
                                 {formatMoney(v.totalMinor, currency)}
@@ -286,11 +310,13 @@ function PersonalHistory({
   eventId,
   meId,
   currency,
+  deliveryFee,
   priceName,
 }: {
   eventId: string;
   meId: string | undefined;
   currency: string;
+  deliveryFee: number;
   priceName: (id?: string) => string;
 }) {
   const { t } = useTranslation();
@@ -306,13 +332,29 @@ function PersonalHistory({
     queryKey: ["personalHistory", eventId, meId, list.dataUpdatedAt],
     queryFn: async () => {
       if (!list.data || !meId) return [];
-      const results = await Promise.all(list.data.map((p) => api.getPurchase(eventId, p.date)));
-      return results
+      // Only fetch active (non-invalidated) purchases
+      const activePurchases = list.data.filter((p) => !p.invalidated_at);
+      const results = await Promise.all(
+        activePurchases.map((p) => api.getPurchase(eventId, p.date)),
+      );
+      // Deduplicate by date (take most recent non-invalidated)
+      const byDate = new Map<string, (typeof results)[0]>();
+      for (const purchase of results) {
+        if (!purchase.invalidated_at) {
+          byDate.set(purchase.date, purchase);
+        }
+      }
+      return Array.from(byDate.values())
         .map((purchase) => {
           const myItems: { label: string; qty: number; subtotal: number }[] = [];
           let total = 0;
+          // Count members who received items (for fee splitting)
+          const memberIds = new Set<string>();
           for (const ln of purchase.lines) {
             const allocs = ln.allocations || [];
+            for (const a of allocs) {
+              if (Number(a.qty) > 0) memberIds.add(a.user_id);
+            }
             const mine = allocs.find((a) => a.user_id === meId);
             if (mine && Number(mine.qty) > 0) {
               const qty = Number(mine.qty);
@@ -326,13 +368,21 @@ function PersonalHistory({
               total += sub;
             }
           }
+          // Add delivery fee share if applicable
+          let feeShare = 0;
+          if (purchase.delivery_fee_applied && memberIds.size > 0 && memberIds.has(meId)) {
+            const eventFee = deliveryFee;
+            feeShare = Math.round(eventFee / memberIds.size);
+            total += feeShare;
+          }
           if (myItems.length === 0) return null;
-          return { date: purchase.date, items: myItems, totalMinor: total };
+          return { date: purchase.date, items: myItems, totalMinor: total, feeShare };
         })
         .filter(Boolean) as {
         date: string;
         items: { label: string; qty: number; subtotal: number }[];
         totalMinor: number;
+        feeShare: number;
       }[];
     },
     enabled: !!list.data && !!meId,
@@ -361,6 +411,11 @@ function PersonalHistory({
                   {it.qty}× {it.label}
                 </span>
               ))}
+              {row.feeShare > 0 && (
+                <span className="muted" style={{ marginRight: 10 }}>
+                  + {t("day.deliveryFee")} ({formatMoney(row.feeShare, currency)})
+                </span>
+              )}
             </td>
             <td style={{ textAlign: "right" }}>{formatMoney(row.totalMinor, currency)}</td>
           </tr>
