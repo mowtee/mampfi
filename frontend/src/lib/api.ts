@@ -232,6 +232,25 @@ export const api = {
     }),
   getPurchase: (eventId: UUID, date: string) =>
     http<Purchase>(`/v1/events/${eventId}/purchases/${date}`),
+  invalidatePurchase: (eventId: UUID, date: string, reason: string) =>
+    http<Purchase>(`/v1/events/${eventId}/purchases/${date}/invalidate`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    }),
+  uploadReceipt: async (eventId: UUID, date: string, file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch(`${API_URL}/v1/events/${eventId}/purchases/${date}/receipt`, {
+      method: "POST",
+      credentials: "include",
+      headers: import.meta.env.DEV ? { "X-Dev-User": localStorage.getItem("devEmail") || "" } : {},
+      body: form,
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json() as Promise<Purchase>;
+  },
+  getReceiptUrl: (eventId: UUID, date: string) =>
+    `${API_URL}/v1/events/${eventId}/purchases/${date}/receipt`,
   listPurchases: (eventId: UUID, start_date?: string, end_date?: string) => {
     const qs = new URLSearchParams();
     if (start_date) qs.set("start_date", start_date);

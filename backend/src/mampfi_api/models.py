@@ -2,7 +2,7 @@ import datetime as dt
 import uuid
 from typing import TypedDict
 
-from sqlalchemy import JSON, Column
+from sqlalchemy import JSON, Column, Text
 from sqlalchemy import DateTime as SADateTime
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlmodel import Field, SQLModel
@@ -133,6 +133,14 @@ class Purchase(SQLModel, table=True):
     total_minor: int
     notes: str | None = None
     version: int = Field(default=1)
+    # Invalidation (admin revert)
+    invalidated_at: dt.datetime | None = Field(
+        default=None, sa_column=Column(SADateTime(timezone=True), nullable=True)
+    )
+    invalidated_by: uuid.UUID | None = Field(default=None, sa_type=UUID(as_uuid=True))
+    invalidation_reason: str | None = None
+    # Receipt photo (base64 encoded, max ~10MB)
+    receipt_data: str | None = Field(default=None, sa_type=Text)
 
 
 class Payment(SQLModel, table=True):

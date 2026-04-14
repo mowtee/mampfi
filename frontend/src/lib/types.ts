@@ -41,6 +41,10 @@ export type Purchase = {
   total_minor: number;
   notes?: string | null;
   lines: PurchaseLine[];
+  invalidated_at?: string | null;
+  invalidated_by?: string | null;
+  invalidation_reason?: string | null;
+  has_receipt?: boolean;
 };
 
 export type PurchaseSummary = {
@@ -49,6 +53,8 @@ export type PurchaseSummary = {
   buyer_id: string;
   finalized_at: string;
   total_minor: number;
+  invalidated_at?: string | null;
+  has_receipt?: boolean;
   notes?: string | null;
 };
 

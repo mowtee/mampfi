@@ -41,6 +41,10 @@ class PurchaseLineOut(BaseModel):
     allocations: list[AllocationOut] | None = None
 
 
+class InvalidatePurchaseIn(BaseModel):
+    reason: str = Field(min_length=1, max_length=500)
+
+
 class PurchaseOut(BaseModel):
     event_id: uuid.UUID
     date: dt.date
@@ -49,3 +53,7 @@ class PurchaseOut(BaseModel):
     lines: list[PurchaseLineOut]
     total_minor: int
     notes: str | None = None
+    invalidated_at: dt.datetime | None = None
+    invalidated_by: uuid.UUID | None = None
+    invalidation_reason: str | None = None
+    has_receipt: bool = False

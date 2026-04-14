@@ -123,10 +123,26 @@ function PurchaseRow({
             {open ? "−" : "+"}
           </button>
         </td>
-        <td>{row.date}</td>
+        <td>
+          {formatYMDToLocale(row.date)}
+          {row.invalidated_at && (
+            <span className="chip warn" style={{ marginLeft: 6, fontSize: 11 }}>
+              {t("day.invalidated")}
+            </span>
+          )}
+        </td>
         <td>{label(row.buyer_id)}</td>
         <td style={{ textAlign: "right" }}>
           {formatMoney(Number(row.total_minor || 0), currency)}
+          {row.has_receipt && (
+            <button
+              className="btn"
+              style={{ marginLeft: 8, padding: "2px 6px", fontSize: 12 }}
+              onClick={() => window.open(api.getReceiptUrl(eventId, row.date), "_blank")}
+            >
+              {t("day.viewReceipt")}
+            </button>
+          )}
         </td>
       </tr>
       {open && (

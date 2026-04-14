@@ -54,6 +54,7 @@ export default function DayTab({
     meMember,
     memberLabel,
     priceName,
+    isOwner,
     qc,
   } = ctx;
 
@@ -549,6 +550,64 @@ export default function DayTab({
                   })}
                 </ul>
               </details>
+              {/* Receipt upload / view */}
+              <div className="row" style={{ marginTop: 8, gap: 8 }}>
+                {purchase.data.has_receipt ? (
+                  <button
+                    className="btn"
+                    onClick={() => window.open(api.getReceiptUrl(eventId, forDate), "_blank")}
+                  >
+                    {t("day.viewReceipt")}
+                  </button>
+                ) : (
+                  <label className="btn" style={{ cursor: "pointer" }}>
+                    {t("day.uploadReceipt")}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      style={{ display: "none" }}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          await api.uploadReceipt(eventId, forDate, file);
+                          qc.invalidateQueries({ queryKey: ["purchase", eventId, forDate] });
+                        } catch (err) {
+                          alert(String(err));
+                        }
+                      }}
+                    />
+                  </label>
+                )}
+              </div>
+              {/* Admin: invalidate */}
+              {isOwner && !purchase.data.invalidated_at && (
+                <div style={{ marginTop: 12 }}>
+                  <button
+                    className="btn"
+                    onClick={() => {
+                      const reason = window.prompt(t("day.invalidateReason"));
+                      if (reason) {
+                        api.invalidatePurchase(eventId, forDate, reason).then(() => {
+                          qc.invalidateQueries({ queryKey: ["purchase", eventId, forDate] });
+                          qc.invalidateQueries({ queryKey: ["purchases", eventId] });
+                          qc.invalidateQueries({ queryKey: ["balances", eventId] });
+                        });
+                      }
+                    }}
+                  >
+                    {t("day.invalidate")}
+                  </button>
+                </div>
+              )}
+              {purchase.data.invalidated_at && (
+                <div className="chip warn" style={{ marginTop: 8 }}>
+                  {t("day.invalidatedBy", {
+                    name: memberLabel(purchase.data.invalidated_by || undefined),
+                    reason: purchase.data.invalidation_reason || "",
+                  })}
+                </div>
+              )}
             </div>
           )}
           {purchase.error && String(purchase.error).includes("HTTP 404") && (
