@@ -1,76 +1,83 @@
 # Mampfi
 
-Group ordering made easy. Mampfi lets a group plan daily orders, one member buys the group order, and the app tracks balances virtually — no external payments.
+Group ordering made easy. Mampfi lets a group plan daily orders — one member buys, everyone else orders ahead, and the app tracks virtual balances. No external payment processor needed.
 
-## What It Does
-- Events with fixed price list and daily cutoff
-- Daily orders (optional rollover per member)
-- Group Order view and buyer finalization (with adjustments and per-member allocations)
-- Virtual balances, payments with confirmation
-- Invite links to join events
+## Features
 
-UI details:
-- Status badge shows "Open until HH:MM" or "Locked" (no timezone text)
-- Dates formatted using the browser locale
+- **Events** with price list, cutoff time, and date range
+- **Daily orders** with automatic rollover (server-side, per member)
+- **Purchase finalization** with adjustment worksheet, delivery fee, and receipt photos
+- **Virtual balances** and payment tracking with dual confirmation
+- **Invite system** — group links, single-use links, and email invites
+- **Member management** — roles (admin/member), notes (allergies), promotion
+- **i18n** — German (default) and English, browser locale detection
+- **Email notifications** — verification, password reset, payment alerts, purchase finalization, event deletion
+- **Auto-cleanup** — events 90 days past end date are automatically deleted
 
-## Tech
-- Backend: FastAPI, SQLModel, Alembic, PostgreSQL
-- Frontend: React + TypeScript + Vite
-- State/Forms: TanStack Query, react-hook-form + zod
-- Styling: Tailwind-like custom CSS + small components
-- Emails: SMTP (outbound only)
-- Reverse proxy: Caddy (external)
+## Tech Stack
+
+- **Backend**: FastAPI · SQLModel · Alembic · PostgreSQL · Python 3.14
+- **Frontend**: React 19 · TypeScript · Vite · TanStack Query · Tailwind CSS
+- **Auth**: JWT access tokens + refresh token families with reuse detection
+- **Email**: SMTP via transactional outbox pattern (worker)
+- **Reverse proxy**: Traefik (auto TLS via Let's Encrypt)
+- **CI/CD**: GitHub Actions (lint + test on push, Docker images on tags)
 
 ## Repo Layout
-- `backend/` FastAPI app (Poetry, Alembic)
-- `frontend/` React SPA (Vite)
-- `infra/` Docker Compose, example Caddyfile
-- `scripts/` Helper scripts
-- `SESSION_NOTES.md` Project log and decisions
+
+```
+backend/          FastAPI API + worker
+frontend/         React/Vite SPA
+infra/            Docker Compose, Traefik, deploy script
+docs/             Backlog
+assets/           Logo and favicon source files
+```
 
 ## Development
 
-1) Configure environment
-   - `cp backend/.env.example backend/.env` and edit (DB URL, SMTP, etc.)
-2) Start Postgres
-   - `make db-up` (or use Docker Compose `db` service)
-3) Migrate DB
-   - `make migrate`
-4) Run services
-   - API: `make dev-api` → http://localhost:8000 (docs at /docs)
-   - Web: `make dev-web` → http://localhost:5173
+```bash
+# Prerequisites: uv, pnpm, docker
 
-Dev auth: send `X-Dev-User: you@example.com` to the API (frontend provides a quick input). Replace with real auth later.
+# Start local Postgres
+make db-up
+
+# Run API (hot reload)
+make dev-api    # → http://localhost:8000 (docs at /docs)
+
+# Run frontend dev server
+make dev-web    # → http://localhost:5173
+
+# Apply migrations
+make migrate
+
+# Run tests
+make test-api   # backend (pytest)
+make test-web   # frontend (vitest)
+
+# Format
+make format-api # ruff format + check --fix
+make format-web # prettier --write
+```
+
+Dev auth: in development mode, send `X-Dev-User: you@example.com` header. The frontend provides a quick input when `import.meta.env.DEV` is true.
 
 ## Deployment
 
-Use Docker Compose for API, Web, and DB, and run Caddy separately to terminate TLS and reverse proxy.
+See [infra/README.md](infra/README.md) for full setup guide.
 
-1) Prepare env (single file)
-   - Copy `infra/.env.example` to `infra/.env` and edit
-   - Define both DB service credentials (POSTGRES_*) and app settings (e.g., DATABASE_URL, MAIL_FROM, SMTP_*) in this file
-2) Create external Caddy network (shared between stacks)
-   - `docker network create caddy_network`
-3) Build and start (no host ports; Caddy will reach services on the docker network)
-   - `docker compose -f infra/docker-compose.yml up -d --build db api web`
-4) Run migrations
-   - `docker compose -f infra/docker-compose.yml --profile migrate run --rm migrate`
-5) Put Caddy in front (examples in `infra/Caddyfile.example`)
-   - Ensure your Caddy container/service also joins `caddy_network`
-   - Single-domain path routing (recommended):
-     - `/v1/*` (preserve prefix) and `/docs*` → `api:8000`
-     - everything else → `web:80`
-   - Two-subdomain setup (optional): `api.yourdomain` → `api:8000`, `app.yourdomain` → `web:80`
+Quick overview:
+1. Traefik handles TLS and routing (`infra/traefik/docker-compose.yml`)
+2. Production compose pulls pre-built images from GHCR (`infra/docker-compose.prod.yml`)
+3. Deploy script: `./infra/deploy.sh [version]` — pulls, migrates, restarts, health checks
 
-Notes:
-- No host ports are required in production when using an external proxy. The Compose file attaches
-  `api` and `web` to the external `caddy_network` so Caddy can reach them by service name.
-- For single-domain path routing, build the frontend with `VITE_API_URL=` (empty) so it calls `/v1/...` on the same origin. Our Compose passes `VITE_API_URL` from `infra/.env` into the frontend build.
-- Data persists in the `pgdata` volume.
-- Optional `worker` service can be enabled for notifications/scheduling.
+```bash
+# Tag a release → GitHub Actions builds images
+git tag v1.0.0 && git push --tags
+
+# On server
+./infra/deploy.sh v1.0.0
+```
 
 ## API
 
-Swagger UI at `/docs` on the API host. Core resources: events, orders, purchases, payments, invites, balances, members.
-
-For ongoing design and decisions, see `SESSION_NOTES.md` and `mampfi_requirements.md`.
+Swagger UI at `/docs` on the API host. Core resources: events, orders, purchases, payments, invites, balances, members, auth.

@@ -58,11 +58,7 @@ Both lockfiles (`uv.lock`, `pnpm-lock.yaml`) are committed to the repo.
 
 ## Planning Workflow
 
-- **`docs/refactor.md`** — tracked refactor backlog, organized by area. Update status inline (`[ ]` → `[~]` → `[x]`). Add new items here before starting work.
-- **`docs/requirements.md`** — canonical product requirements.
-- **`SESSION_NOTES.md`** — working notes, decisions, and open questions across sessions.
-
-Before touching a refactor item, mark it `[~]` in `docs/refactor.md`.
+- **`docs/backlog.md`** — open items and future work. Update status inline (`[ ]` → `[~]` → `[x]`).
 
 ---
 
@@ -142,7 +138,7 @@ Before touching a refactor item, mark it `[~]` in `docs/refactor.md`.
 
 **Commit authorship:** don't reference Claude as a co-author
 
-**PRs:** one logical change per PR; reference the relevant `docs/refactor.md` item in the description if applicable.
+**PRs:** one logical change per PR.
 
 **Before every commit — run formatters:**
 
