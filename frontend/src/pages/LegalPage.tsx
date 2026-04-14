@@ -48,7 +48,7 @@ export default function LegalPage() {
         )}
         {data && (
           <div className="prose">
-            <Markdown>{data}</Markdown>
+            <Markdown breaks>{data}</Markdown>
           </div>
         )}
       </div>
