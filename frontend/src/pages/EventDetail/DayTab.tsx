@@ -154,6 +154,8 @@ export default function DayTab({
   const [ws, setWs] = React.useState<WSLine[]>([]);
   const [wsNotes, setWsNotes] = React.useState("");
   const [addItemId, setAddItemId] = React.useState("");
+  const hasDeliveryFee = !!ev.data?.delivery_fee_minor && ev.data.delivery_fee_minor > 0;
+  const [deliveryFeeChecked, setDeliveryFeeChecked] = React.useState(true);
 
   const finalize = useMutation({
     mutationFn: async () => {
@@ -168,7 +170,13 @@ export default function DayTab({
           unit_price_minor: Number(it.unit_price_minor || 0),
           allocations: (it.consumers || []).map((c) => ({ user_id: c.user_id, qty: c.qty })),
         }));
-      return api.createPurchase(eventId, forDate, lines);
+      return api.createPurchase(
+        eventId,
+        forDate,
+        lines,
+        undefined,
+        hasDeliveryFee && deliveryFeeChecked,
+      );
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["purchase", eventId, forDate] });
@@ -191,7 +199,13 @@ export default function DayTab({
       }[];
       notes?: string;
     }) => {
-      return api.createPurchase(eventId, forDate, lines, notes);
+      return api.createPurchase(
+        eventId,
+        forDate,
+        lines,
+        notes,
+        hasDeliveryFee && deliveryFeeChecked,
+      );
     },
     onSuccess: () => {
       setModal("closed");
@@ -688,6 +702,21 @@ export default function DayTab({
                     </tr>
                   </tfoot>
                 </table>
+                {hasDeliveryFee && (
+                  <div className="row" style={{ marginTop: 12, alignItems: "center", gap: 8 }}>
+                    <input
+                      type="checkbox"
+                      checked={deliveryFeeChecked}
+                      onChange={(e) => setDeliveryFeeChecked(e.target.checked)}
+                      id="delivery-fee-check"
+                    />
+                    <label htmlFor="delivery-fee-check">
+                      {t("day.deliveryFeeApplied", {
+                        amount: formatMoney(ev.data?.delivery_fee_minor || 0, currency),
+                      })}
+                    </label>
+                  </div>
+                )}
               </ModalBody>
               <ModalActions>
                 <button

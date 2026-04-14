@@ -80,6 +80,12 @@ def finalize_purchase(
             }
         )
 
+    # Apply delivery fee if event has one configured and buyer opted in
+    delivery_fee_applied = False
+    if data.delivery_fee_applied and ev.delivery_fee_minor and ev.delivery_fee_minor > 0:
+        total_minor += ev.delivery_fee_minor
+        delivery_fee_applied = True
+
     purchase = Purchase(
         event_id=ev.id,
         date=data.date,
@@ -88,6 +94,7 @@ def finalize_purchase(
         lines=normalized_lines,
         total_minor=total_minor,
         notes=data.notes,
+        delivery_fee_applied=delivery_fee_applied,
     )
     session.add(purchase)
     session.commit()

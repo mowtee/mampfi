@@ -24,6 +24,7 @@ class PurchaseCreateIn(BaseModel):
     date: dt.date
     lines: list[PurchaseLineIn]
     notes: str | None = Field(default=None, max_length=2000)
+    delivery_fee_applied: bool = False
 
 
 class AllocationOut(BaseModel):
@@ -56,4 +57,5 @@ class PurchaseOut(BaseModel):
     invalidated_at: dt.datetime | None = None
     invalidated_by: uuid.UUID | None = None
     invalidation_reason: str | None = None
+    delivery_fee_applied: bool = False
     has_receipt: bool = False

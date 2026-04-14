@@ -227,10 +227,11 @@ export const api = {
       allocations?: { user_id: UUID; qty: number }[];
     }[],
     notes?: string,
+    delivery_fee_applied?: boolean,
   ) =>
     http(`/v1/events/${eventId}/purchases`, {
       method: "POST",
-      body: JSON.stringify({ date, lines, notes }),
+      body: JSON.stringify({ date, lines, notes, delivery_fee_applied }),
     }),
   getPurchase: (eventId: UUID, date: string) =>
     http<Purchase>(`/v1/events/${eventId}/purchases/${date}`),
