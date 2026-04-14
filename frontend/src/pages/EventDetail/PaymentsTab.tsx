@@ -254,16 +254,7 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
                         <td>
                           {memberLabel(p.from_user_id)} → {memberLabel(p.to_user_id)}
                         </td>
-                        <td
-                          style={{
-                            maxWidth: 360,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {p.note}
-                        </td>
+                        <td style={{ maxWidth: 360, wordBreak: "break-word" }}>{p.note}</td>
                         <td style={{ textAlign: "right" }}>
                           {formatMoney(Number(p.amount_minor), p.currency)}
                         </td>
@@ -311,33 +302,34 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
               </table>
             );
           })()}
-
-          {/* Log a payment */}
-          {(() => {
-            if (!meId) return null;
-            const candidates = (members.data || [])
-              .map((m) => m.user_id)
-              .filter((id) => id && id !== meId);
-            return (
-              <div style={{ marginTop: 12 }}>
-                <h4 style={{ margin: "6px 0" }}>{t("payments.logPayment")}</h4>
-                <NewPaymentForm
-                  key={paymentFormKey}
-                  currency={currency}
-                  me={meId}
-                  candidates={candidates}
-                  totals={balances.data?.totals || []}
-                  label={memberLabel}
-                  onSubmit={(to, amount_minor, note) =>
-                    createPay.mutate({ to_user_id: to, amount_minor, note })
-                  }
-                />
-              </div>
-            );
-          })()}
-          {createPay.error && <div className="danger">{String(createPay.error)}</div>}
         </div>
       </section>
+
+      {/* Log a payment */}
+      {(() => {
+        if (!meId) return null;
+        const candidates = (members.data || [])
+          .map((m) => m.user_id)
+          .filter((id) => id && id !== meId);
+        return (
+          <section className="section">
+            <div className="card">
+              <NewPaymentForm
+                key={paymentFormKey}
+                currency={currency}
+                me={meId}
+                candidates={candidates}
+                totals={balances.data?.totals || []}
+                label={memberLabel}
+                onSubmit={(to, amount_minor, note) =>
+                  createPay.mutate({ to_user_id: to, amount_minor, note })
+                }
+              />
+              {createPay.error && <div className="danger">{String(createPay.error)}</div>}
+            </div>
+          </section>
+        );
+      })()}
     </>
   );
 }
@@ -424,6 +416,7 @@ function NewPaymentForm({
           value={payNote}
           onChange={(e) => setPayNote(e.target.value)}
           placeholder={t("payments.notePlaceholder")}
+          maxLength={150}
           style={{ minWidth: 240 }}
         />
         <button
