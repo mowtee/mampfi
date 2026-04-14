@@ -15,7 +15,12 @@ def compute_balances(session: Session, event_id: uuid.UUID) -> dict[uuid.UUID, i
     """
     balances: dict[uuid.UUID, int] = {}
 
-    purchases = session.exec(select(Purchase).where(Purchase.event_id == event_id)).all()
+    purchases = session.exec(
+        select(Purchase).where(
+            Purchase.event_id == event_id,
+            Purchase.invalidated_at.is_(None),  # type: ignore[union-attr]
+        )
+    ).all()
     for pur in purchases:
         balances[pur.buyer_id] = balances.get(pur.buyer_id, 0) + int(pur.total_minor or 0)
         for line in pur.lines or []:

@@ -139,12 +139,11 @@ function PurchaseRow({
           )}
         </td>
         <td>{label(row.buyer_id)}</td>
-        <td style={{ textAlign: "right" }}>
-          {formatMoney(Number(row.total_minor || 0), currency)}
+        <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
           {row.has_receipt && (
             <button
               className="btn"
-              style={{ marginLeft: 8, padding: "2px 6px", fontSize: 12 }}
+              style={{ marginRight: 8, padding: "2px 6px", fontSize: 12 }}
               onClick={() => window.open(api.getReceiptUrl(eventId, row.date), "_blank")}
             >
               {t("day.viewReceipt")}
@@ -154,7 +153,7 @@ function PurchaseRow({
             <button
               className="btn"
               title={t("day.invalidate")}
-              style={{ marginLeft: 8, padding: "2px 6px", fontSize: 14 }}
+              style={{ marginRight: 8, padding: "2px 6px", fontSize: 14 }}
               onClick={() => {
                 const reason = window.prompt(t("day.invalidateReason"));
                 if (reason) {
@@ -169,6 +168,7 @@ function PurchaseRow({
               ↩
             </button>
           )}
+          {formatMoney(Number(row.total_minor || 0), currency)}
         </td>
       </tr>
       {open && (
