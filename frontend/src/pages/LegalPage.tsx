@@ -3,7 +3,6 @@ import { useLocation, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Markdown from "react-markdown";
-import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 import LegalFooter from "../components/LegalFooter";
 
@@ -50,7 +49,7 @@ export default function LegalPage() {
         )}
         {data && (
           <div className="prose">
-            <Markdown remarkPlugins={[remarkGfm, remarkBreaks]}>{data}</Markdown>
+            <Markdown remarkPlugins={[remarkGfm]}>{data}</Markdown>
           </div>
         )}
       </div>
