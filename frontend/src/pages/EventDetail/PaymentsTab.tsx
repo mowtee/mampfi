@@ -373,7 +373,7 @@ function NewPaymentForm({
   }, [payTo]);
 
   return (
-    <div style={{ marginTop: 16, borderTop: "1px solid var(--border)", paddingTop: 12 }}>
+    <div>
       <h4 style={{ margin: 0, marginBottom: 8 }}>{t("payments.newPayment")}</h4>
       <div className="row">
         <label className="muted">{t("payments.to")}</label>

@@ -546,27 +546,12 @@ a:hover {
   display: inline-block;
 }
 
-/* Sticky total at bottom of card (mobile-friendly) */
+/* Total at bottom of order card */
 .sticky-total {
-  position: sticky;
-  bottom: 0; /* sit on card bottom without overlap */
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--surface) 40%, transparent),
-    color-mix(in oklab, var(--surface) 90%, transparent)
-  );
-  backdrop-filter: blur(6px);
-  border-top: 1px solid var(--border);
-  margin: 10px -14px 0 -14px;
-  padding: 12px 14px;
+  margin-top: 10px;
+  padding: 4px 0;
   display: flex;
   justify-content: flex-end;
-}
-/* Ensure elements after sticky bar have breathing room */
-.sticky-total + .btn {
-  margin-top: 22px;
-  position: relative;
-  z-index: 2;
 }
 
 /* Payments row highlight */
@@ -691,19 +676,6 @@ body.modal-open {
 }
 .mini {
   font-size: 12px;
-}
-
-/* Layering adjustments to ensure buttons are not obscured by sticky totals */
-.card {
-  position: relative;
-}
-.btn {
-  position: relative;
-  z-index: 1;
-}
-.sticky-total {
-  z-index: 0;
-  pointer-events: none;
 }
 
 /* Mobile adjustments for toolbars and topbar */
