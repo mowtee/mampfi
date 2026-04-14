@@ -471,10 +471,16 @@ a:hover {
 }
 
 @media (max-width: 520px) {
-  /* Allow tabs to wrap on small widths */
   .tabs {
     flex-wrap: wrap;
     row-gap: 6px;
+    border-radius: 12px;
+    justify-content: center;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    min-width: fit-content;
   }
 }
 

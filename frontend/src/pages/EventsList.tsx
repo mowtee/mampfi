@@ -24,18 +24,26 @@ export default function EventsList() {
       <ul className="grid" style={{ padding: 0, listStyle: "none" }}>
         {q.data?.map((ev) => (
           <li key={ev.id} className="card">
-            <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
-              <div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr auto",
+                gap: 12,
+                alignItems: "center",
+              }}
+            >
+              <div style={{ minWidth: 0 }}>
                 <div
                   style={{
                     fontWeight: 700,
                     marginBottom: 4,
                     display: "flex",
                     alignItems: "center",
-                    gap: 8,
+                    gap: 6,
+                    flexWrap: "wrap",
                   }}
                 >
-                  <span>{ev.name}</span>
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{ev.name}</span>
                   {ev.left_at ? (
                     <span className="chip muted">{t("events.left")}</span>
                   ) : (
@@ -52,7 +60,11 @@ export default function EventsList() {
                   {ev.currency}
                 </div>
               </div>
-              <Link to={`/events/${ev.id}`} className="btn primary">
+              <Link
+                to={`/events/${ev.id}`}
+                className="btn primary"
+                style={{ whiteSpace: "nowrap" }}
+              >
                 {t("events.open")}
               </Link>
             </div>

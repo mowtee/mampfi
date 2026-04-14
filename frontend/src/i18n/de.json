@@ -118,7 +118,7 @@
     "rolloverHintOn": "Deine letzte Bestellung wird automatisch für morgen übernommen, sofern du sie nicht vor der Sperrzeit änderst.",
     "rolloverHintOff": "Übernahme ist deaktiviert. Jeder Tag startet mit einer leeren Bestellung.",
     "yourOrder": "Deine Bestellung",
-    "rolledOver": "Übernommen von {{date}}",
+    "rolledOver": "Übernommen vom {{date}}",
     "explicitOrder": "Gespeicherte Bestellung",
     "noOrder": "Keine Bestellung",
     "rolloverDisabled": "Übernahme deaktiviert — leerer Start für diesen Tag",
