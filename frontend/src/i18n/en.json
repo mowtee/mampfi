@@ -153,7 +153,7 @@
     "invalidateConfirm": "Revert finalization? The day can then be re-finalized.",
     "invalidateReason": "Reason for reverting",
     "invalidated": "Reverted",
-    "invalidatedBy": "Reverted by {{name}}: {{reason}}",
+    "invalidatedBy": "Reverted by {{name}}. Reason: {{reason}}",
     "uploadReceipt": "Upload receipt",
     "viewReceipt": "View receipt",
     "receiptUploaded": "Receipt uploaded.",

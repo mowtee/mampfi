@@ -153,7 +153,7 @@
     "invalidateConfirm": "Abschluss widerrufen? Der Tag kann danach erneut abgeschlossen werden.",
     "invalidateReason": "Grund für den Widerruf",
     "invalidated": "Widerrufen",
-    "invalidatedBy": "Widerrufen von {{name}}: {{reason}}",
+    "invalidatedBy": "Widerrufen von {{name}}. Grund: {{reason}}",
     "uploadReceipt": "Bon hochladen",
     "viewReceipt": "Bon anzeigen",
     "receiptUploaded": "Bon hochgeladen.",
