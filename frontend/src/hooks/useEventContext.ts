@@ -152,7 +152,8 @@ export function useEventContext(eventId: string, forDate: string, activeTab: str
     return { locked, cutoffTime };
   }, [ev.data, forDate]);
 
-  const readOnly = !!purchase.data || lockInfo.locked || inactiveForDate;
+  const activePurchase = purchase.data && !purchase.data?.invalidated_at;
+  const readOnly = !!activePurchase || lockInfo.locked || inactiveForDate;
 
   // statusChip removed — computed in DayTab with i18n
 

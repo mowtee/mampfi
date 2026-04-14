@@ -59,10 +59,13 @@ export default function DayTab({
     qc,
   } = ctx;
 
+  // Active purchase = not invalidated
+  const activePurchase = purchase.data && !purchase.data.invalidated_at ? purchase.data : null;
+  const canFinalize = !activePurchase && (purchase.error || purchase.data?.invalidated_at);
+
   const statusChip = React.useMemo(() => {
-    if (purchase.data) return { className: "chip finalized", text: t("day.finalized") };
+    if (activePurchase) return { className: "chip finalized", text: t("day.finalized") };
     if (lockInfo.locked) return { className: "chip locked", text: t("day.locked") };
-    // Show cutoff time only for tomorrow (the next lockable date)
     const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
     if (forDate === tomorrow) {
       return {
@@ -71,17 +74,17 @@ export default function DayTab({
       };
     }
     return { className: "chip open", text: t("day.open") };
-  }, [purchase.data, lockInfo, t, forDate]);
+  }, [activePurchase, lockInfo, t, forDate]);
 
   // --- Rollover (server-side preference) ---
   const rolloverEnabled = ctx.meMember?.rollover_enabled ?? true;
   const toggleRollover = React.useCallback(() => {
     api.setRollover(eventId, !rolloverEnabled).then(() => {
-      qc.invalidateQueries({ queryKey: ["members", eventId] });
-      qc.invalidateQueries({ queryKey: ["myOrder", eventId] });
-      qc.invalidateQueries({ queryKey: ["agg", eventId] });
+      qc.refetchQueries({ queryKey: ["members", eventId] });
+      qc.invalidateQueries({ queryKey: ["myOrder", eventId, forDate] });
+      qc.invalidateQueries({ queryKey: ["agg", eventId, forDate] });
     });
-  }, [eventId, rolloverEnabled, qc]);
+  }, [eventId, forDate, rolloverEnabled, qc]);
 
   // --- Local state ---
   const [quantities, setQuantities] = React.useState<Record<string, number>>({});
@@ -153,6 +156,7 @@ export default function DayTab({
       );
     },
     onSuccess: () => {
+      setModal("closed");
       qc.invalidateQueries({ queryKey: ["purchase", eventId, forDate] });
       qc.invalidateQueries({ queryKey: ["balances", eventId] });
       qc.invalidateQueries({ queryKey: ["payments", eventId] });
@@ -387,7 +391,7 @@ export default function DayTab({
             onClick={() => upsert.mutate()}
             disabled={
               upsert.isPending ||
-              !!purchase.data ||
+              !!activePurchase ||
               lockInfo.locked ||
               inactiveForDate ||
               orderUnchanged
@@ -395,7 +399,7 @@ export default function DayTab({
             className="btn primary"
             style={{ marginTop: 10 }}
           >
-            {purchase.data
+            {activePurchase
               ? t("day.finalized")
               : upsert.isPending
                 ? t("day.saving")
@@ -516,23 +520,23 @@ export default function DayTab({
       {/* Purchase Finalization */}
       <section className="section">
         <div className="card">
-          <h3>{purchase.data ? t("day.purchaseCompleted") : t("day.forBuyer")}</h3>
+          <h3>{activePurchase ? t("day.purchaseCompleted") : t("day.forBuyer")}</h3>
           <p className="muted" style={{ marginTop: -4, marginBottom: 12 }}>
-            {purchase.data ? t("day.purchaseCompletedHint") : t("day.forBuyerHint")}
+            {activePurchase ? t("day.purchaseCompletedHint") : t("day.forBuyerHint")}
           </p>
           {purchase.isLoading && <p>{t("day.checkingPurchase")}</p>}
-          {purchase.data && (
+          {activePurchase && (
             <div className="vstack">
               <div>
-                {t("day.buyer")}: {memberLabel(purchase.data.buyer_id)}
+                {t("day.buyer")}: {memberLabel(activePurchase.buyer_id)}
               </div>
               <div>
-                {t("day.total")}: {formatMoney(Number(purchase.data.total_minor || 0), currency)}
+                {t("day.total")}: {formatMoney(Number(activePurchase.total_minor || 0), currency)}
               </div>
               <details style={{ marginTop: 8 }}>
                 <summary>{t("day.lines")}</summary>
                 <ul>
-                  {purchase.data.lines.map((ln, idx) => {
+                  {activePurchase.lines.map((ln, idx) => {
                     const label = ln.name || priceName(ln.price_item_id) || ln.price_item_id;
                     return (
                       <li key={idx}>
@@ -545,7 +549,7 @@ export default function DayTab({
               </details>
               {/* Receipt upload / view */}
               <div className="row" style={{ marginTop: 8, gap: 8 }}>
-                {purchase.data.has_receipt ? (
+                {activePurchase.has_receipt ? (
                   <button
                     className="btn"
                     onClick={() => window.open(api.getReceiptUrl(eventId, forDate), "_blank")}
@@ -574,7 +578,7 @@ export default function DayTab({
                 )}
               </div>
               {/* Admin: invalidate */}
-              {isOwner && !purchase.data.invalidated_at && (
+              {isOwner && !activePurchase.invalidated_at && (
                 <div style={{ marginTop: 12 }}>
                   <button
                     className="btn"
@@ -593,17 +597,17 @@ export default function DayTab({
                   </button>
                 </div>
               )}
-              {purchase.data.invalidated_at && (
+              {activePurchase.invalidated_at && (
                 <div className="chip warn" style={{ marginTop: 8 }}>
                   {t("day.invalidatedBy", {
-                    name: memberLabel(purchase.data.invalidated_by || undefined),
-                    reason: purchase.data.invalidation_reason || "",
+                    name: memberLabel(activePurchase.invalidated_by || undefined),
+                    reason: activePurchase.invalidation_reason || "",
                   })}
                 </div>
               )}
             </div>
           )}
-          {purchase.error && String(purchase.error).includes("HTTP 404") && (
+          {canFinalize && (
             <div>
               {!agg.data || (agg.data.items || []).length === 0 ? (
                 <p className="muted">
