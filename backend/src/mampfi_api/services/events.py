@@ -239,26 +239,45 @@ def delete_event(session: Session, event_id: uuid.UUID, user: User) -> None:
     session.delete(ev)
     session.flush()
 
+    # Build balance summary for emails
+    all_users = {m.user_id: session.get(User, m.user_id) for m in mems}
+    all_settled = all(abs(balances.get(m.user_id, 0)) == 0 for m in mems)
+    balance_lines: list[str] = []
+    for m in mems:
+        u = all_users.get(m.user_id)
+        name = (u.name or u.email) if u else str(m.user_id)
+        bal = balances.get(m.user_id, 0)
+        balance_lines.append(f"  {name}: {bal / 100:.2f} {ev.currency}")
+    balance_summary = "\n".join(balance_lines)
+
     # Enqueue notification emails to all members
     from ..i18n import get_lang, t
 
     for m in mems:
         if m.user_id == user.id:
             continue
-        member_user = session.get(User, m.user_id)
+        member_user = all_users.get(m.user_id)
         if not member_user:
             continue
         lang = get_lang(member_user.locale)
-        bal = balances.get(m.user_id, 0)
-        bal_str = f"{bal / 100:.2f} {ev.currency}" if bal != 0 else "0"
+        if all_settled:
+            status_text = t("event_deleted_settled", lang)
+        else:
+            status_text = t("event_deleted_balances", lang) + "\n" + balance_summary
         subject = t("event_deleted_subject", lang, event_name=ev.name)
         body = t(
             "event_deleted_body",
             lang,
             event_name=ev.name,
             deleter=deleter_name,
-            balance=bal_str,
+            status=status_text,
         )
-        enqueue_email(session, member_user.email, subject, f"<p>{body}</p>", body)
+        enqueue_email(
+            session,
+            member_user.email,
+            subject,
+            f"<p>{body.replace(chr(10), '<br>')}</p>",
+            body,
+        )
 
     session.commit()

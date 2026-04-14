@@ -67,25 +67,27 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
                     <td>
                       {name}
                       {isMe && <span className="muted"> ({t("app.you")})</span>}
-                      {m.note && (
+                      {m.note && !isMe && (
                         <button
                           className="btn"
                           title={m.note}
                           onClick={() => window.alert(m.note)}
                           style={{
-                            padding: "2px 4px",
+                            padding: "2px 6px",
                             fontSize: 14,
                             marginLeft: 4,
                             verticalAlign: "middle",
                           }}
                         >
-                          {t("members.noteBtn")}
+                          ℹ️
                         </button>
                       )}
                       {isMe && (
                         <button
                           className="btn"
-                          title={t("members.setNote")}
+                          title={
+                            m.note ? `${t("members.noteBtn")}: ${m.note}` : t("members.setNote")
+                          }
                           disabled={setNote.isPending}
                           onClick={() => {
                             const current = m.note || "";
@@ -95,13 +97,13 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
                             }
                           }}
                           style={{
-                            padding: "2px 4px",
-                            fontSize: 12,
+                            padding: "2px 6px",
+                            fontSize: 14,
                             marginLeft: 4,
                             verticalAlign: "middle",
                           }}
                         >
-                          {t("members.setNote")}
+                          {m.note ? "✏️" : "📝"}
                         </button>
                       )}
                     </td>

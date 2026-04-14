@@ -52,7 +52,9 @@ EMAIL_STRINGS: dict[str, dict[str, str]] = {
         "invite_expiry": "Diese Einladung ist 14 Tage gültig.",
         # Event deletion
         "event_deleted_subject": "{event_name} wurde gelöscht",
-        "event_deleted_body": 'Das Event "{event_name}" wurde von {deleter} gelöscht. Dein Zahlungsstatus: {balance}.',
+        "event_deleted_body": 'Das Event "{event_name}" wurde von {deleter} gelöscht.\n\n{status}',
+        "event_deleted_settled": "Alle Zahlungen waren ausgeglichen.",
+        "event_deleted_balances": "Zahlungsstatus aller Mitglieder:",
     },
     "en": {
         # Common
@@ -87,7 +89,9 @@ EMAIL_STRINGS: dict[str, dict[str, str]] = {
         "invite_expiry": "This invitation expires in 14 days.",
         # Event deletion
         "event_deleted_subject": "{event_name} was deleted",
-        "event_deleted_body": 'The event "{event_name}" was deleted by {deleter}. Your balance status: {balance}.',
+        "event_deleted_body": 'The event "{event_name}" was deleted by {deleter}.\n\n{status}',
+        "event_deleted_settled": "All payments were settled.",
+        "event_deleted_balances": "Balance status of all members:",
     },
 }
 

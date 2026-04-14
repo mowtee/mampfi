@@ -133,6 +133,7 @@ export default function DayTab({
   const [addItemId, setAddItemId] = React.useState("");
   const hasDeliveryFee = !!ev.data?.delivery_fee_minor && ev.data.delivery_fee_minor > 0;
   const [deliveryFeeChecked, setDeliveryFeeChecked] = React.useState(true);
+  const [receiptFile, setReceiptFile] = React.useState<File | null>(null);
 
   const finalize = useMutation({
     mutationFn: async () => {
@@ -155,7 +156,15 @@ export default function DayTab({
         hasDeliveryFee && deliveryFeeChecked,
       );
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      if (receiptFile) {
+        try {
+          await api.uploadReceipt(eventId, forDate, receiptFile);
+          setReceiptFile(null);
+        } catch {
+          /* receipt upload optional */
+        }
+      }
       setModal("closed");
       qc.invalidateQueries({ queryKey: ["purchase", eventId, forDate] });
       qc.invalidateQueries({ queryKey: ["balances", eventId] });
@@ -700,6 +709,17 @@ export default function DayTab({
                     </label>
                   </div>
                 )}
+                <div style={{ marginTop: 12 }}>
+                  <label className="muted" style={{ fontSize: 13 }}>
+                    {t("day.receiptHint")}
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
+                    style={{ marginTop: 4, display: "block" }}
+                  />
+                </div>
               </ModalBody>
               <ModalActions>
                 <button

@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { formatYMDToLocale } from "../../lib/date";
 import { formatMoney } from "../../lib/money";
@@ -14,7 +14,7 @@ type HistoryTabProps = {
 
 export default function HistoryTab({ ctx, eventId }: HistoryTabProps) {
   const { t } = useTranslation();
-  const { ev, meId, memberLabel, priceName } = ctx;
+  const { ev, meId, isOwner, memberLabel, priceName } = ctx;
   if (!ev.data) return null;
 
   return (
@@ -38,6 +38,7 @@ export default function HistoryTab({ ctx, eventId }: HistoryTabProps) {
             currency={ev.data.currency}
             label={memberLabel}
             itemName={priceName}
+            isOwner={isOwner}
           />
         </div>
       </section>
@@ -50,11 +51,13 @@ function PurchasesHistory({
   currency,
   label,
   itemName,
+  isOwner,
 }: {
   eventId: string;
   currency: string;
   label: (id?: string) => string;
   itemName: (id?: string) => string;
+  isOwner: boolean;
 }) {
   const { t } = useTranslation();
   const list = useQuery({
@@ -86,6 +89,7 @@ function PurchasesHistory({
             row={p}
             currency={currency}
             label={label}
+            isOwner={isOwner}
             itemName={itemName}
           />
         ))}
@@ -100,14 +104,17 @@ function PurchaseRow({
   currency,
   label,
   itemName,
+  isOwner,
 }: {
   eventId: string;
   row: PurchaseSummary;
   currency: string;
   label: (id?: string) => string;
   itemName: (id?: string) => string;
+  isOwner: boolean;
 }) {
   const { t } = useTranslation();
+  const qc = useQueryClient();
   const [open, setOpen] = React.useState(false);
   const details = useQuery({
     queryKey: ["purchase", eventId, row.date],
@@ -141,6 +148,25 @@ function PurchaseRow({
               onClick={() => window.open(api.getReceiptUrl(eventId, row.date), "_blank")}
             >
               {t("day.viewReceipt")}
+            </button>
+          )}
+          {isOwner && !row.invalidated_at && (
+            <button
+              className="btn"
+              title={t("day.invalidate")}
+              style={{ marginLeft: 8, padding: "2px 6px", fontSize: 14 }}
+              onClick={() => {
+                const reason = window.prompt(t("day.invalidateReason"));
+                if (reason) {
+                  api.invalidatePurchase(eventId, row.date, reason).then(() => {
+                    qc.invalidateQueries({ queryKey: ["purchases", eventId] });
+                    qc.invalidateQueries({ queryKey: ["purchase", eventId] });
+                    qc.invalidateQueries({ queryKey: ["balances", eventId] });
+                  });
+                }
+              }}
+            >
+              ↩
             </button>
           )}
         </td>
