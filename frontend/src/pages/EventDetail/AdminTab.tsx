@@ -423,10 +423,6 @@ function CreateGroupInviteButton({ eventId }: { eventId: string }) {
               </div>
             );
           })()}
-          <div>
-            <strong>{t("admin.token")}</strong> <span className="code">{created.token}</span>
-          </div>
-          <div className="muted">{t("admin.shareHint")}</div>
         </div>
       )}
     </div>
