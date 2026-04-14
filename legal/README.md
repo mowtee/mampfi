@@ -12,7 +12,7 @@ This directory contains deployment-specific legal documents served at `/privacy`
 
 ## Setup
 
-Create the markdown files in this directory. They are rendered as GitHub Flavored Markdown (headings, tables, bold, lists all work). For line breaks within a paragraph (e.g. addresses), use `<br>` at the end of the line.
+Create the markdown files in this directory. They are rendered as GitHub Flavored Markdown (headings, tables, bold, lists all work). For line breaks within a paragraph (e.g. addresses), add two trailing spaces at the end of the line.
 
 These files are **gitignored** because they contain operator-specific information (name, address, hosting provider) that varies per deployment.
 

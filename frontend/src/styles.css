@@ -713,10 +713,15 @@ body.modal-open {
 .prose p {
   margin: 8px 0;
 }
-.prose ul,
+.prose ul {
+  padding-left: 20px;
+  margin: 8px 0;
+  list-style-type: disc;
+}
 .prose ol {
   padding-left: 20px;
   margin: 8px 0;
+  list-style-type: decimal;
 }
 .prose table {
   border-collapse: collapse;
