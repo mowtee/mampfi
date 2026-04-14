@@ -78,6 +78,18 @@ git tag v1.0.0 && git push --tags
 ./infra/deploy.sh v1.0.0
 ```
 
+## Legal Pages
+
+If you host Mampfi publicly, you are responsible for providing legal documents as required by your jurisdiction. The app serves markdown files from the `legal/` directory at these routes:
+
+| Route | File | Purpose |
+|-------|------|---------|
+| `/impressum` | `legal/impressum.md` | Legal notice |
+| `/privacy` | `legal/privacy.md` | Privacy policy |
+| `/terms` | `legal/terms.md` | Terms of use |
+
+Create the files in `legal/` — they are gitignored since they contain operator-specific information. See `legal/README.md` for details.
+
 ## API
 
 Swagger UI at `/docs` on the API host. Core resources: events, orders, purchases, payments, invites, balances, members, auth.

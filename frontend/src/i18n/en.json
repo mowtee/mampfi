@@ -355,5 +355,10 @@
     "inviteTo": "Invite to: <strong>{{name}}</strong>",
     "loginRequired": "Log in or create an account to join.",
     "joinEvent": "Join {{name}}"
+  },
+  "footer": {
+    "legalNotice": "Legal Notice",
+    "privacy": "Privacy",
+    "terms": "Terms"
   }
 }

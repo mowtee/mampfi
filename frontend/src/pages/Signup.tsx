@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { errorMessage } from "../lib/errors";
+import LegalFooter from "../components/LegalFooter";
 
 export default function Signup() {
   const { t, i18n } = useTranslation();
@@ -92,6 +93,7 @@ export default function Signup() {
           </div>
         </div>
       </form>
+      <LegalFooter />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { Link, Outlet, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Modal, ModalBody, ModalActions } from "./components/ui/Modal";
 import { useAuth } from "./hooks/useAuth";
+import LegalFooter from "./components/LegalFooter";
 
 export default function App() {
   const { user, logout } = useAuth();
@@ -152,6 +153,8 @@ export default function App() {
           </button>
         </ModalActions>
       </Modal>
+
+      <LegalFooter />
 
       <Modal open={import.meta.env.DEV && devOpen} onClose={() => setDevOpen(false)} size="sm" top>
         <h3>Developer Email</h3>

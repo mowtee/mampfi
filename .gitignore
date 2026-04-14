@@ -38,6 +38,10 @@ frontend/dist/
 # Docker
 infra/.env
 
+# Legal documents (deployment-specific)
+legal/*.md
+!legal/README.md
+
 # Test / coverage artefacts
 .pytest_cache/
 htmlcov/

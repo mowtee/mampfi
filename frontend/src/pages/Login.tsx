@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { errorMessage } from "../lib/errors";
+import LegalFooter from "../components/LegalFooter";
 
 export default function Login() {
   const { t } = useTranslation();
@@ -74,6 +75,7 @@ export default function Login() {
           </div>
         </div>
       </form>
+      <LegalFooter />
     </div>
   );
 }

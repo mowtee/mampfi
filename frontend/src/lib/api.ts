@@ -305,6 +305,9 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ note }),
     }),
+  // Info
+  getInfo: () => http<{ legal_enabled: boolean; footer_message: string | null }>(`/v1/info`),
+
   // Auth
   signup: (email: string, password: string, name?: string, locale?: string) =>
     http<{ message: string }>(`/v1/auth/signup`, {

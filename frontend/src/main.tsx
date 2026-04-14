@@ -14,6 +14,7 @@ import NewEvent from "./pages/NewEvent";
 import ResetPassword from "./pages/ResetPassword";
 import Signup from "./pages/Signup";
 import VerifyEmail from "./pages/VerifyEmail";
+import LegalPage from "./pages/LegalPage";
 import "./tailwind.css";
 import "./styles.css";
 
@@ -51,6 +52,9 @@ createRoot(el).render(
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/join" element={<Join />} />
+          <Route path="/privacy" element={<LegalPage />} />
+          <Route path="/terms" element={<LegalPage />} />
+          <Route path="/legal-notice" element={<LegalPage />} />
 
           {/* Protected routes */}
           <Route element={<RequireAuth />}>

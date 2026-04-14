@@ -30,6 +30,8 @@ services:
       - .env
     environment:
       DATABASE_URL: "postgresql+psycopg://${POSTGRES_USER:-mampfi}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-mampfi}"
+    volumes:
+      - ../legal:/app/legal:ro
     depends_on:
       db:
         condition: service_healthy

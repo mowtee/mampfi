@@ -15,6 +15,7 @@ from .routers import balances as balances_router
 from .routers import events as events_router
 from .routers import holidays as holidays_router
 from .routers import invites as invites_router
+from .routers import legal as legal_router
 from .routers import me as me_router
 from .routers import members as members_router
 from .routers import orders as orders_router
@@ -105,6 +106,7 @@ app.include_router(balances_router.router)
 app.include_router(members_router.router)
 app.include_router(me_router.router)
 app.include_router(holidays_router.router)
+app.include_router(legal_router.router)
 
 
 @app.get("/v1/info")
@@ -113,4 +115,6 @@ def info() -> dict:
         "name": "mampfi",
         "version": "0.1.0",
         "env": settings.env,
+        "legal_enabled": settings.legal_enabled,
+        "footer_message": settings.footer_message,
     }

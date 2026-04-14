@@ -29,6 +29,11 @@ class Settings(BaseSettings):
     mail_from: str | None = None
     mail_from_name: str | None = None  # e.g. "Mampfi"
 
+    # Footer / legal
+    legal_enabled: bool = False
+    legal_dir: str = "/app/legal"  # path to legal markdown files
+    footer_message: str | None = None  # e.g. "Made with ❤️ by Timo"
+
 
 @lru_cache
 def get_settings() -> Settings:
