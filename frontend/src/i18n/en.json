@@ -117,7 +117,7 @@
     "date": "Date",
     "lockInfo": "Orders lock on the previous day at {{time}}.",
     "rollover": "Rollover",
-    "rolloverHintOn": "Your latest order rolls over to tomorrow unless changed before cutoff.",
+    "rolloverHintOn": "Your orders are automatically carried forward each day. You can adjust them at any time.",
     "rolloverHintOff": "Rollover is disabled. Each day starts with an empty order.",
     "yourOrder": "Your Order",
     "rolledOver": "Rolled from {{date}}",

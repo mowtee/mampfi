@@ -117,7 +117,7 @@
     "date": "Datum",
     "lockInfo": "Bestellungen möglich bis {{time}}.",
     "rollover": "Übernehmen",
-    "rolloverHintOn": "Deine letzte Bestellung wird automatisch für morgen übernommen, sofern du sie nicht vor der Sperrzeit änderst.",
+    "rolloverHintOn": "Deine Bestellungen werden täglich automatisch übernommen. Du kannst sie jederzeit anpassen.",
     "rolloverHintOff": "Übernahme ist deaktiviert. Jeder Tag startet mit einer leeren Bestellung.",
     "yourOrder": "Deine Bestellung",
     "rolledOver": "Übernommen vom {{date}}",
