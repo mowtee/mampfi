@@ -179,6 +179,17 @@ function PurchaseRow({
             {details.error && <div className="danger">{String(details.error)}</div>}
             {details.data && (
               <div style={{ marginTop: 4 }}>
+                {details.data.invalidated_at && (
+                  <div
+                    className="chip warn"
+                    style={{ marginBottom: 10, display: "inline-block", fontSize: 13 }}
+                  >
+                    {t("day.invalidatedBy", {
+                      name: label(details.data.invalidated_by || undefined),
+                      reason: details.data.invalidation_reason || "",
+                    })}
+                  </div>
+                )}
                 <div style={{ fontWeight: 600, marginBottom: 4 }}>{t("history.aggregate")}</div>
                 <table className="table">
                   <thead>
