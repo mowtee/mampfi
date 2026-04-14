@@ -237,7 +237,7 @@
     "createPayment": "Zahlung erstellen",
     "settlementPending": "Warte auf Bestätigung",
     "allSettlementsPending": "Ausgleichszahlungen erstellt — warte auf Bestätigung der Empfänger.",
-    "declineReason": "Grund: {{reason}}",
+    "declineReason": "Abgelehnt: {{reason}}",
     "youShouldReceive": "Du solltest {{amount}} {{currency}} erhalten. Bitte Folgende, dich zu bezahlen:",
     "shouldPayYou": "{{name}} sollte dir {{amount}} {{currency}} zahlen",
     "unableToLeave": "Austritt nicht möglich.",
