@@ -693,6 +693,47 @@ body.modal-open {
   }
 }
 
+/* Prose styling for markdown content (legal pages) */
+.prose {
+  line-height: 1.7;
+  font-size: 15px;
+}
+.prose h1 {
+  font-size: 1.6em;
+  margin: 0 0 16px;
+}
+.prose h2 {
+  font-size: 1.3em;
+  margin: 24px 0 8px;
+}
+.prose h3 {
+  font-size: 1.1em;
+  margin: 20px 0 6px;
+}
+.prose p {
+  margin: 8px 0;
+}
+.prose ul,
+.prose ol {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+.prose table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 12px 0;
+}
+.prose th,
+.prose td {
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  text-align: left;
+}
+.prose th {
+  background: var(--glass-bg);
+  font-weight: 600;
+}
+
 /* Simple responsive utility classes */
 @media (max-width: 480px) {
   .sm-hidden {

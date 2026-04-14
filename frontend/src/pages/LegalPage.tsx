@@ -2,6 +2,7 @@ import React from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import Markdown from "react-markdown";
 import LegalFooter from "../components/LegalFooter";
 
 const API_URL = import.meta.env.VITE_API_URL || "";
@@ -46,7 +47,9 @@ export default function LegalPage() {
           </p>
         )}
         {data && (
-          <div style={{ whiteSpace: "pre-wrap", lineHeight: 1.7, fontSize: 15 }}>{data}</div>
+          <div className="prose">
+            <Markdown>{data}</Markdown>
+          </div>
         )}
       </div>
       <LegalFooter />
