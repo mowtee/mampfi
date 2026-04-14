@@ -3,6 +3,8 @@ import { useLocation, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Markdown from "react-markdown";
+import remarkBreaks from "remark-breaks";
+import remarkGfm from "remark-gfm";
 import LegalFooter from "../components/LegalFooter";
 
 const API_URL = import.meta.env.VITE_API_URL || "";
@@ -48,7 +50,7 @@ export default function LegalPage() {
         )}
         {data && (
           <div className="prose">
-            <Markdown breaks>{data}</Markdown>
+            <Markdown remarkPlugins={[remarkGfm, remarkBreaks]}>{data}</Markdown>
           </div>
         )}
       </div>
