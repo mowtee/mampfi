@@ -6,11 +6,7 @@
 Internet → Traefik (ports 80/443, auto TLS)
              ├── mampfi.zenbytes.eu /v1/*, /docs*, /health → mampfi-api:8000
              ├── mampfi.zenbytes.eu /*                      → mampfi-web:8080
-             ├── docs.zenbytes.eu                           → (your docs service)
-             └── files.zenbytes.eu                          → (your files service)
 ```
-
-All compose stacks share the `traefik` Docker network. Routing is declared via container labels — no central config to update.
 
 ## First-time server setup
 
@@ -53,28 +49,3 @@ git tag v0.1.0 && git push --tags
 | `traefik/docker-compose.yml` | Traefik reverse proxy (shared across all stacks) |
 | `deploy.sh` | Pull images, run migrations, restart, health check |
 | `.env.example` | Template for production environment variables |
-
-## Migrating existing services to Traefik
-
-Add these labels to your existing `docs.zenbytes.eu` and `files.zenbytes.eu` services:
-
-```yaml
-services:
-  your-service:
-    # ... existing config ...
-    networks:
-      - default
-      - traefik
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.SERVICENAME.rule=Host(`DOMAIN.zenbytes.eu`)"
-      - "traefik.http.routers.SERVICENAME.entrypoints=websecure"
-      - "traefik.http.routers.SERVICENAME.tls.certresolver=letsencrypt"
-      - "traefik.http.services.SERVICENAME.loadbalancer.server.port=PORT"
-
-networks:
-  traefik:
-    external: true
-```
-
-Then remove Caddy and the `caddy_network`.
