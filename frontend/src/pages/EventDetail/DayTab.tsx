@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "../../lib/api";
+import { formatYMDToLocale } from "../../lib/date";
 import { formatMoney } from "../../lib/money";
 import { Modal, ModalBody, ModalActions } from "../../components/ui/Modal";
 import DateField from "../../components/DateField";
@@ -72,51 +73,24 @@ export default function DayTab({
     return { className: "chip open", text: t("day.open") };
   }, [purchase.data, lockInfo, t, forDate]);
 
+  // --- Rollover (server-side preference) ---
+  const rolloverEnabled = ctx.meMember?.rollover_enabled ?? true;
+  const toggleRollover = React.useCallback(() => {
+    api.setRollover(eventId, !rolloverEnabled).then(() => {
+      qc.invalidateQueries({ queryKey: ["members", eventId] });
+      qc.invalidateQueries({ queryKey: ["myOrder", eventId] });
+      qc.invalidateQueries({ queryKey: ["agg", eventId] });
+    });
+  }, [eventId, rolloverEnabled, qc]);
+
   // --- Local state ---
   const [quantities, setQuantities] = React.useState<Record<string, number>>({});
-  const prefKey = React.useMemo(
-    () => (meQ.data?.id ? `rollover:${eventId}:${meQ.data.id}` : null),
-    [eventId, meQ.data?.id],
-  );
-  const [rolloverEnabled, setRolloverEnabled] = React.useState(true);
-  React.useEffect(() => {
-    if (!prefKey) return;
-    const v = localStorage.getItem(prefKey);
-    setRolloverEnabled(v ? v === "1" : true);
-  }, [prefKey]);
-  const toggleRollover = React.useCallback(() => {
-    if (!prefKey) return;
-    setRolloverEnabled((prev) => {
-      const next = !prev;
-      localStorage.setItem(prefKey, next ? "1" : "0");
-      return next;
-    });
-  }, [prefKey]);
 
   React.useEffect(() => {
-    if (myOrder.data?.is_rolled_over && !rolloverEnabled) {
-      setQuantities({});
-      return;
-    }
     const q: Record<string, number> = {};
     myOrder.data?.items?.forEach((it) => (q[it.price_item_id] = it.qty));
     setQuantities(q);
-  }, [myOrder.data, rolloverEnabled]);
-
-  // Fallback: derive from aggregate when no explicit order
-  React.useEffect(() => {
-    if (!meQ.data?.id) return;
-    if (myOrder.data && (myOrder.data.items || []).length > 0) return;
-    if (!agg.data || !(agg.data.items || []).length) return;
-    const mine: Record<string, number> = {};
-    for (const it of agg.data.items) {
-      const mineRow = (it.consumers || []).find((c) => c.user_id === meQ.data!.id);
-      if (mineRow && Number(mineRow.qty) > 0) {
-        mine[it.price_item_id] = Number(mineRow.qty);
-      }
-    }
-    if (Object.keys(mine).length > 0) setQuantities(mine);
-  }, [agg.data, myOrder.data, meQ.data?.id]);
+  }, [myOrder.data]);
 
   // Check if quantities differ from saved order
   const orderUnchanged = React.useMemo(() => {
@@ -318,14 +292,19 @@ export default function DayTab({
       <section className="section">
         <div className="card">
           <h3>{t("day.yourOrder")}</h3>
-          {myOrder.data?.is_rolled_over && rolloverEnabled && (
-            <div className="chip warn" style={{ marginBottom: 8 }}>
-              {t("day.rolledOver")}
+          {myOrder.data?.is_rolled_over && myOrder.data?.rolled_from_date && (
+            <div className="chip" style={{ marginBottom: 8, background: "#e5e7eb" }}>
+              {t("day.rolledOver", { date: formatYMDToLocale(myOrder.data.rolled_from_date) })}
             </div>
           )}
-          {myOrder.data?.is_rolled_over && !rolloverEnabled && (
+          {myOrder.data?.is_explicit && (
+            <div className="chip open" style={{ marginBottom: 8 }}>
+              {t("day.explicitOrder")}
+            </div>
+          )}
+          {!myOrder.data?.is_rolled_over && !myOrder.data?.is_explicit && !myOrder.isLoading && (
             <div className="chip muted" style={{ marginBottom: 8 }}>
-              {t("day.rolloverDisabled")}
+              {t("day.noOrder")}
             </div>
           )}
           {price.isLoading && <p>{t("day.loadingPrice")}</p>}

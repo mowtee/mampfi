@@ -12,3 +12,7 @@ class LeaveIntentOut(BaseModel):
 
 class MemberNoteIn(BaseModel):
     note: str | None = Field(default=None, max_length=500)
+
+
+class RolloverIn(BaseModel):
+    enabled: bool

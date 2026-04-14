@@ -27,7 +27,9 @@ class OrderOut(BaseModel):
     event_id: uuid.UUID
     user_id: uuid.UUID
     date: dt.date
-    is_rolled_over: bool | None = None
+    is_rolled_over: bool = False
+    rolled_from_date: dt.date | None = None
+    is_explicit: bool = False
     items: list[OrderItemOut]
     total_minor: int | None = None
 

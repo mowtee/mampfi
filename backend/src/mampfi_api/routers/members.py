@@ -6,7 +6,7 @@ from sqlmodel import Session
 from ..auth import get_current_user
 from ..db import session_dep
 from ..models import User
-from ..schemas.members import LeaveIntentIn, LeaveIntentOut, MemberNoteIn
+from ..schemas.members import LeaveIntentIn, LeaveIntentOut, MemberNoteIn, RolloverIn
 from ..services import members as svc
 
 router = APIRouter(prefix="/v1/events/{event_id}/members", tags=["members"])
@@ -62,3 +62,13 @@ def set_member_note(
     user: User = Depends(get_current_user),
 ) -> dict:
     return svc.set_member_note(session, event_id, data.note, user)
+
+
+@router.post("/me/rollover")
+def set_rollover(
+    event_id: uuid.UUID,
+    data: RolloverIn,
+    session: Session = Depends(session_dep),
+    user: User = Depends(get_current_user),
+) -> dict:
+    return svc.set_rollover(session, event_id, data.enabled, user)

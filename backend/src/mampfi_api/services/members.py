@@ -30,6 +30,15 @@ def set_member_note(session: Session, event_id: uuid.UUID, note: str | None, use
     return {"status": "ok", "note": mem.note}
 
 
+def set_rollover(session: Session, event_id: uuid.UUID, enabled: bool, user: User) -> dict:
+    ev = get_event(session, event_id)
+    mem = require_member(session, ev.id, user.id)
+    mem.rollover_enabled = enabled
+    session.add(mem)
+    session.commit()
+    return {"status": "ok", "rollover_enabled": mem.rollover_enabled}
+
+
 def leave_event(session: Session, event_id: uuid.UUID, user: User) -> None:
     ev = session.get(Event, event_id)
     if ev is None:

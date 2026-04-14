@@ -86,6 +86,7 @@ export type Member = {
   role: string;
   joined_at: string;
   left_at?: string | null;
+  rollover_enabled?: boolean;
   note?: string | null;
 };
 
@@ -126,6 +127,8 @@ export const api = {
       user_id: UUID;
       date: string;
       is_rolled_over?: boolean;
+      rolled_from_date?: string;
+      is_explicit?: boolean;
       items: {
         price_item_id: string;
         qty: number;
@@ -292,6 +295,11 @@ export const api = {
   ) => http(`/v1/events/${eventId}`, { method: "PATCH", body: JSON.stringify(data) }),
 
   deleteEvent: (eventId: UUID) => http<void>(`/v1/events/${eventId}`, { method: "DELETE" }),
+  setRollover: (eventId: UUID, enabled: boolean) =>
+    http<{ status: string; rollover_enabled: boolean }>(
+      `/v1/events/${eventId}/members/me/rollover`,
+      { method: "POST", body: JSON.stringify({ enabled }) },
+    ),
   setMemberNote: (eventId: UUID, note: string | null) =>
     http<{ status: string; note: string | null }>(`/v1/events/${eventId}/members/me/note`, {
       method: "POST",

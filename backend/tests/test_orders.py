@@ -108,7 +108,7 @@ def test_get_order_empty(client: TestClient, session: Session, user, ev, item):
     assert resp.status_code == 200
     data = resp.json()
     assert data["items"] == []
-    assert data["is_rolled_over"] is None
+    assert data["is_rolled_over"] is False
 
 
 def test_get_order_rollover(client: TestClient, session: Session, user, ev, item):

@@ -131,8 +131,11 @@ def get_my_order(session: Session, event_id: uuid.UUID, for_date: dt.date, user:
         )
     ).first()
 
+    is_explicit = order is not None
     rolled = False
-    if not order:
+    rolled_from_date: dt.date | None = None
+
+    if not order and member.rollover_enabled:
         joined_date = member.joined_at.astimezone(tz).date()
         prev = session.exec(
             select(DailyOrder)
@@ -147,8 +150,10 @@ def get_my_order(session: Session, event_id: uuid.UUID, for_date: dt.date, user:
         if prev:
             order = prev
             rolled = True
+            rolled_from_date = prev.date
 
     price_items = session.exec(select(PriceItem).where(PriceItem.event_id == ev.id)).all()
+    active_ids = {str(pi.id) for pi in price_items if pi.active}
     meta = {
         str(pi.id): {
             "name": pi.name,
@@ -163,6 +168,9 @@ def get_my_order(session: Session, event_id: uuid.UUID, for_date: dt.date, user:
     for it in order.items if order else []:
         pid = str(it.get("price_item_id"))
         qty = int(it.get("qty", 0))
+        # Filter out inactive items from rolled orders
+        if rolled and pid not in active_ids:
+            continue
         m = meta.get(pid, {})
         unit = m.get("unit_price_minor")
         item_total = (qty * unit) if isinstance(unit, int) else None
@@ -184,7 +192,9 @@ def get_my_order(session: Session, event_id: uuid.UUID, for_date: dt.date, user:
         date=for_date,
         items=enriched,
         total_minor=grand_total,
-        is_rolled_over=(rolled or None),
+        is_rolled_over=rolled,
+        rolled_from_date=rolled_from_date,
+        is_explicit=is_explicit,
     )
 
 
@@ -206,12 +216,15 @@ def aggregate_orders(
     mems = session.exec(select(Membership).where(Membership.event_id == ev.id)).all()
     active_user_ids: set[uuid.UUID] = set()
     joined_dates: dict[uuid.UUID, dt.date] = {}
+    rollover_users: set[uuid.UUID] = set()
     for m in mems:
         jd = m.joined_at.astimezone(tz).date()
         ld = m.left_at.astimezone(tz).date() if m.left_at else None
         if date >= jd and (ld is None or date < ld):
             active_user_ids.add(m.user_id)
             joined_dates[m.user_id] = jd
+            if m.rollover_enabled:
+                rollover_users.add(m.user_id)
 
     have_order_ids = {o.user_id for o in orders}
     active_item_ids = set(
@@ -220,7 +233,8 @@ def aggregate_orders(
         ).all()
     )
 
-    for uid in active_user_ids - have_order_ids:
+    # Only rollover for users who have rollover enabled AND don't have an explicit order
+    for uid in (active_user_ids & rollover_users) - have_order_ids:
         jd = joined_dates.get(uid)
         prev = session.exec(
             select(DailyOrder)
