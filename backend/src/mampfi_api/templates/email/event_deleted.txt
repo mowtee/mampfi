@@ -1,0 +1,10 @@
+{% extends "email/base.txt" %}
+{% block content %}
+{{ greeting }} {{ name }},
+
+{{ body }}
+
+{% if balance_lines %}
+{{ balance_lines }}
+{% endif %}
+{% endblock %}

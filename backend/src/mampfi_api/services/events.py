@@ -224,7 +224,6 @@ def delete_event(session: Session, event_id: uuid.UUID, user: User) -> None:
 
     # Collect member info before deletion for notifications
     from ..services.balances import compute_balances
-    from ..services.email import enqueue_email
 
     mems = session.exec(select(Membership).where(Membership.event_id == ev.id)).all()
     balances = compute_balances(session, ev.id)
@@ -250,12 +249,15 @@ def delete_event(session: Session, event_id: uuid.UUID, user: User) -> None:
         balance_lines.append(f"  {name}: {bal / 100:.2f} {ev.currency}")
     balance_summary = "\n".join(balance_lines)
 
-    # Enqueue notification emails to all members
+    # Enqueue notification emails to ALL members (including deleter)
+    from ..config import get_settings
     from ..i18n import get_lang, t
+    from ..services.email import _logo_url, _render
+    from ..services.email import enqueue_email as _enqueue
+
+    frontend_url = get_settings().frontend_url
 
     for m in mems:
-        if m.user_id == user.id:
-            continue
         member_user = all_users.get(m.user_id)
         if not member_user:
             continue
@@ -263,21 +265,29 @@ def delete_event(session: Session, event_id: uuid.UUID, user: User) -> None:
         if all_settled:
             status_text = t("event_deleted_settled", lang)
         else:
-            status_text = t("event_deleted_balances", lang) + "\n" + balance_summary
+            status_text = t("event_deleted_balances", lang)
         subject = t("event_deleted_subject", lang, event_name=ev.name)
-        body = t(
+        body_text = t(
             "event_deleted_body",
             lang,
             event_name=ev.name,
             deleter=deleter_name,
             status=status_text,
         )
-        enqueue_email(
+        ctx = dict(
+            lang=lang,
+            logo_url=_logo_url(frontend_url),
+            greeting=t("greeting", lang),
+            name=member_user.name or member_user.email,
+            body=body_text,
+            balance_lines=balance_summary if not all_settled else "",
+        )
+        _enqueue(
             session,
             member_user.email,
             subject,
-            f"<p>{body.replace(chr(10), '<br>')}</p>",
-            body,
+            _render("email/event_deleted.html", **ctx),
+            _render("email/event_deleted.txt", **ctx),
         )
 
     session.commit()
