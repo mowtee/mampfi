@@ -684,6 +684,14 @@ body.modal-open {
   font-size: 12px;
 }
 
+/* Receipt upload button — keep roomy on narrow screens so file names don't crush it */
+.receipt-upload {
+  max-width: 100%;
+  white-space: normal;
+  word-break: break-word;
+  text-align: center;
+}
+
 /* Mobile adjustments for toolbars and topbar */
 @media (max-width: 700px) {
   .toolbar {
@@ -691,6 +699,11 @@ body.modal-open {
   }
   .hide-mobile {
     display: none !important;
+  }
+  .receipt-upload {
+    display: block !important;
+    width: 100%;
+    box-sizing: border-box;
   }
 }
 @media (min-width: 701px) {

@@ -194,7 +194,15 @@ export default function DayTab({
         hasDeliveryFee && deliveryFeeChecked,
       );
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      if (receiptFile) {
+        try {
+          await api.uploadReceipt(eventId, forDate, receiptFile);
+          setReceiptFile(null);
+        } catch {
+          /* receipt upload optional */
+        }
+      }
       setModal("closed");
       qc.invalidateQueries({ queryKey: ["purchase", eventId, forDate] });
       qc.invalidateQueries({ queryKey: ["balances", eventId] });
@@ -690,7 +698,10 @@ export default function DayTab({
                   <div className="muted" style={{ fontSize: 13, marginBottom: 4 }}>
                     {t("day.receiptHint")}
                   </div>
-                  <label className="btn" style={{ cursor: "pointer" }}>
+                  <label
+                    className="btn receipt-upload"
+                    style={{ cursor: "pointer", display: "inline-block" }}
+                  >
                     {receiptFile ? `✓ ${receiptFile.name}` : t("day.uploadReceipt")}
                     <input
                       type="file"
@@ -1009,6 +1020,38 @@ export default function DayTab({
                       style={{ minWidth: 280 }}
                     />
                   </div>
+                </div>
+                {hasDeliveryFee && (
+                  <div className="row" style={{ marginTop: 12, alignItems: "center", gap: 8 }}>
+                    <input
+                      type="checkbox"
+                      checked={deliveryFeeChecked}
+                      onChange={(e) => setDeliveryFeeChecked(e.target.checked)}
+                      id="delivery-fee-ws"
+                    />
+                    <label htmlFor="delivery-fee-ws">
+                      {t("day.deliveryFeeApplied", {
+                        amount: formatMoney(ev.data?.delivery_fee_minor || 0, currency),
+                      })}
+                    </label>
+                  </div>
+                )}
+                <div style={{ marginTop: 12 }}>
+                  <div className="muted" style={{ fontSize: 13, marginBottom: 4 }}>
+                    {t("day.receiptHint")}
+                  </div>
+                  <label
+                    className="btn receipt-upload"
+                    style={{ cursor: "pointer", display: "inline-block" }}
+                  >
+                    {receiptFile ? `✓ ${receiptFile.name}` : t("day.uploadReceipt")}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      style={{ display: "none" }}
+                      onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
+                    />
+                  </label>
                 </div>
               </ModalBody>
               <ModalActions>
