@@ -2,7 +2,7 @@ import uuid
 
 from sqlmodel import Session, select
 
-from ..models import Membership, Payment, Purchase, User
+from ..models import Event, Membership, Payment, Purchase, User
 from ..schemas.balances import BalanceLine, BalancesOut
 from ..services.events import get_event, require_member
 
@@ -15,6 +15,9 @@ def compute_balances(session: Session, event_id: uuid.UUID) -> dict[uuid.UUID, i
     """
     balances: dict[uuid.UUID, int] = {}
 
+    ev = session.get(Event, event_id)
+    event_fee = int(ev.delivery_fee_minor or 0) if ev else 0
+
     purchases = session.exec(
         select(Purchase).where(
             Purchase.event_id == event_id,
@@ -23,15 +26,28 @@ def compute_balances(session: Session, event_id: uuid.UUID) -> dict[uuid.UUID, i
     ).all()
     for pur in purchases:
         balances[pur.buyer_id] = balances.get(pur.buyer_id, 0) + int(pur.total_minor or 0)
+
+        # Collect members who received items (for delivery fee splitting)
+        members_in_purchase: set[uuid.UUID] = set()
         for line in pur.lines or []:
             unit = int(line.get("unit_price_minor") or 0)
             for alloc in line.get("allocations") or []:
                 try:
                     uid = uuid.UUID(str(alloc.get("user_id")))
-                except ValueError, AttributeError:
+                except (ValueError, AttributeError):
                     continue
                 qty = int(alloc.get("qty") or 0)
+                if qty > 0:
+                    members_in_purchase.add(uid)
                 balances[uid] = balances.get(uid, 0) - unit * qty
+
+        # Split delivery fee among members who received items
+        if pur.delivery_fee_applied and event_fee > 0 and members_in_purchase:
+            fee_per_member = event_fee // len(members_in_purchase)
+            remainder = event_fee - fee_per_member * len(members_in_purchase)
+            for i, uid in enumerate(sorted(members_in_purchase)):
+                share = fee_per_member + (1 if i < remainder else 0)
+                balances[uid] = balances.get(uid, 0) - share
 
     for pay in session.exec(
         select(Payment).where(Payment.event_id == event_id, Payment.status == "confirmed")
