@@ -514,8 +514,10 @@ function SettleMyBalance({
       </p>
     );
 
-  const hasPendingTo = (toId: string) =>
-    payments.some((p) => p.from_user_id === me && p.to_user_id === toId && p.status === "pending");
+  const pendingAmountTo = (toId: string) =>
+    payments
+      .filter((p) => p.from_user_id === me && p.to_user_id === toId && p.status === "pending")
+      .reduce((sum, p) => sum + Number(p.amount_minor || 0), 0);
 
   const creditors = totals.filter((t) => Number(t.balance_minor) > 0 && t.user_id !== me);
   const debtors = totals.filter((t) => Number(t.balance_minor) < 0 && t.user_id !== me);
@@ -539,7 +541,7 @@ function SettleMyBalance({
       }
     }
 
-    const allPending = plan.length > 0 && plan.every((p) => hasPendingTo(p.to));
+    const allPending = plan.length > 0 && plan.every((p) => pendingAmountTo(p.to) >= p.amount);
     if (allPending) {
       return (
         <div style={{ marginTop: 12 }}>
@@ -556,29 +558,51 @@ function SettleMyBalance({
           {t("payments.youOwe", { amount: (-myBal / 100).toFixed(2), currency })}
         </p>
         <ul>
-          {plan.map((p, i) => (
-            <li key={i}>
-              {t("payments.payTo", {
-                amount: (p.amount / 100).toFixed(2),
-                currency,
-                name: label(p.to),
-              })}
-              {hasPendingTo(p.to) ? (
-                <span className="chip warn" style={{ marginLeft: 8 }}>
-                  {t("payments.settlementPending")}
-                </span>
-              ) : (
-                <button
-                  className="btn"
-                  style={{ marginLeft: 8 }}
-                  onClick={() => onCreatePayment(p.to, p.amount, t("payments.balanceSettlement"))}
-                  disabled={!!isCreating}
-                >
-                  {t("payments.createPayment")}
-                </button>
-              )}
-            </li>
-          ))}
+          {plan.map((p, i) => {
+            const pending = pendingAmountTo(p.to);
+            const remaining = Math.max(0, p.amount - pending);
+            const fullyCovered = pending >= p.amount;
+            return (
+              <li key={i}>
+                {t("payments.payTo", {
+                  amount: (p.amount / 100).toFixed(2),
+                  currency,
+                  name: label(p.to),
+                })}
+                {fullyCovered ? (
+                  <span className="chip warn" style={{ marginLeft: 8 }}>
+                    {t("payments.settlementPending")}
+                  </span>
+                ) : (
+                  <>
+                    {pending > 0 && (
+                      <span className="chip warn" style={{ marginLeft: 8 }}>
+                        {t("payments.partiallyPending", {
+                          amount: (pending / 100).toFixed(2),
+                          currency,
+                        })}
+                      </span>
+                    )}
+                    <button
+                      className="btn"
+                      style={{ marginLeft: 8 }}
+                      onClick={() =>
+                        onCreatePayment(p.to, remaining, t("payments.balanceSettlement"))
+                      }
+                      disabled={!!isCreating}
+                    >
+                      {pending > 0
+                        ? t("payments.payRemaining", {
+                            amount: (remaining / 100).toFixed(2),
+                            currency,
+                          })
+                        : t("payments.createPayment")}
+                    </button>
+                  </>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
     );

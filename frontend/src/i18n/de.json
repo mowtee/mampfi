@@ -236,6 +236,8 @@
     "payTo": "Zahle {{amount}} {{currency}} an {{name}}",
     "createPayment": "Zahlung erstellen",
     "settlementPending": "Warte auf Bestätigung",
+    "partiallyPending": "{{amount}} {{currency}} in Bearbeitung",
+    "payRemaining": "Restbetrag zahlen ({{amount}} {{currency}})",
     "allSettlementsPending": "Ausgleichszahlungen erstellt — warte auf Bestätigung der Empfänger.",
     "declineReason": "Abgelehnt: {{reason}}",
     "youShouldReceive": "Du solltest {{amount}} {{currency}} erhalten. Bitte Folgende, dich zu bezahlen:",

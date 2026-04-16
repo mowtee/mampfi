@@ -236,6 +236,8 @@
     "payTo": "Pay {{amount}} {{currency}} to {{name}}",
     "createPayment": "Create payment",
     "settlementPending": "Awaiting confirmation",
+    "partiallyPending": "{{amount}} {{currency}} pending",
+    "payRemaining": "Pay remaining ({{amount}} {{currency}})",
     "allSettlementsPending": "Settlement payments created — awaiting confirmation from recipients.",
     "declineReason": "Declined: {{reason}}",
     "youShouldReceive": "You should receive {{amount}} {{currency}}. Ask the following to pay you:",
