@@ -41,11 +41,12 @@ def compute_balances(session: Session, event_id: uuid.UUID) -> dict[uuid.UUID, i
                     members_in_purchase.add(uid)
                 balances[uid] = balances.get(uid, 0) - unit * qty
 
-        # Split delivery fee among members who received items
-        if pur.delivery_fee_applied and event_fee > 0 and members_in_purchase:
-            fee_per_member = event_fee // len(members_in_purchase)
-            remainder = event_fee - fee_per_member * len(members_in_purchase)
-            for i, uid in enumerate(sorted(members_in_purchase)):
+        # Split delivery fee among members who received items (excluding buyer)
+        fee_members = members_in_purchase - {pur.buyer_id}
+        if pur.delivery_fee_applied and event_fee > 0 and fee_members:
+            fee_per_member = event_fee // len(fee_members)
+            remainder = event_fee - fee_per_member * len(fee_members)
+            for i, uid in enumerate(sorted(fee_members)):
                 share = fee_per_member + (1 if i < remainder else 0)
                 balances[uid] = balances.get(uid, 0) - share
 

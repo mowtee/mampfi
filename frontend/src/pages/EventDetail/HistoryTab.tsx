@@ -243,16 +243,26 @@ function PurchaseRow({
                       entry.totalMinor += qty * unitPrice;
                     }
                   }
-                  // Compute delivery fee share per member
-                  const memberCount = per.size;
+                  // Compute delivery fee share per member (excluding buyer)
                   const feeApplied = details.data.delivery_fee_applied;
                   const eventFee = deliveryFee;
+                  const feeRecipients = new Set(per.keys());
+                  feeRecipients.delete(row.buyer_id);
                   const feePerMember =
-                    feeApplied && memberCount > 0 ? Math.round(eventFee / memberCount) : 0;
-                  if (feePerMember > 0) {
-                    for (const [, entry] of per) {
-                      entry.totalMinor += feePerMember;
-                    }
+                    feeApplied && feeRecipients.size > 0
+                      ? Math.floor(eventFee / feeRecipients.size)
+                      : 0;
+                  const feeRemainder =
+                    feeApplied && feeRecipients.size > 0
+                      ? eventFee - feePerMember * feeRecipients.size
+                      : 0;
+                  if (feePerMember > 0 || feeRemainder > 0) {
+                    const sorted = [...feeRecipients].sort();
+                    sorted.forEach((id, i) => {
+                      const share = feePerMember + (i < feeRemainder ? 1 : 0);
+                      const entry = per.get(id);
+                      if (entry) entry.totalMinor += share;
+                    });
                   }
 
                   const rows = Array.from(per.entries());
@@ -272,26 +282,33 @@ function PurchaseRow({
                           </tr>
                         </thead>
                         <tbody>
-                          {rows.map(([id, v]) => (
-                            <tr key={id}>
-                              <td>{v.name}</td>
-                              <td>
-                                {v.items.map((it, i) => (
-                                  <span key={i} style={{ marginRight: 10 }}>
-                                    {it.qty}× {it.label}
-                                  </span>
-                                ))}
-                                {feePerMember > 0 && (
-                                  <span className="muted" style={{ marginRight: 10 }}>
-                                    + {t("day.deliveryFee")} ({formatMoney(feePerMember, currency)})
-                                  </span>
-                                )}
-                              </td>
-                              <td style={{ textAlign: "right" }}>
-                                {formatMoney(v.totalMinor, currency)}
-                              </td>
-                            </tr>
-                          ))}
+                          {rows.map(([id, v]) => {
+                            const hasFee = feeRecipients.has(id);
+                            const myFee = hasFee
+                              ? feePerMember +
+                                ([...feeRecipients].sort().indexOf(id) < feeRemainder ? 1 : 0)
+                              : 0;
+                            return (
+                              <tr key={id}>
+                                <td>{v.name}</td>
+                                <td>
+                                  {v.items.map((it, i) => (
+                                    <span key={i} style={{ marginRight: 10 }}>
+                                      {it.qty}× {it.label}
+                                    </span>
+                                  ))}
+                                  {myFee > 0 && (
+                                    <span className="muted" style={{ marginRight: 10 }}>
+                                      + {t("day.deliveryFee")} ({formatMoney(myFee, currency)})
+                                    </span>
+                                  )}
+                                </td>
+                                <td style={{ textAlign: "right" }}>
+                                  {formatMoney(v.totalMinor, currency)}
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
@@ -368,12 +385,19 @@ function PersonalHistory({
               total += sub;
             }
           }
-          // Add delivery fee share if applicable
+          // Add delivery fee share if applicable (buyer excluded from fee)
           let feeShare = 0;
-          if (purchase.delivery_fee_applied && memberIds.size > 0 && memberIds.has(meId)) {
-            const eventFee = deliveryFee;
-            feeShare = Math.round(eventFee / memberIds.size);
-            total += feeShare;
+          if (purchase.delivery_fee_applied && memberIds.has(meId) && meId !== purchase.buyer_id) {
+            const feeRecips = new Set(memberIds);
+            feeRecips.delete(purchase.buyer_id);
+            if (feeRecips.size > 0) {
+              const eventFee = deliveryFee;
+              feeShare = Math.floor(eventFee / feeRecips.size);
+              const rem = eventFee - feeShare * feeRecips.size;
+              const idx = [...feeRecips].sort().indexOf(meId);
+              if (idx >= 0 && idx < rem) feeShare += 1;
+              total += feeShare;
+            }
           }
           if (myItems.length === 0) return null;
           return { date: purchase.date, items: myItems, totalMinor: total, feeShare };
