@@ -33,6 +33,11 @@ export type PurchaseLine = {
   allocations?: Allocation[];
 };
 
+export type DeliveryFeeShare = {
+  user_id: string;
+  amount_minor: number;
+};
+
 export type Purchase = {
   event_id: string;
   date: string;
@@ -45,6 +50,7 @@ export type Purchase = {
   invalidated_by?: string | null;
   invalidation_reason?: string | null;
   delivery_fee_applied?: boolean;
+  delivery_fee_shares?: DeliveryFeeShare[];
   has_receipt?: boolean;
 };
 

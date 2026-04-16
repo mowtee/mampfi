@@ -6,15 +6,40 @@ from sqlmodel import Session, select
 from ..config import get_settings
 from ..exceptions import Conflict, DomainError, NotFound
 from ..models import Event, PriceItem, Purchase, User
-from ..schemas.purchases import InvalidatePurchaseIn, PurchaseCreateIn, PurchaseOut
+from ..schemas.purchases import (
+    DeliveryFeeShare,
+    InvalidatePurchaseIn,
+    PurchaseCreateIn,
+    PurchaseOut,
+)
 from ..services.email import notify_purchase_finalized
 from ..services.events import require_member, require_owner
 from ..timeutils import now_utc
 
 
-def _purchase_out(p: Purchase) -> PurchaseOut:
+def _purchase_out(p: Purchase, event_fee: int = 0) -> PurchaseOut:
     out = PurchaseOut.model_validate(p, from_attributes=True)
     out.has_receipt = bool(p.receipt_data)
+
+    if p.delivery_fee_applied and event_fee > 0:
+        # Collect members who received items, excluding buyer
+        members: set[str] = set()
+        for line in p.lines or []:
+            for alloc in line.get("allocations") or []:
+                qty = int(alloc.get("qty") or 0)
+                if qty > 0:
+                    members.add(str(alloc.get("user_id")))
+        members.discard(str(p.buyer_id))
+
+        if members:
+            fee_per = event_fee // len(members)
+            remainder = event_fee - fee_per * len(members)
+            shares = []
+            for i, uid in enumerate(sorted(members)):
+                share = fee_per + (1 if i < remainder else 0)
+                shares.append(DeliveryFeeShare(user_id=uid, amount_minor=share))
+            out.delivery_fee_shares = shares
+
     return out
 
 
@@ -129,7 +154,7 @@ def finalize_purchase(
     if notified:
         session.commit()
 
-    return _purchase_out(purchase)
+    return _purchase_out(purchase, int(ev.delivery_fee_minor or 0))
 
 
 def get_purchase(
@@ -147,7 +172,7 @@ def get_purchase(
     ).first()
     if not purchase:
         raise NotFound("purchase")
-    return _purchase_out(purchase)
+    return _purchase_out(purchase, int(ev.delivery_fee_minor or 0))
 
 
 def list_purchases(
@@ -169,7 +194,8 @@ def list_purchases(
         stmt = stmt.where(Purchase.date <= end_date)
     stmt = stmt.order_by(Purchase.date.desc(), Purchase.finalized_at.desc())
 
-    return [_purchase_out(p) for p in session.exec(stmt).all()]
+    fee = int(ev.delivery_fee_minor or 0)
+    return [_purchase_out(p, fee) for p in session.exec(stmt).all()]
 
 
 def invalidate_purchase(
@@ -200,7 +226,7 @@ def invalidate_purchase(
     session.add(purchase)
     session.commit()
     session.refresh(purchase)
-    return _purchase_out(purchase)
+    return _purchase_out(purchase, int(ev.delivery_fee_minor or 0))
 
 
 MAX_RECEIPT_SIZE = 10 * 1024 * 1024  # 10 MB
@@ -241,7 +267,7 @@ def upload_receipt(
     session.add(purchase)
     session.commit()
     session.refresh(purchase)
-    return _purchase_out(purchase)
+    return _purchase_out(purchase, int(ev.delivery_fee_minor or 0))
 
 
 def get_receipt(session: Session, event_id: uuid.UUID, for_date: dt.date, user: User) -> str:

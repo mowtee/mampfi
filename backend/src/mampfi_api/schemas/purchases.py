@@ -46,6 +46,11 @@ class InvalidatePurchaseIn(BaseModel):
     reason: str = Field(min_length=1, max_length=500)
 
 
+class DeliveryFeeShare(BaseModel):
+    user_id: str
+    amount_minor: int
+
+
 class PurchaseOut(BaseModel):
     event_id: uuid.UUID
     date: dt.date
@@ -58,4 +63,5 @@ class PurchaseOut(BaseModel):
     invalidated_by: uuid.UUID | None = None
     invalidation_reason: str | None = None
     delivery_fee_applied: bool = False
+    delivery_fee_shares: list[DeliveryFeeShare] = []
     has_receipt: bool = False
