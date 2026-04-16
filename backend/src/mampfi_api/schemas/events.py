@@ -76,5 +76,6 @@ class MemberOut(BaseModel):
     role: str
     joined_at: dt.datetime
     left_at: dt.datetime | None = None
+    banned_at: dt.datetime | None = None
     rollover_enabled: bool = True
     note: str | None = None

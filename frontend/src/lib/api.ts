@@ -86,6 +86,7 @@ export type Member = {
   role: string;
   joined_at: string;
   left_at?: string | null;
+  banned_at?: string | null;
   rollover_enabled?: boolean;
   note?: string | null;
 };
@@ -266,8 +267,13 @@ export const api = {
   },
   // Members
   listMembers: (eventId: UUID) => http<Member[]>(`/v1/events/${eventId}/members`),
-  removeMember: (eventId: UUID, userId: UUID) =>
-    http<void>(`/v1/events/${eventId}/members/${userId}/remove`, { method: "POST" }),
+  removeMember: (eventId: UUID, userId: UUID, ban: boolean = false) =>
+    http<{ status: string; balance_minor: number; currency: string; banned: boolean }>(
+      `/v1/events/${eventId}/members/${userId}/remove`,
+      { method: "POST", body: JSON.stringify({ ban }) },
+    ),
+  unbanMember: (eventId: UUID, userId: UUID) =>
+    http<{ status: string }>(`/v1/events/${eventId}/members/${userId}/unban`, { method: "POST" }),
   promoteMember: (eventId: UUID, userId: UUID) =>
     http<void>(`/v1/events/${eventId}/members/${userId}/promote`, { method: "POST" }),
   // Holidays

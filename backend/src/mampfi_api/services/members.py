@@ -111,7 +111,11 @@ def leave_event(session: Session, event_id: uuid.UUID, user: User) -> None:
 
 
 def remove_member(
-    session: Session, event_id: uuid.UUID, target_user_id: uuid.UUID, user: User
+    session: Session,
+    event_id: uuid.UUID,
+    target_user_id: uuid.UUID,
+    user: User,
+    ban: bool = False,
 ) -> dict:
     ev = get_event(session, event_id)
     require_owner(session, ev.id, user.id)
@@ -133,11 +137,42 @@ def remove_member(
     balances = compute_balances(session, ev.id)
     balance = int(balances.get(target_user_id, 0))
 
-    mem.left_at = now_utc()
+    now = now_utc()
+    mem.left_at = now
     mem.wants_to_leave = balance != 0
+    if ban:
+        mem.banned_at = now
     session.add(mem)
     session.commit()
-    return {"status": "removed", "balance_minor": balance, "currency": ev.currency}
+    return {
+        "status": "removed",
+        "balance_minor": balance,
+        "currency": ev.currency,
+        "banned": ban,
+    }
+
+
+def unban_member(
+    session: Session, event_id: uuid.UUID, target_user_id: uuid.UUID, user: User
+) -> dict:
+    ev = get_event(session, event_id)
+    require_owner(session, ev.id, user.id)
+
+    mem = session.exec(
+        select(Membership).where(
+            Membership.event_id == ev.id,
+            Membership.user_id == target_user_id,
+        )
+    ).first()
+    if not mem:
+        raise NotFound("member")
+    if mem.banned_at is None:
+        raise DomainError("member is not banned")
+
+    mem.banned_at = None
+    session.add(mem)
+    session.commit()
+    return {"status": "unbanned"}
 
 
 def promote_member(

@@ -210,6 +210,7 @@ def list_members(session: Session, event_id: uuid.UUID, user: User) -> list[Memb
             role=m.role,
             joined_at=m.joined_at,
             left_at=m.left_at,
+            banned_at=m.banned_at,
             rollover_enabled=m.rollover_enabled,
             note=m.note,
         )

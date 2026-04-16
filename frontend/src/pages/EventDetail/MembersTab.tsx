@@ -1,8 +1,9 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "../../lib/api";
+import { api, type Member } from "../../lib/api";
 import { formatMoney } from "../../lib/money";
+import { Modal, ModalActions, ModalBody } from "../../components/ui/Modal";
 import type { EventContextType } from "../../hooks/useEventContext";
 import { formatYMDToLocale } from "../../lib/date";
 
@@ -16,11 +17,24 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
   const { members, meId, isOwner, balances } = ctx;
   const qc = useQueryClient();
 
+  const [removeTarget, setRemoveTarget] = React.useState<Member | null>(null);
+  const [banChecked, setBanChecked] = React.useState(false);
+
   const remove = useMutation({
-    mutationFn: (userId: string) => api.removeMember(eventId, userId),
+    mutationFn: (vars: { userId: string; ban: boolean }) =>
+      api.removeMember(eventId, vars.userId, vars.ban),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["members", eventId] });
       qc.invalidateQueries({ queryKey: ["balances", eventId] });
+      setRemoveTarget(null);
+      setBanChecked(false);
+    },
+  });
+
+  const unban = useMutation({
+    mutationFn: (userId: string) => api.unbanMember(eventId, userId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["members", eventId] });
     },
   });
 
@@ -37,6 +51,17 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
       qc.invalidateQueries({ queryKey: ["members", eventId] });
     },
   });
+
+  const openRemove = (m: Member) => {
+    setRemoveTarget(m);
+    setBanChecked(false);
+  };
+
+  const targetBalance = React.useMemo(() => {
+    if (!removeTarget || !balances.data) return 0;
+    const bal = balances.data.totals.find((b) => b.user_id === removeTarget.user_id);
+    return Number(bal?.balance_minor || 0);
+  }, [removeTarget, balances.data]);
 
   return (
     <section className="section">
@@ -62,6 +87,7 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
               {members.data.map((m) => {
                 const name = (m.name && m.name.trim()) || m.email || m.user_id;
                 const isMe = m.user_id === meId;
+                const isBanned = !!m.banned_at;
                 const isActive = !m.left_at;
                 return (
                   <tr key={m.user_id}>
@@ -118,7 +144,9 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
                       )}
                     </td>
                     <td style={{ textAlign: "center" }}>
-                      {isActive ? (
+                      {isBanned ? (
+                        <span className="chip warn">{t("members.banned")}</span>
+                      ) : isActive ? (
                         <span className="chip open">{t("members.active")}</span>
                       ) : (
                         <span className="chip muted">{t("members.left")}</span>
@@ -148,26 +176,25 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
                               className="btn"
                               title={t("members.remove")}
                               disabled={remove.isPending}
+                              onClick={() => openRemove(m)}
+                              style={{ padding: "4px 8px", fontSize: 16 }}
+                            >
+                              ✕
+                            </button>
+                          )}
+                          {isBanned && !isMe && (
+                            <button
+                              className="btn"
+                              title={t("members.unban")}
+                              disabled={unban.isPending}
                               onClick={() => {
-                                const bal = (balances.data?.totals || []).find(
-                                  (b) => b.user_id === m.user_id,
-                                );
-                                const balMinor = Number(bal?.balance_minor || 0);
-                                const currency = balances.data?.currency || "";
-                                const msg =
-                                  balMinor !== 0
-                                    ? t("members.confirmRemoveUnbalanced", {
-                                        name,
-                                        amount: formatMoney(Math.abs(balMinor), currency),
-                                      })
-                                    : t("members.confirmRemove", { name });
-                                if (window.confirm(msg)) {
-                                  remove.mutate(m.user_id);
+                                if (window.confirm(t("members.confirmUnban", { name }))) {
+                                  unban.mutate(m.user_id);
                                 }
                               }}
                               style={{ padding: "4px 8px", fontSize: 16 }}
                             >
-                              ✕
+                              ↻
                             </button>
                           )}
                         </div>
@@ -184,7 +211,59 @@ export default function MembersTab({ ctx, eventId }: MembersTabProps) {
             {String(remove.error)}
           </div>
         )}
+        {unban.error && (
+          <div className="danger" style={{ marginTop: 8 }}>
+            {String(unban.error)}
+          </div>
+        )}
       </div>
+
+      {removeTarget && (
+        <Modal open onClose={() => setRemoveTarget(null)} size="sm" top>
+          <ModalBody>
+            <h3 style={{ marginTop: 0 }}>{t("members.remove")}</h3>
+            <p>
+              {targetBalance !== 0
+                ? t("members.confirmRemoveUnbalanced", {
+                    name: removeTarget.name || removeTarget.email || removeTarget.user_id,
+                    amount: formatMoney(Math.abs(targetBalance), balances.data?.currency || ""),
+                  })
+                : t("members.confirmRemove", {
+                    name: removeTarget.name || removeTarget.email || removeTarget.user_id,
+                  })}
+            </p>
+            <label className="row" style={{ alignItems: "center", gap: 8, marginTop: 12 }}>
+              <input
+                type="checkbox"
+                checked={banChecked}
+                onChange={(e) => setBanChecked(e.target.checked)}
+              />
+              <span>{t("members.banOption")}</span>
+            </label>
+            {banChecked && (
+              <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>
+                {t("members.banHint")}
+              </p>
+            )}
+          </ModalBody>
+          <ModalActions>
+            <button
+              className="btn"
+              onClick={() => setRemoveTarget(null)}
+              disabled={remove.isPending}
+            >
+              {t("app.cancel")}
+            </button>
+            <button
+              className="btn danger"
+              onClick={() => remove.mutate({ userId: removeTarget.user_id, ban: banChecked })}
+              disabled={remove.isPending}
+            >
+              {t("members.remove")}
+            </button>
+          </ModalActions>
+        </Modal>
+      )}
     </section>
   );
 }

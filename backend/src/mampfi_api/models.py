@@ -69,6 +69,10 @@ class Membership(SQLModel, table=True):
         default=None,
         sa_column=Column(SADateTime(timezone=True), nullable=True),
     )
+    banned_at: dt.datetime | None = Field(
+        default=None,
+        sa_column=Column(SADateTime(timezone=True), nullable=True),
+    )
     wants_to_leave: bool = Field(default=False)
     rollover_enabled: bool = Field(default=True)
     note: str | None = None  # e.g., allergy info

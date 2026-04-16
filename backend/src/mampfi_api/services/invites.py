@@ -120,8 +120,19 @@ def redeem_invite(session: Session, token: str, user: User) -> dict:
         raise NotFound("event")
 
     member = session.get(Membership, (user.id, ev.id))
-    if not member:
+    if member is None:
         session.add(Membership(user_id=user.id, event_id=ev.id, role="member", joined_at=now))
+    elif member.banned_at is not None:
+        raise DomainError("banned from this event")
+    elif member.left_at is not None:
+        # Reactivate on rejoin. Reset joined_at so rollover / active-date checks
+        # start fresh from today and don't phantom-fire pre-leave orders across
+        # the gap period.
+        member.left_at = None
+        member.wants_to_leave = False
+        member.joined_at = now
+        session.add(member)
+    # else: already active — idempotent
 
     inv.used_count += 1
     inv.last_used_at = now

@@ -16,3 +16,7 @@ class MemberNoteIn(BaseModel):
 
 class RolloverIn(BaseModel):
     enabled: bool
+
+
+class RemoveMemberIn(BaseModel):
+    ban: bool = False

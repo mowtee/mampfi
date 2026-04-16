@@ -6,7 +6,13 @@ from sqlmodel import Session
 from ..auth import get_current_user
 from ..db import session_dep
 from ..models import User
-from ..schemas.members import LeaveIntentIn, LeaveIntentOut, MemberNoteIn, RolloverIn
+from ..schemas.members import (
+    LeaveIntentIn,
+    LeaveIntentOut,
+    MemberNoteIn,
+    RemoveMemberIn,
+    RolloverIn,
+)
 from ..services import members as svc
 
 router = APIRouter(prefix="/v1/events/{event_id}/members", tags=["members"])
@@ -36,10 +42,22 @@ def leave_event(
 def remove_member(
     event_id: uuid.UUID,
     user_id: uuid.UUID,
+    data: RemoveMemberIn | None = None,
     session: Session = Depends(session_dep),
     user: User = Depends(get_current_user),
 ) -> dict:
-    return svc.remove_member(session, event_id, user_id, user)
+    ban = bool(data.ban) if data is not None else False
+    return svc.remove_member(session, event_id, user_id, user, ban=ban)
+
+
+@router.post("/{user_id}/unban")
+def unban_member(
+    event_id: uuid.UUID,
+    user_id: uuid.UUID,
+    session: Session = Depends(session_dep),
+    user: User = Depends(get_current_user),
+) -> dict:
+    return svc.unban_member(session, event_id, user_id, user)
 
 
 @router.post("/{user_id}/promote", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
