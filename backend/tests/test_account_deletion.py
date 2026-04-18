@@ -8,7 +8,7 @@ from sqlmodel import Session, select
 from mampfi_api.models import Membership, Payment, Purchase, RefreshToken, User
 from mampfi_api.timeutils import now_utc
 
-from .conftest import auth_headers, make_event, make_user
+from .conftest import auth_headers, make_user
 
 
 def test_preview_empty_blockers(client: TestClient, user):
@@ -58,9 +58,7 @@ def test_delete_blocked_by_nonzero_balance(
     )
     session.commit()
 
-    resp = client.get(
-        "/v1/auth/delete-account/preview", headers=auth_headers(other_user.email)
-    )
+    resp = client.get("/v1/auth/delete-account/preview", headers=auth_headers(other_user.email))
     body = resp.json()
     assert len(body["balance_events"]) == 1
     assert body["balance_events"][0]["balance_minor"] == -500
@@ -84,9 +82,7 @@ def test_delete_blocked_by_pending_outgoing_payment(
     )
     session.commit()
 
-    resp = client.get(
-        "/v1/auth/delete-account/preview", headers=auth_headers(other_user.email)
-    )
+    resp = client.get("/v1/auth/delete-account/preview", headers=auth_headers(other_user.email))
     body = resp.json()
     assert len(body["pending_payments"]) == 1
 
@@ -147,9 +143,7 @@ def test_delete_revokes_refresh_tokens(client: TestClient, session: Session, use
     _, _ = create_refresh_token(session, user.id, 30)
     session.commit()
 
-    tokens_before = session.exec(
-        select(RefreshToken).where(RefreshToken.user_id == user.id)
-    ).all()
+    tokens_before = session.exec(select(RefreshToken).where(RefreshToken.user_id == user.id)).all()
     assert any(t.revoked_at is None for t in tokens_before)
 
     resp = client.post(
@@ -160,9 +154,7 @@ def test_delete_revokes_refresh_tokens(client: TestClient, session: Session, use
     assert resp.status_code == 200
 
     session.expire_all()
-    tokens_after = session.exec(
-        select(RefreshToken).where(RefreshToken.user_id == user.id)
-    ).all()
+    tokens_after = session.exec(select(RefreshToken).where(RefreshToken.user_id == user.id)).all()
     assert all(t.revoked_at is not None for t in tokens_after)
 
 
