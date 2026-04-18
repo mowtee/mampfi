@@ -326,7 +326,7 @@ export default function PaymentsTab({ ctx, eventId }: PaymentsTabProps) {
                               <button
                                 onClick={() => {
                                   const reason =
-                                    window.prompt(t("payments.declineReason")) || undefined;
+                                    window.prompt(t("payments.declineReasonPrompt")) || undefined;
                                   declinePay.mutate({ id: p.id, reason });
                                 }}
                                 disabled={declinePay.isPending}
