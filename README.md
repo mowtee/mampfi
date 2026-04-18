@@ -1,6 +1,7 @@
 # Mampfi
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![CodeQL](https://github.com/mowtee/mampfi/actions/workflows/codeql.yml/badge.svg)](https://github.com/mowtee/mampfi/actions/workflows/codeql.yml)
 
 Group ordering made easy. Mampfi lets a group plan daily orders — one member buys, everyone else orders ahead, and the app tracks virtual balances. No external payment processor needed.
 
@@ -95,3 +96,10 @@ Create the files in `legal/` — they are gitignored since they contain operator
 ## API
 
 Swagger UI at `/docs` on the API host. Core resources: events, orders, purchases, payments, invites, balances, members, auth.
+
+## Security
+
+- **Dependabot** (`.github/dependabot.yml`) opens weekly PRs for outdated Python, npm, Docker, and GitHub Actions dependencies.
+- **CodeQL** (`.github/workflows/codeql.yml`) scans TypeScript and Python on every push, pull request, and weekly schedule. Findings land in the repo's Security → Code scanning tab.
+- **Secret scanning + push protection** are one-click settings in GitHub — **Settings → Code security**. Both are free for public repos and recommended. Enable them after forking.
+- **Private vulnerability reporting** (same settings page) lets researchers report issues privately via GitHub's UI before public disclosure.
