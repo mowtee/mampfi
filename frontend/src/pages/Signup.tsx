@@ -91,15 +91,23 @@ export default function Signup() {
             />
           </div>
           <div className="field">
-            <label className="row" style={{ alignItems: "flex-start", gap: 8, fontSize: 13 }}>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                flexWrap: "nowrap",
+                gap: 8,
+                fontSize: 13,
+              }}
+            >
               <input
                 type="checkbox"
                 required
                 checked={accepted}
                 onChange={(e) => setAccepted(e.target.checked)}
-                style={{ marginTop: 3 }}
+                style={{ marginTop: 3, flexShrink: 0 }}
               />
-              <span>
+              <span style={{ flex: 1 }}>
                 <Trans
                   i18nKey="auth.acceptTerms"
                   components={{
