@@ -25,7 +25,8 @@
     "signup": "Konto erstellen",
     "email": "E-Mail",
     "password": "Passwort",
-    "name": "Name (optional)",
+    "name": "Name",
+    "namePlaceholder": "z.B. Max oder Maxi",
     "loggingIn": "Anmeldung…",
     "creating": "Erstellen…",
     "createAccount": "Konto erstellen",
@@ -376,6 +377,7 @@
   "account": {
     "title": "Mein Konto",
     "info": "Kontoinformationen",
+    "nameSaved": "Gespeichert",
     "dangerZone": "Gefahrenbereich",
     "deleteHint": "Das Löschen deines Kontos entfernt deine persönlichen Daten. Beiträge in Events bleiben aus historischen Gründen erhalten, werden aber als „[gelöscht]\" angezeigt.",
     "deleteButton": "Konto löschen",

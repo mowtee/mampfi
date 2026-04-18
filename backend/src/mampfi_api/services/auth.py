@@ -184,7 +184,7 @@ def signup(
     session: Session,
     email: str,
     password: str,
-    name: str | None,
+    name: str,
     settings: Settings,
     locale: str | None = None,
 ) -> User:
@@ -192,7 +192,9 @@ def signup(
     if existing:
         raise Conflict("email already registered")
 
-    user = User(email=email, name=name, password_hash=hash_password(password), locale=locale)
+    user = User(
+        email=email, name=name.strip(), password_hash=hash_password(password), locale=locale
+    )
     session.add(user)
     session.flush()  # get user.id before building token
 

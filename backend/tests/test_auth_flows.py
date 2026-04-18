@@ -78,19 +78,27 @@ def test_signup_creates_user(client: TestClient, session: Session):
 def test_signup_duplicate_email(client: TestClient):
     client.post(
         "/v1/auth/signup",
-        json={"email": "dup@example.com", "password": "testpass123"},
+        json={"email": "dup@example.com", "password": "testpass123", "name": "A"},
     )
     resp = client.post(
         "/v1/auth/signup",
-        json={"email": "dup@example.com", "password": "otherpass123"},
+        json={"email": "dup@example.com", "password": "otherpass123", "name": "A"},
     )
     assert resp.status_code == 409
+
+
+def test_signup_requires_name(client: TestClient):
+    resp = client.post(
+        "/v1/auth/signup",
+        json={"email": "noname@example.com", "password": "testpass123"},
+    )
+    assert resp.status_code == 422
 
 
 def test_login_unverified_fails(client: TestClient):
     client.post(
         "/v1/auth/signup",
-        json={"email": "unverified@example.com", "password": "testpass123"},
+        json={"email": "unverified@example.com", "password": "testpass123", "name": "A"},
     )
     resp = client.post(
         "/v1/auth/login",
@@ -103,7 +111,7 @@ def test_login_unverified_fails(client: TestClient):
 def test_login_wrong_password(client: TestClient, session: Session):
     client.post(
         "/v1/auth/signup",
-        json={"email": "wrong@example.com", "password": "testpass123"},
+        json={"email": "wrong@example.com", "password": "testpass123", "name": "A"},
     )
     # Manually verify
     user = session.exec(select(User).where(User.email == "wrong@example.com")).first()
@@ -156,7 +164,7 @@ def test_refresh_rotates_token(client: TestClient, session: Session):
     # Setup: create verified user and login
     client.post(
         "/v1/auth/signup",
-        json={"email": "refresh@example.com", "password": "testpass123"},
+        json={"email": "refresh@example.com", "password": "testpass123", "name": "A"},
     )
     user = session.exec(select(User).where(User.email == "refresh@example.com")).first()
     user.email_verified_at = now_utc()
@@ -178,7 +186,7 @@ def test_refresh_reuse_revokes_family(client: TestClient, session: Session):
     # Setup
     client.post(
         "/v1/auth/signup",
-        json={"email": "reuse@example.com", "password": "testpass123"},
+        json={"email": "reuse@example.com", "password": "testpass123", "name": "A"},
     )
     user = session.exec(select(User).where(User.email == "reuse@example.com")).first()
     user.email_verified_at = now_utc()
@@ -214,7 +222,7 @@ def test_refresh_reuse_revokes_family(client: TestClient, session: Session):
 def test_logout_clears_cookies(client: TestClient, session: Session):
     client.post(
         "/v1/auth/signup",
-        json={"email": "logout@example.com", "password": "testpass123"},
+        json={"email": "logout@example.com", "password": "testpass123", "name": "A"},
     )
     user = session.exec(select(User).where(User.email == "logout@example.com")).first()
     user.email_verified_at = now_utc()
@@ -246,7 +254,7 @@ def test_password_reset_flow(client: TestClient, session: Session):
     # Signup + verify
     client.post(
         "/v1/auth/signup",
-        json={"email": "reset@example.com", "password": "oldpass123"},
+        json={"email": "reset@example.com", "password": "oldpass123", "name": "A"},
     )
     user = session.exec(select(User).where(User.email == "reset@example.com")).first()
     user.email_verified_at = now_utc()

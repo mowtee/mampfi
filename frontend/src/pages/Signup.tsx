@@ -22,7 +22,7 @@ export default function Signup() {
     setError(null);
     setLoading(true);
     try {
-      await api.signup(email, password, name || undefined, i18n.language);
+      await api.signup(email, password, name.trim(), i18n.language);
       if (next !== "/") localStorage.setItem("authNext", next);
       setDone(true);
     } catch (err) {
@@ -69,7 +69,15 @@ export default function Signup() {
           </div>
           <div className="field">
             <label className="muted">{t("auth.name")}</label>
-            <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
+            <input
+              className="input"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              minLength={1}
+              maxLength={200}
+              placeholder={t("auth.namePlaceholder")}
+            />
           </div>
           <div className="field">
             <label className="muted">{t("auth.password")}</label>

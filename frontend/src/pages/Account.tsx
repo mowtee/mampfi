@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { formatMoney } from "../lib/money";
@@ -12,6 +12,25 @@ export default function Account() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const qc = useQueryClient();
+
+  const [nameDraft, setNameDraft] = React.useState(user?.name || "");
+  const [nameSaved, setNameSaved] = React.useState(false);
+
+  React.useEffect(() => {
+    setNameDraft(user?.name || "");
+  }, [user?.name]);
+
+  const updateName = useMutation({
+    mutationFn: (name: string) => api.updateMe(name),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["auth", "me"] });
+      setNameSaved(true);
+      setTimeout(() => setNameSaved(false), 2000);
+    },
+  });
+
+  const nameChanged = nameDraft.trim() !== (user?.name || "") && nameDraft.trim().length > 0;
 
   const [modalOpen, setModalOpen] = React.useState(false);
   const [confirmation, setConfirmation] = React.useState("");
@@ -59,11 +78,32 @@ export default function Account() {
           <div className="muted" style={{ marginBottom: 4 }}>
             {t("auth.email")}
           </div>
-          <div style={{ marginBottom: 12 }}>{user?.email}</div>
+          <div style={{ marginBottom: 16 }}>{user?.email}</div>
           <div className="muted" style={{ marginBottom: 4 }}>
             {t("auth.name")}
           </div>
-          <div>{user?.name || <span className="muted">—</span>}</div>
+          <div className="row" style={{ gap: 8 }}>
+            <input
+              className="input"
+              value={nameDraft}
+              onChange={(e) => {
+                setNameDraft(e.target.value);
+                setNameSaved(false);
+              }}
+              minLength={1}
+              maxLength={200}
+              style={{ maxWidth: 320 }}
+            />
+            <button
+              className="btn primary"
+              onClick={() => updateName.mutate(nameDraft.trim())}
+              disabled={!nameChanged || updateName.isPending}
+            >
+              {updateName.isPending ? t("app.loading") : t("app.save")}
+            </button>
+            {nameSaved && <span className="ok">{t("account.nameSaved")}</span>}
+            {updateName.error && <span className="danger">{String(updateName.error)}</span>}
+          </div>
         </div>
       </section>
 

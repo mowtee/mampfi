@@ -25,7 +25,8 @@
     "signup": "Create account",
     "email": "Email",
     "password": "Password",
-    "name": "Name (optional)",
+    "name": "Name",
+    "namePlaceholder": "e.g. Max or Maxi",
     "loggingIn": "Logging in…",
     "creating": "Creating…",
     "createAccount": "Create account",
@@ -376,6 +377,7 @@
   "account": {
     "title": "My Account",
     "info": "Account information",
+    "nameSaved": "Saved",
     "dangerZone": "Danger zone",
     "deleteHint": "Deleting your account removes your personal data. Contributions to events are preserved for accounting reasons but show up as \"[deleted]\".",
     "deleteButton": "Delete account",
