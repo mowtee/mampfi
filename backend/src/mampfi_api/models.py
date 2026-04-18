@@ -28,6 +28,9 @@ class User(SQLModel, table=True):
     email_verified_at: dt.datetime | None = Field(
         default=None, sa_column=Column(SADateTime(timezone=True), nullable=True)
     )
+    deleted_at: dt.datetime | None = Field(
+        default=None, sa_column=Column(SADateTime(timezone=True), nullable=True)
+    )
     created_at: dt.datetime = Field(
         default_factory=now_utc,
         sa_column=Column(SADateTime(timezone=True), nullable=False),

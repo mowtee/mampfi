@@ -12,7 +12,7 @@ from sqlmodel import Session, select
 
 from ..config import Settings
 from ..exceptions import Conflict, DomainError
-from ..models import RefreshToken, User
+from ..models import EmailOutbox, Membership, Payment, PaymentEvent, RefreshToken, User
 from ..timeutils import now_utc
 
 _ph = PasswordHasher()
@@ -211,6 +211,9 @@ def login(session: Session, email: str, password: str, settings: Settings) -> tu
     if not user or not user.password_hash or not verify_password(password, user.password_hash):
         raise DomainError("invalid email or password")
 
+    if user.deleted_at is not None:
+        raise DomainError("invalid email or password")
+
     if not user.email_verified_at:
         raise DomainError("email not verified")
 
@@ -268,4 +271,147 @@ def reset_password(session: Session, token: str, new_password: str, secret: str)
 
 def logout(session: Session, raw_refresh_token: str) -> None:
     revoke_token(session, raw_refresh_token)
+    session.commit()
+
+
+# ---------------------------------------------------------------------------
+# Account deletion
+# ---------------------------------------------------------------------------
+
+
+def compute_delete_blockers(session: Session, user: User) -> dict:
+    """Return a structured list of things that would prevent account deletion.
+
+    Keys are empty when there are no blockers.
+    """
+    from ..models import Event
+    from .balances import compute_balances
+
+    my_memberships = session.exec(
+        select(Membership).where(
+            Membership.user_id == user.id,
+            Membership.left_at.is_(None),  # type: ignore[union-attr]
+        )
+    ).all()
+
+    sole_owner_events: list[dict] = []
+    balance_events: list[dict] = []
+
+    for mem in my_memberships:
+        ev = session.get(Event, mem.event_id)
+        if ev is None:
+            continue
+
+        if mem.role == "owner":
+            # Check if another active owner exists
+            other_owner = session.exec(
+                select(Membership).where(
+                    Membership.event_id == ev.id,
+                    Membership.role == "owner",
+                    Membership.user_id != user.id,
+                    Membership.left_at.is_(None),  # type: ignore[union-attr]
+                )
+            ).first()
+            if other_owner is None:
+                sole_owner_events.append({"id": str(ev.id), "name": ev.name})
+
+        balances = compute_balances(session, ev.id)
+        bal = int(balances.get(user.id, 0))
+        if bal != 0:
+            balance_events.append(
+                {
+                    "id": str(ev.id),
+                    "name": ev.name,
+                    "balance_minor": bal,
+                    "currency": ev.currency,
+                }
+            )
+
+    pending_payments = session.exec(
+        select(Payment).where(
+            Payment.from_user_id == user.id,
+            Payment.status == "pending",
+        )
+    ).all()
+    pending_out = [
+        {
+            "id": str(p.id),
+            "event_id": str(p.event_id),
+            "to_user_id": str(p.to_user_id),
+            "amount_minor": int(p.amount_minor),
+            "currency": p.currency,
+        }
+        for p in pending_payments
+    ]
+
+    return {
+        "sole_owner_events": sole_owner_events,
+        "balance_events": balance_events,
+        "pending_payments": pending_out,
+    }
+
+
+def delete_self_account(session: Session, user: User, confirmation: str) -> None:
+    if confirmation.strip().lower() != (user.email or "").strip().lower():
+        raise DomainError("confirmation does not match account email")
+
+    blockers = compute_delete_blockers(session, user)
+    if any(blockers[k] for k in blockers):
+        raise Conflict({"reason": "has_blockers", **blockers})
+
+    now = now_utc()
+
+    # Auto-decline any incoming pending payments so counterparts aren't stuck
+    # waiting for confirmation forever.
+    incoming = session.exec(
+        select(Payment).where(
+            Payment.to_user_id == user.id,
+            Payment.status == "pending",
+        )
+    ).all()
+    for p in incoming:
+        p.status = "declined"
+        p.decided_at = now
+        p.version = (p.version or 1) + 1
+        session.add(p)
+        session.add(
+            PaymentEvent(
+                payment_id=p.id,
+                event_id=p.event_id,
+                event_type="declined",
+                actor_id=user.id,
+                at=now,
+                note="recipient account deleted",
+            )
+        )
+
+    # Left + banned on every membership (including already-left ones, for symmetry)
+    for mem in session.exec(select(Membership).where(Membership.user_id == user.id)).all():
+        if mem.left_at is None:
+            mem.left_at = now
+        mem.banned_at = now
+        mem.wants_to_leave = False
+        session.add(mem)
+
+    # Revoke all refresh tokens
+    revoke_all_user_tokens(session, user.id)
+
+    # Purge unsent outbox entries for this email
+    outbox_rows = session.exec(
+        select(EmailOutbox).where(
+            EmailOutbox.to_email == user.email,
+            EmailOutbox.sent_at.is_(None),  # type: ignore[union-attr]
+        )
+    ).all()
+    for row in outbox_rows:
+        session.delete(row)
+
+    # Tombstone the user row
+    user.email = f"deleted-{user.id}@deleted.local"
+    user.name = None
+    user.password_hash = None
+    user.email_verified_at = None
+    user.locale = None
+    user.deleted_at = now
+    session.add(user)
     session.commit()

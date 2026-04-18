@@ -343,6 +343,24 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ token, password }),
     }),
+  previewDeleteAccount: () => http<DeleteAccountBlockers>(`/v1/auth/delete-account/preview`),
+  deleteAccount: (confirmation: string) =>
+    http<{ status: string }>(`/v1/auth/delete-account`, {
+      method: "POST",
+      body: JSON.stringify({ confirmation }),
+    }),
+};
+
+export type DeleteAccountBlockers = {
+  sole_owner_events: { id: UUID; name: string }[];
+  balance_events: { id: UUID; name: string; balance_minor: number; currency: string }[];
+  pending_payments: {
+    id: UUID;
+    event_id: UUID;
+    to_user_id: UUID;
+    amount_minor: number;
+    currency: string;
+  }[];
 };
 
 export type AuthUser = {

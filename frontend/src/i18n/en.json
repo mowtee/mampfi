@@ -49,7 +49,9 @@
     "setNewPassword": "Set new password",
     "saving": "Saving…",
     "passwordUpdated": "Password updated",
-    "passwordUpdatedBody": "Your password has been reset."
+    "passwordUpdatedBody": "Your password has been reset.",
+    "acceptTerms": "I accept the <terms>Terms of Use</terms> and the <privacy>Privacy Policy</privacy>.",
+    "accountDeleted": "Your account has been deleted."
   },
   "events": {
     "title": "My Events",
@@ -370,5 +372,21 @@
     "legalNotice": "Legal Notice",
     "privacy": "Privacy",
     "terms": "Terms"
+  },
+  "account": {
+    "title": "My Account",
+    "info": "Account information",
+    "dangerZone": "Danger zone",
+    "deleteHint": "Deleting your account removes your personal data. Contributions to events are preserved for accounting reasons but show up as \"[deleted]\".",
+    "deleteButton": "Delete account",
+    "deleteTitle": "Really delete your account?",
+    "blockersIntro": "Please resolve the following first:",
+    "soleOwnerTitle": "Sole admin",
+    "balanceTitle": "Open balances",
+    "pendingTitle": "Pending payments",
+    "readyToDelete": "Deleting your account is irreversible. To confirm, please type your email address.",
+    "confirmLabel": "Type {{email}} to confirm",
+    "deleteFinal": "Delete account permanently",
+    "deleting": "Deleting…"
   }
 }

@@ -34,3 +34,7 @@ class AuthUserOut(BaseModel):
     name: str | None = None
     locale: str | None = None
     email_verified: bool
+
+
+class DeleteAccountIn(BaseModel):
+    confirmation: str = Field(min_length=1, max_length=320)

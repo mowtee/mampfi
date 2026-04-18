@@ -49,7 +49,9 @@
     "setNewPassword": "Neues Passwort setzen",
     "saving": "Speichern…",
     "passwordUpdated": "Passwort aktualisiert",
-    "passwordUpdatedBody": "Dein Passwort wurde zurückgesetzt."
+    "passwordUpdatedBody": "Dein Passwort wurde zurückgesetzt.",
+    "acceptTerms": "Ich akzeptiere die <terms>Nutzungsbedingungen</terms> und die <privacy>Datenschutzerklärung</privacy>.",
+    "accountDeleted": "Dein Konto wurde gelöscht."
   },
   "events": {
     "title": "Meine Events",
@@ -370,5 +372,21 @@
     "legalNotice": "Impressum",
     "privacy": "Datenschutz",
     "terms": "Nutzungsbedingungen"
+  },
+  "account": {
+    "title": "Mein Konto",
+    "info": "Kontoinformationen",
+    "dangerZone": "Gefahrenbereich",
+    "deleteHint": "Das Löschen deines Kontos entfernt deine persönlichen Daten. Beiträge in Events bleiben aus historischen Gründen erhalten, werden aber als „[gelöscht]\" angezeigt.",
+    "deleteButton": "Konto löschen",
+    "deleteTitle": "Konto wirklich löschen?",
+    "blockersIntro": "Bitte kläre zunächst folgende offene Punkte:",
+    "soleOwnerTitle": "Alleiniger Admin",
+    "balanceTitle": "Offene Salden",
+    "pendingTitle": "Ausstehende Zahlungen",
+    "readyToDelete": "Nach dem Löschen ist dein Konto unwiderruflich deaktiviert. Zur Bestätigung gib bitte deine E-Mail-Adresse ein.",
+    "confirmLabel": "Tippe {{email}} zur Bestätigung",
+    "deleteFinal": "Konto endgültig löschen",
+    "deleting": "Lösche…"
   }
 }

@@ -31,7 +31,11 @@ export default function App() {
           <img src="/logo.png" alt="Mampfi" style={{ height: 72 }} />
         </Link>
         <span className="spacer" />
-        {user && <span className="muted">{user.name || user.email}</span>}
+        {user && (
+          <Link to="/account" className="muted" style={{ textDecoration: "none" }}>
+            {user.name || user.email}
+          </Link>
+        )}
         <select
           className="input select"
           value={i18n.language}

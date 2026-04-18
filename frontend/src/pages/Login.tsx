@@ -16,6 +16,7 @@ export default function Login() {
   const qc = useQueryClient();
   const [search] = useSearchParams();
   const next = search.get("next") || localStorage.getItem("authNext") || "/";
+  const justDeleted = search.get("deleted") === "1";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,6 +39,11 @@ export default function Login() {
       <div style={{ display: "flex", justifyContent: "center", marginBottom: 32, marginTop: 16 }}>
         <img src="/logo.png" alt="Mampfi" style={{ height: 180 }} />
       </div>
+      {justDeleted && (
+        <div className="ok" style={{ marginBottom: 16, textAlign: "center" }}>
+          {t("auth.accountDeleted")}
+        </div>
+      )}
       <form onSubmit={handleSubmit}>
         <div className="vstack">
           <div className="field">

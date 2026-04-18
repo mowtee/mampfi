@@ -202,20 +202,23 @@ def list_members(session: Session, event_id: uuid.UUID, user: User) -> list[Memb
     if user_ids:
         for u in session.exec(select(User).where(User.id.in_(user_ids))).all():
             users[u.id] = u
-    return [
-        MemberOut(
+
+    def _out(m: Membership) -> MemberOut:
+        u = users.get(m.user_id)
+        deleted = bool(u and u.deleted_at is not None)
+        return MemberOut(
             user_id=m.user_id,
-            email=(users[m.user_id].email if m.user_id in users else None),
-            name=(users[m.user_id].name if m.user_id in users else None),
+            email=None if deleted or u is None else u.email,
+            name=("[deleted]" if deleted else (u.name if u else None)),
             role=m.role,
             joined_at=m.joined_at,
             left_at=m.left_at,
             banned_at=m.banned_at,
             rollover_enabled=m.rollover_enabled,
-            note=m.note,
+            note=None if deleted else m.note,
         )
-        for m in mems
-    ]
+
+    return [_out(m) for m in mems]
 
 
 def delete_event(session: Session, event_id: uuid.UUID, user: User) -> None:

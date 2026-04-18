@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { errorMessage } from "../lib/errors";
 import LegalFooter from "../components/LegalFooter";
@@ -10,6 +10,7 @@ export default function Signup() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [name, setName] = React.useState("");
+  const [accepted, setAccepted] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [done, setDone] = React.useState(false);
@@ -81,8 +82,28 @@ export default function Signup() {
               minLength={8}
             />
           </div>
+          <div className="field">
+            <label className="row" style={{ alignItems: "flex-start", gap: 8, fontSize: 13 }}>
+              <input
+                type="checkbox"
+                required
+                checked={accepted}
+                onChange={(e) => setAccepted(e.target.checked)}
+                style={{ marginTop: 3 }}
+              />
+              <span>
+                <Trans
+                  i18nKey="auth.acceptTerms"
+                  components={{
+                    terms: <Link to="/terms" target="_blank" rel="noopener noreferrer" />,
+                    privacy: <Link to="/privacy" target="_blank" rel="noopener noreferrer" />,
+                  }}
+                />
+              </span>
+            </label>
+          </div>
           {error && <div className="danger">{error}</div>}
-          <button className="btn primary" type="submit" disabled={loading}>
+          <button className="btn primary" type="submit" disabled={loading || !accepted}>
             {loading ? t("auth.creating") : t("auth.createAccount")}
           </button>
           <div className="muted" style={{ marginTop: 8 }}>

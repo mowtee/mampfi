@@ -15,6 +15,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Signup from "./pages/Signup";
 import VerifyEmail from "./pages/VerifyEmail";
 import LegalPage from "./pages/LegalPage";
+import Account from "./pages/Account";
 import "./tailwind.css";
 import "./styles.css";
 
@@ -62,6 +63,7 @@ createRoot(el).render(
               <Route index element={<EventsList />} />
               <Route path="/events/:eventId" element={<EventDetail />} />
               <Route path="/events/new" element={<NewEvent />} />
+              <Route path="/account" element={<Account />} />
             </Route>
           </Route>
         </Routes>

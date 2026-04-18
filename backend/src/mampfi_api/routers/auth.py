@@ -9,6 +9,7 @@ from ..db import session_dep
 from ..models import User
 from ..schemas.auth import (
     AuthUserOut,
+    DeleteAccountIn,
     ForgotPasswordIn,
     LoginIn,
     ResetPasswordIn,
@@ -142,3 +143,24 @@ def reset_password(
 @router.get("/me")
 def auth_me(user: User = Depends(get_current_user)) -> AuthUserOut:
     return _user_out(user)
+
+
+@router.get("/delete-account/preview")
+def delete_account_preview(
+    session: Session = Depends(session_dep),
+    user: User = Depends(get_current_user),
+) -> dict:
+    return auth_svc.compute_delete_blockers(session, user)
+
+
+@router.post("/delete-account")
+def delete_account(
+    data: DeleteAccountIn,
+    response: Response,
+    session: Session = Depends(session_dep),
+    user: User = Depends(get_current_user),
+    settings: Settings = Depends(get_settings),
+) -> dict:
+    auth_svc.delete_self_account(session, user, data.confirmation)
+    _clear_auth_cookies(response, settings)
+    return {"status": "deleted"}
