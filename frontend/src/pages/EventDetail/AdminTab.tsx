@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, type Event } from "../../lib/api";
 import { formatMoney, parseMoneyToMinor } from "../../lib/money";
+import MoneyInput from "../../components/MoneyInput";
 import type { EventContextType } from "../../hooks/useEventContext";
 import type { Invite } from "../../lib/types";
 
@@ -264,11 +265,10 @@ function PriceListAdmin({ eventId, currency }: { eventId: string; currency: stri
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        <input
-          className="input"
+        <MoneyInput
           placeholder={t("admin.pricePlaceholder")}
           value={price}
-          onChange={(e) => setPrice(e.target.value)}
+          onChange={setPrice}
           style={{ width: 160 }}
         />
         <span className="muted">{currency}</span>
@@ -593,12 +593,10 @@ function DeliveryFeeEditor({
   const unchanged = fee.trim() === currentDisplay;
   return (
     <div className="row">
-      <input
-        className="input"
+      <MoneyInput
         placeholder={t("admin.deliveryFeePlaceholder")}
         value={fee}
-        onChange={(e) => setFee(e.target.value)}
-        inputMode="decimal"
+        onChange={setFee}
         style={{ width: 160 }}
       />
       <span className="muted">{currency}</span>

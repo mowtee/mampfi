@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { parseMoneyToMinor } from "../lib/money";
 import DateField from "../components/DateField";
+import MoneyInput from "../components/MoneyInput";
 
 export default function NewEvent() {
   const { t } = useTranslation();
@@ -174,11 +175,10 @@ export default function NewEvent() {
                     maxLength={36}
                     onChange={(e) => updateItem(idx, "name", e.target.value)}
                   />
-                  <input
-                    className="input"
+                  <MoneyInput
                     placeholder={t("newEvent.pricePlaceholder")}
                     value={it.price}
-                    onChange={(e) => updateItem(idx, "price", e.target.value)}
+                    onChange={(v) => updateItem(idx, "price", v)}
                     style={{ width: 160 }}
                   />
                   <span className="muted">{currency}</span>

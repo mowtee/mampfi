@@ -41,6 +41,26 @@ export function parseMoneyToMinor(input: string): number {
   return Math.round(num * 100);
 }
 
+// Filter a raw input string down to a valid money-entry draft string.
+// Keeps digits and a single separator (, or .), truncates fractional part to 2 digits,
+// and strips everything else. Returns the cleaned string (may be empty or end on a
+// trailing separator while the user is still typing). Feed the result straight into
+// an input's `value`.
+export function filterMoneyInput(raw: string): string {
+  if (raw == null) return "";
+  // Keep digits, commas, dots
+  let s = String(raw).replace(/[^0-9.,]/g, "");
+  // Find the first separator, drop any further commas/dots entirely
+  const firstSep = s.search(/[.,]/);
+  if (firstSep !== -1) {
+    const sep = s[firstSep];
+    const head = s.slice(0, firstSep);
+    const tail = s.slice(firstSep + 1).replace(/[.,]/g, "");
+    s = head + sep + tail.slice(0, 2);
+  }
+  return s;
+}
+
 // Format minor units (integer cents) with Intl.NumberFormat to a currency string
 // Example: formatMoney(1234, 'EUR') -> "€12.34" (locale-dependent symbol/placement)
 export function formatMoney(minor: number, currency: string, locale?: string): string {

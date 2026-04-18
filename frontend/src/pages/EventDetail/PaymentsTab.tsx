@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { api } from "../../lib/api";
 import { formatMoney, parseMoneyToMinor } from "../../lib/money";
+import MoneyInput from "../../components/MoneyInput";
 import type { EventContextType } from "../../hooks/useEventContext";
 import type { BalanceLine, LeaveErrorPayload, Payment } from "../../lib/types";
 
@@ -441,12 +442,10 @@ function NewPaymentForm({
           ))}
         </select>
         <label className="muted">{t("payments.amount")}</label>
-        <input
-          className="input"
+        <MoneyInput
           value={payAmount}
-          onChange={(e) => setPayAmount(e.target.value)}
+          onChange={setPayAmount}
           placeholder={t("payments.amountPlaceholder")}
-          inputMode="decimal"
           style={{ width: 140 }}
         />
         <span className="muted">{currency}</span>
