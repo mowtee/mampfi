@@ -12,7 +12,7 @@ from sqlalchemy.engine import Engine
 from sqlmodel import Session, select
 
 from .config import Settings, get_settings
-from .logging import setup_logging
+from .log_config import setup_logging
 from .models import (
     DailyOrder,
     EmailOutbox,

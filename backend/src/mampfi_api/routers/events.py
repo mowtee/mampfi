@@ -8,6 +8,7 @@ from ..db import session_dep
 from ..models import Event, PriceItem, User
 from ..schemas.events import EventCreate, EventUpdate, EventWithMe, MemberOut, PriceItemAdd
 from ..services import events as svc
+from ..services.memberships import get_event_as_member
 
 router = APIRouter(prefix="/v1/events", tags=["events"])
 
@@ -35,7 +36,7 @@ def get_event(
     session: Session = Depends(session_dep),
     user: User = Depends(get_current_user),
 ) -> Event:
-    return svc.get_event_as_member(session, event_id, user)
+    return get_event_as_member(session, event_id, user)
 
 
 @router.patch("/{event_id}", response_model=Event)

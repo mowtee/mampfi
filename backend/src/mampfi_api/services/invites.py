@@ -8,7 +8,7 @@ from sqlmodel import Session, select
 from ..exceptions import DomainError, NotFound
 from ..models import Event, InviteToken, Membership, User
 from ..schemas.invites import GroupInviteIn, InviteOut, SingleInviteIn
-from ..services.events import get_event, require_owner
+from ..services.memberships import get_event, require_owner
 from ..timeutils import now_utc
 
 

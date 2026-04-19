@@ -13,7 +13,7 @@ from ..schemas.purchases import (
     PurchaseOut,
 )
 from ..services.email import notify_purchase_finalized
-from ..services.events import require_member, require_owner
+from ..services.memberships import require_member, require_owner
 from ..timeutils import now_utc
 
 

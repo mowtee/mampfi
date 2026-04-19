@@ -6,7 +6,7 @@ from ..exceptions import Conflict, DomainError, NotFound
 from ..models import Event, Membership, User
 from ..schemas.members import LeaveIntentOut
 from ..services.balances import compute_balances
-from ..services.events import get_event, require_member, require_owner
+from ..services.memberships import get_event, require_member, require_owner
 from ..timeutils import now_utc
 
 

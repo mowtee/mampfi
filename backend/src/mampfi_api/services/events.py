@@ -3,7 +3,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from sqlmodel import Session, select
 
-from ..exceptions import DomainError, Forbidden, NotFound
+from ..exceptions import DomainError, NotFound
 from ..models import (
     DailyOrder,
     Event,
@@ -17,34 +17,8 @@ from ..models import (
 )
 from ..schemas.events import EventCreate, EventUpdate, EventWithMe, MemberOut, PriceItemAdd
 from ..timeutils import now_utc
-
-
-def require_member(session: Session, event_id: uuid.UUID, user_id: uuid.UUID) -> Membership:
-    """Return the membership or raise Forbidden. Does not check for event existence."""
-    m = session.get(Membership, (user_id, event_id))
-    if not m:
-        raise Forbidden("not a member of this event")
-    return m
-
-
-def require_owner(session: Session, event_id: uuid.UUID, user_id: uuid.UUID) -> Membership:
-    m = session.get(Membership, (user_id, event_id))
-    if not m or m.role != "owner":
-        raise Forbidden("owner role required")
-    return m
-
-
-def get_event(session: Session, event_id: uuid.UUID) -> Event:
-    ev = session.get(Event, event_id)
-    if ev is None:
-        raise NotFound("event")
-    return ev
-
-
-def get_event_as_member(session: Session, event_id: uuid.UUID, user: User) -> Event:
-    ev = get_event(session, event_id)
-    require_member(session, ev.id, user.id)
-    return ev
+from .balances import compute_balances
+from .memberships import get_event, require_member, require_owner
 
 
 def validate_timezone(timezone: str) -> None:
@@ -227,8 +201,6 @@ def delete_event(session: Session, event_id: uuid.UUID, user: User) -> None:
     require_owner(session, ev.id, user.id)
 
     # Collect member info before deletion for notifications
-    from ..services.balances import compute_balances
-
     mems = session.exec(select(Membership).where(Membership.event_id == ev.id)).all()
     balances = compute_balances(session, ev.id)
     deleter_name = user.name or user.email

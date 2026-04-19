@@ -12,8 +12,9 @@ from sqlmodel import Session, select
 
 from ..config import Settings
 from ..exceptions import Conflict, DomainError
-from ..models import EmailOutbox, Membership, Payment, PaymentEvent, RefreshToken, User
+from ..models import EmailOutbox, Event, Membership, Payment, PaymentEvent, RefreshToken, User
 from ..timeutils import now_utc
+from .balances import compute_balances
 
 _ph = PasswordHasher()
 
@@ -286,9 +287,6 @@ def compute_delete_blockers(session: Session, user: User) -> dict:
 
     Keys are empty when there are no blockers.
     """
-    from ..models import Event
-    from .balances import compute_balances
-
     my_memberships = session.exec(
         select(Membership).where(
             Membership.user_id == user.id,

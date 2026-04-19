@@ -7,7 +7,7 @@ from ..exceptions import Conflict, DomainError, Forbidden, NotFound
 from ..models import Event, Payment, PaymentEvent, User
 from ..schemas.payments import DeclineIn, PaymentCreateIn, PaymentEventOut, PaymentOut
 from ..services.email import notify_payment_confirmed, notify_payment_created
-from ..services.events import require_member
+from ..services.memberships import require_member
 from ..timeutils import now_utc
 
 

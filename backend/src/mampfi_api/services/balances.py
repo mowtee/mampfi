@@ -4,7 +4,7 @@ from sqlmodel import Session, select
 
 from ..models import Event, Membership, Payment, Purchase, User
 from ..schemas.balances import BalanceLine, BalancesOut
-from ..services.events import get_event, require_member
+from ..services.memberships import get_event, require_member
 
 
 def compute_balances(session: Session, event_id: uuid.UUID) -> dict[uuid.UUID, int]:

@@ -31,11 +31,19 @@ def _fetch_public_holidays(country: str, year: int) -> list[dict]:
 @router.get("/holidays")
 def get_holidays(
     country: str = Query(
-        ..., min_length=2, max_length=8, description="ISO 3166-1 alpha-2 country code"
+        ...,
+        min_length=2,
+        max_length=8,
+        pattern=r"^[A-Za-z]{2,8}$",
+        description="ISO 3166-1 alpha-2 country code",
     ),
     year: int = Query(..., ge=1900, le=2100),
     region: str | None = Query(
-        None, min_length=2, max_length=16, description="Optional regional/county code"
+        None,
+        min_length=2,
+        max_length=16,
+        pattern=r"^[A-Za-z0-9-]{2,16}$",
+        description="Optional regional/county code",
     ),
 ) -> list[dict]:
     country = country.upper()

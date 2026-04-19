@@ -14,7 +14,7 @@ from ..schemas.orders import (
     OrderOut,
     OrderUpsertIn,
 )
-from ..services.events import require_member
+from ..services.memberships import require_member
 
 
 def _get_timezone(ev: Event) -> ZoneInfo:

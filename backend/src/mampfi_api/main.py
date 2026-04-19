@@ -9,7 +9,7 @@ from sqlalchemy import text
 from .config import get_settings
 from .db import get_engine
 from .exceptions import Conflict, DomainError, Forbidden, NotFound
-from .logging import setup_logging
+from .log_config import setup_logging
 from .routers import auth as auth_router
 from .routers import balances as balances_router
 from .routers import events as events_router
