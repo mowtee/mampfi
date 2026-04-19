@@ -3,9 +3,10 @@ import { useTranslation } from "react-i18next";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { formatYMDToLocale } from "../../lib/date";
-import { formatMoney } from "../../lib/money";
+import { formatMoney, parseMoneyToMinor } from "../../lib/money";
 import { Modal, ModalBody, ModalActions } from "../../components/ui/Modal";
 import DateField from "../../components/DateField";
+import MoneyInput from "../../components/MoneyInput";
 import type { EventContextType } from "../../hooks/useEventContext";
 import type { AggregateItem } from "../../lib/types";
 
@@ -126,7 +127,7 @@ export default function DayTab({
     },
   });
 
-  type ModalState = "closed" | "precheck" | "finalize" | "worksheet";
+  type ModalState = "closed" | "precheck" | "finalize" | "worksheet" | "amounts";
   const [modal, setModal] = React.useState<ModalState>("closed");
   const [ws, setWs] = React.useState<WSLine[]>([]);
   const [wsNotes, setWsNotes] = React.useState("");
@@ -134,6 +135,8 @@ export default function DayTab({
   const hasDeliveryFee = !!ev.data?.delivery_fee_minor && ev.data.delivery_fee_minor > 0;
   const [deliveryFeeChecked, setDeliveryFeeChecked] = React.useState(true);
   const [receiptFile, setReceiptFile] = React.useState<File | null>(null);
+  const [amountsByUser, setAmountsByUser] = React.useState<Record<string, string>>({});
+  const [amountsNotes, setAmountsNotes] = React.useState("");
 
   const finalize = useMutation({
     mutationFn: async () => {
@@ -209,6 +212,51 @@ export default function DayTab({
       qc.invalidateQueries({ queryKey: ["payments", eventId] });
     },
   });
+
+  const finalizeAmounts = useMutation({
+    mutationFn: async (payload: { amounts: Record<string, number>; notes: string }) => {
+      const name = payload.notes.trim() || t("day.amountsDefaultLine");
+      const lines = Object.entries(payload.amounts)
+        .filter(([, minor]) => minor > 0)
+        .map(([user_id, minor]) => ({
+          type: "custom" as const,
+          name,
+          qty_final: 1,
+          unit_price_minor: minor,
+          allocations: [{ user_id, qty: 1 }],
+        }));
+      if (!lines.length) throw new Error(t("day.amountsEmpty"));
+      return api.createPurchase(
+        eventId,
+        forDate,
+        lines,
+        payload.notes.trim() || undefined,
+        hasDeliveryFee && deliveryFeeChecked,
+      );
+    },
+    onSuccess: async () => {
+      if (receiptFile) {
+        try {
+          await api.uploadReceipt(eventId, forDate, receiptFile);
+          setReceiptFile(null);
+        } catch {
+          /* receipt upload optional */
+        }
+      }
+      setModal("closed");
+      setAmountsByUser({});
+      setAmountsNotes("");
+      qc.invalidateQueries({ queryKey: ["purchase", eventId, forDate] });
+      qc.invalidateQueries({ queryKey: ["balances", eventId] });
+      qc.invalidateQueries({ queryKey: ["payments", eventId] });
+    },
+  });
+
+  function openAmountsModal() {
+    setAmountsByUser({});
+    setAmountsNotes("");
+    setModal("amounts");
+  }
 
   function finalizeFromWorksheet() {
     const lines = ws
@@ -768,6 +816,9 @@ export default function DayTab({
                 <button className="btn" onClick={openWorksheetFromAggregate}>
                   {t("day.noMakeAdjustments")}
                 </button>
+                <button className="btn" onClick={openAmountsModal}>
+                  {t("day.justAmounts")}
+                </button>
               </ModalActions>
             </Modal>
           )}
@@ -1064,6 +1115,170 @@ export default function DayTab({
               </ModalActions>
             </Modal>
           )}
+
+          {/* Amounts modal: per-member sum finalization (non-standard days) */}
+          {modal === "amounts" &&
+            (() => {
+              const activeMembers = (members.data || []).filter((m) => !m.left_at);
+
+              // Build per-user order summary from aggregate
+              const summaryByUser = new Map<string, string>();
+              for (const it of agg.data?.items || []) {
+                for (const c of it.consumers || []) {
+                  const q = Number(c.qty || 0);
+                  if (q <= 0) continue;
+                  const prev = summaryByUser.get(c.user_id);
+                  const chunk = `${q}× ${it.name || t("day.item")}`;
+                  summaryByUser.set(c.user_id, prev ? `${prev}, ${chunk}` : chunk);
+                }
+              }
+
+              const sortedMembers = [...activeMembers].sort((a, b) => {
+                const aHas = summaryByUser.has(a.user_id) ? 0 : 1;
+                const bHas = summaryByUser.has(b.user_id) ? 0 : 1;
+                if (aHas !== bHas) return aHas - bHas;
+                return memberLabel(a.user_id).localeCompare(memberLabel(b.user_id));
+              });
+
+              const totalMinor = Object.values(amountsByUser).reduce((sum, v) => {
+                const n = parseMoneyToMinor(v);
+                return sum + (isFinite(n) && n > 0 ? n : 0);
+              }, 0);
+              const canSubmit = totalMinor > 0 && !finalizeAmounts.isPending;
+
+              return (
+                <Modal open={true} onClose={() => setModal("precheck")} size="md" top>
+                  <ModalBody>
+                    <h3 style={{ marginTop: 0 }}>{t("day.amountsTitle")}</h3>
+                    <div className="muted" style={{ marginBottom: 4 }}>
+                      {forDate} • {t("day.buyer")}: {memberLabel(meQ.data?.id)}
+                    </div>
+                    <div className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
+                      {t("day.amountsHint")}
+                    </div>
+                    <div className="vstack" style={{ gap: 10 }}>
+                      {sortedMembers.map((m) => {
+                        const summary = summaryByUser.get(m.user_id);
+                        return (
+                          <div
+                            key={m.user_id}
+                            className="row"
+                            style={{
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              gap: 8,
+                            }}
+                          >
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div>{memberLabel(m.user_id)}</div>
+                              <div
+                                className="muted"
+                                style={{ fontSize: 12, wordBreak: "break-word" }}
+                              >
+                                {summary
+                                  ? t("day.amountsOrderedSummary", { items: summary })
+                                  : t("day.amountsNoneOrdered")}
+                              </div>
+                            </div>
+                            <div
+                              className="row"
+                              style={{ gap: 4, alignItems: "center", flexShrink: 0 }}
+                            >
+                              <MoneyInput
+                                value={amountsByUser[m.user_id] || ""}
+                                onChange={(v) =>
+                                  setAmountsByUser((prev) => ({ ...prev, [m.user_id]: v }))
+                                }
+                                placeholder="0,00"
+                                style={{ width: 90 }}
+                              />
+                              <span className="muted">{currency}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="row" style={{ marginTop: 12, justifyContent: "flex-end" }}>
+                      <strong>
+                        {t("day.amountsTotal", { amount: formatMoney(totalMinor, currency) })}
+                      </strong>
+                    </div>
+                    {hasDeliveryFee && (
+                      <div className="row" style={{ marginTop: 12, alignItems: "center", gap: 8 }}>
+                        <input
+                          type="checkbox"
+                          checked={deliveryFeeChecked}
+                          onChange={(e) => setDeliveryFeeChecked(e.target.checked)}
+                          id="delivery-fee-amounts"
+                        />
+                        <label htmlFor="delivery-fee-amounts">
+                          {t("day.deliveryFeeApplied", {
+                            amount: formatMoney(ev.data?.delivery_fee_minor || 0, currency),
+                          })}
+                        </label>
+                      </div>
+                    )}
+                    <div className="field" style={{ marginTop: 12 }}>
+                      <label className="muted" style={{ fontSize: 13 }}>
+                        {t("day.notes")}
+                      </label>
+                      <input
+                        className="input"
+                        value={amountsNotes}
+                        onChange={(e) => setAmountsNotes(e.target.value)}
+                        placeholder={t("day.amountsNotePlaceholder")}
+                        maxLength={200}
+                      />
+                    </div>
+                    <div style={{ marginTop: 12 }}>
+                      <div className="muted" style={{ fontSize: 13, marginBottom: 4 }}>
+                        {t("day.receiptHint")}
+                      </div>
+                      <label
+                        className="btn receipt-upload"
+                        style={{ cursor: "pointer", display: "inline-block" }}
+                      >
+                        {receiptFile ? `✓ ${receiptFile.name}` : t("day.uploadReceipt")}
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          style={{ display: "none" }}
+                          onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
+                        />
+                      </label>
+                    </div>
+                    {finalizeAmounts.error && (
+                      <div className="danger" style={{ marginTop: 8 }}>
+                        {String(finalizeAmounts.error)}
+                      </div>
+                    )}
+                  </ModalBody>
+                  <ModalActions>
+                    <button
+                      className="btn"
+                      onClick={() => setModal("precheck")}
+                      disabled={finalizeAmounts.isPending}
+                    >
+                      {t("app.cancel")}
+                    </button>
+                    <button
+                      className="btn primary"
+                      onClick={() => {
+                        const amounts: Record<string, number> = {};
+                        for (const [uid, v] of Object.entries(amountsByUser)) {
+                          const n = parseMoneyToMinor(v);
+                          if (isFinite(n) && n > 0) amounts[uid] = n;
+                        }
+                        finalizeAmounts.mutate({ amounts, notes: amountsNotes });
+                      }}
+                      disabled={!canSubmit}
+                    >
+                      {finalizeAmounts.isPending ? t("day.finalizing") : t("day.confirmFinalize")}
+                    </button>
+                  </ModalActions>
+                </Modal>
+              );
+            })()}
         </div>
       </section>
     </>
