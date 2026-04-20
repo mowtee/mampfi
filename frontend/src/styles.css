@@ -648,9 +648,18 @@ body.modal-open {
 }
 .modal-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   justify-content: flex-end;
   margin-top: 12px;
+}
+@media (max-width: 600px) {
+  .modal-actions {
+    flex-direction: column;
+  }
+  .modal-actions > * {
+    width: 100%;
+  }
 }
 
 /* Worksheet helpers */
