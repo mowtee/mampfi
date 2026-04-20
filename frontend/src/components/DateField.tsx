@@ -1,6 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import Calendar from "./ui/Calendar";
+import { formatYMDToLocale } from "../lib/date";
 
 type Props = {
   value: string;
@@ -23,7 +24,6 @@ export default function DateField({
   style,
   holidaysLabelByDate,
 }: Props) {
-  const ref = React.useRef<HTMLInputElement>(null);
   const wrapRef = React.useRef<HTMLDivElement>(null);
   const [open, setOpen] = React.useState(false);
   const [pos, setPos] = React.useState<{ top: number; left: number } | null>(null);
@@ -67,38 +67,13 @@ export default function DateField({
     setPos({ top, left });
   }
 
-  function shouldUseNative() {
-    // Prefer native on touch devices or narrow viewports
-    const coarse =
-      typeof window !== "undefined" &&
-      window.matchMedia &&
-      window.matchMedia("(pointer: coarse)").matches;
-    const touch =
-      typeof navigator !== "undefined" &&
-      ((navigator as { maxTouchPoints?: number }).maxTouchPoints ?? 0) > 0;
-    const narrow = typeof window !== "undefined" && window.innerWidth < 700;
-    return coarse || touch || narrow;
-  }
-
   function openPicker() {
     if (disabled) return;
-    if (shouldUseNative()) {
-      const el = ref.current;
-      if (!el) return;
-      // Try native showPicker if supported; fall back to focus
-      if (typeof (el as HTMLInputElement & { showPicker?: () => void }).showPicker === "function") {
-        (el as HTMLInputElement & { showPicker: () => void }).showPicker();
-      } else {
-        el.focus();
-        el.click();
-      }
-    } else {
-      setOpen((v) => {
-        const next = !v;
-        if (next) positionPortal();
-        return next;
-      });
-    }
+    setOpen((v) => {
+      const next = !v;
+      if (next) positionPortal();
+      return next;
+    });
   }
 
   return (
@@ -110,20 +85,20 @@ export default function DateField({
       style={style}
     >
       <input
-        ref={ref}
-        type="date"
+        type="text"
+        readOnly
         className="input date-input"
-        value={value}
-        min={min}
-        max={max}
+        value={value ? formatYMDToLocale(value, { dateStyle: "short" }) : ""}
         disabled={disabled}
-        onChange={(e) => {
-          let v = e.target.value;
-          if (!v) return;
-          if (min && v < min) v = min;
-          if (max && v > max) v = max;
-          onChange(v);
+        onClick={openPicker}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openPicker();
+          }
         }}
+        aria-haspopup="dialog"
+        aria-expanded={open}
       />
       <button
         type="button"

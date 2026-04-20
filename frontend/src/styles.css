@@ -230,23 +230,8 @@ a:hover {
   opacity: 0.6;
   cursor: default;
 }
-/* Hide default icon in WebKit on desktop to avoid double affordance.
-   On mobile (coarse pointer) keep native behavior visible. */
-@media (pointer: fine) {
-  .date-input::-webkit-calendar-picker-indicator {
-    opacity: 0;
-    display: none;
-  }
-}
-/* On mobile, hide our custom calendar button and let native input work */
-@media (pointer: coarse) {
-  .date-button {
-    display: none;
-  }
-  .date-input {
-    padding-right: 10px;
-    min-width: 140px;
-  }
+.date-input {
+  cursor: pointer;
 }
 
 /* Calendar dropdown (desktop) */
