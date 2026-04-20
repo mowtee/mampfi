@@ -117,7 +117,13 @@ export default function DateField({
         min={min}
         max={max}
         disabled={disabled}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          let v = e.target.value;
+          if (!v) return;
+          if (min && v < min) v = min;
+          if (max && v > max) v = max;
+          onChange(v);
+        }}
       />
       <button
         type="button"
