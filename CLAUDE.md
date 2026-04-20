@@ -140,11 +140,14 @@ Both lockfiles (`uv.lock`, `pnpm-lock.yaml`) are committed to the repo.
 
 **PRs:** one logical change per PR.
 
-**Before every commit — run formatters:**
+**Before every commit — run lint + format on what you touched:**
 
 ```bash
-make format-api   # ruff format + ruff check --fix (backend)
-make format-web   # prettier --write (frontend)
+make format-api lint-api   # backend: ruff format + ruff check
+make format-web lint-web   # frontend: prettier --write + eslint + prettier --check
 ```
 
-CI enforces format checks (`ruff format --check`, `prettier --check`) and will fail if files are not formatted.
+`lint-api` and `lint-web` mirror CI exactly (eslint + prettier --check on the
+frontend, ruff check + ruff format --check on the backend). Running them
+locally before committing catches everything CI would fail on. The format
+targets only fix what's auto-fixable; the lint targets are the gate.

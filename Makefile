@@ -12,8 +12,8 @@ help:
 	@echo "  dev-web      - Run Vite dev server"
 	@echo "  migrate      - Run Alembic migrations (upgrade head)"
 	@echo "  seed         - Run backend seed script"
-	@echo "  lint-api     - Lint backend with ruff"
-	@echo "  lint-web     - Lint frontend with eslint"
+	@echo "  lint-api     - Lint backend (ruff check + ruff format --check)"
+	@echo "  lint-web     - Lint frontend (eslint + prettier --check)"
 	@echo "  format-api   - Format backend with ruff"
 	@echo "  format-web   - Format frontend with prettier"
 	@echo "  test-api     - Run backend tests (pytest)"
@@ -58,7 +58,7 @@ lint-api:
 	cd backend && uv run ruff check src && uv run ruff format --check src
 
 lint-web:
-	cd frontend && pnpm lint
+	cd frontend && pnpm lint && pnpm format:check
 
 format-api:
 	cd backend && uv run ruff format src && uv run ruff check --fix src
