@@ -30,25 +30,28 @@ export default function DateField({
   const portalRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
+    if (!open) return;
     function onDoc(e: MouseEvent) {
-      if (!open) return;
       const wrap = wrapRef.current;
       const portalEl = portalRef.current;
       if (wrap && e.target instanceof Node && wrap.contains(e.target)) return;
       if (portalEl && e.target instanceof Node && portalEl.contains(e.target)) return;
       setOpen(false);
     }
-    function onScrollOrResize() {
-      if (!open) return;
-      positionPortal();
+    // Dismiss on page scroll/resize instead of repositioning. Tracking the
+    // input frame-by-frame causes jitter on iOS momentum scroll, and matches
+    // the native popover/select dismissal pattern.
+    function dismiss(e: Event) {
+      if (e.target instanceof Node && portalRef.current?.contains(e.target)) return;
+      setOpen(false);
     }
     document.addEventListener("mousedown", onDoc);
-    window.addEventListener("scroll", onScrollOrResize, true);
-    window.addEventListener("resize", onScrollOrResize);
+    window.addEventListener("scroll", dismiss, true);
+    window.addEventListener("resize", dismiss);
     return () => {
       document.removeEventListener("mousedown", onDoc);
-      window.removeEventListener("scroll", onScrollOrResize, true);
-      window.removeEventListener("resize", onScrollOrResize);
+      window.removeEventListener("scroll", dismiss, true);
+      window.removeEventListener("resize", dismiss);
     };
   }, [open]);
 
