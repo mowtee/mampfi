@@ -1,7 +1,9 @@
 # Mampfi
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![CI](https://github.com/mowtee/mampfi/actions/workflows/ci.yml/badge.svg)](https://github.com/mowtee/mampfi/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/mowtee/mampfi/actions/workflows/codeql.yml/badge.svg)](https://github.com/mowtee/mampfi/actions/workflows/codeql.yml)
+[![Dependabot](https://img.shields.io/badge/Dependabot-enabled-success?logo=dependabot)](https://github.com/mowtee/mampfi/blob/main/.github/dependabot.yml)
 
 Group ordering made easy. Mampfi lets a group plan daily orders — one member buys, everyone else orders ahead, and the app tracks virtual balances. No external payment processor needed.
 
