@@ -61,13 +61,30 @@ export default function DateField({
     if (!wrap) return;
     const rect = wrap.getBoundingClientRect();
     const width = 300;
+    // Approximate calendar height — header + 6 weeks of 40px cells +
+    // weekday row + footer + padding. Used to decide flip placement.
+    const estimatedHeight = 380;
     const margin = 8;
+
+    // Horizontal: align right edge to input, clamp inside viewport.
     let left = rect.right - width;
     if (left < margin) left = margin;
-    const rightEdge = left + width;
     const vw = window.innerWidth;
-    if (rightEdge > vw - margin) left = Math.max(margin, vw - margin - width);
-    const top = rect.bottom + margin;
+    if (left + width > vw - margin) left = Math.max(margin, vw - margin - width);
+
+    // Vertical: prefer below, flip above if no room there, clamp as last resort.
+    const vh = window.innerHeight;
+    const belowTop = rect.bottom + margin;
+    const aboveTop = rect.top - margin - estimatedHeight;
+    let top: number;
+    if (belowTop + estimatedHeight <= vh - margin) {
+      top = belowTop;
+    } else if (aboveTop >= margin) {
+      top = aboveTop;
+    } else {
+      top = Math.max(margin, vh - margin - estimatedHeight);
+    }
+
     setPos({ top, left });
   }
 
