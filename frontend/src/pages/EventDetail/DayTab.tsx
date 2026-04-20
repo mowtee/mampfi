@@ -805,10 +805,7 @@ export default function DayTab({
                   </div>
                 )}
               </ModalBody>
-              <ModalActions>
-                <button className="btn" onClick={() => setModal("closed")}>
-                  {t("app.cancel")}
-                </button>
+              <ModalActions vertical>
                 <button
                   className="btn primary"
                   onClick={() => {
@@ -822,6 +819,9 @@ export default function DayTab({
                 </button>
                 <button className="btn" onClick={openAmountsModal}>
                   {t("day.justAmounts")}
+                </button>
+                <button className="btn" onClick={() => setModal("closed")}>
+                  {t("app.cancel")}
                 </button>
               </ModalActions>
             </Modal>

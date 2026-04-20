@@ -61,6 +61,12 @@ export function ModalBody({ children }: { children: React.ReactNode }) {
   return <div className="modal-body">{children}</div>;
 }
 
-export function ModalActions({ children }: { children: React.ReactNode }) {
-  return <div className="modal-actions">{children}</div>;
+export function ModalActions({
+  children,
+  vertical,
+}: {
+  children: React.ReactNode;
+  vertical?: boolean;
+}) {
+  return <div className={vertical ? "modal-actions vertical" : "modal-actions"}>{children}</div>;
 }

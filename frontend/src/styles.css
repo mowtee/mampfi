@@ -653,6 +653,12 @@ body.modal-open {
   justify-content: flex-end;
   margin-top: 12px;
 }
+.modal-actions.vertical {
+  flex-direction: column;
+}
+.modal-actions.vertical > * {
+  width: 100%;
+}
 @media (max-width: 600px) {
   .modal-actions {
     flex-direction: column;
