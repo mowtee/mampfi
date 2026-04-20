@@ -418,9 +418,7 @@ function NewPaymentForm({
   const selectPayTo = (id: string) => {
     setPayTo(id);
     if (!id) return;
-    const recipientBal = Number(
-      (totals || []).find((t) => t.user_id === id)?.balance_minor || 0,
-    );
+    const recipientBal = Number((totals || []).find((t) => t.user_id === id)?.balance_minor || 0);
     if (myBal < 0 && recipientBal > 0) {
       const exact = Math.min(-myBal, recipientBal);
       setPayAmount((exact / 100).toFixed(2));
