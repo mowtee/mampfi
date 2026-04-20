@@ -12,9 +12,6 @@ export default function Join() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const [token, setToken] = React.useState<string>(() => params.get("token") || "");
-  React.useEffect(() => {
-    setToken(params.get("token") || "");
-  }, [params]);
 
   const preview = useQuery({
     queryKey: ["invitePreview", token],

@@ -50,20 +50,21 @@ export function useEventContext(eventId: string, forDate: string, activeTab: str
     [members.data, meId],
   );
 
-  const leftLocalDate = React.useMemo(() => {
-    if (!meMember?.left_at || !ev.data) return null;
-    const tz = ev.data.timezone;
+  // Intl formatting is cheap; React Compiler can't verify the optional-chain
+  // deps here, so we skip manual memoization.
+  let leftLocalDate: string | null = null;
+  if (meMember?.left_at && ev.data) {
     const d = new Date(meMember.left_at);
     const fmt = new Intl.DateTimeFormat("en-CA", {
-      timeZone: tz,
+      timeZone: ev.data.timezone,
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
     });
     const parts = fmt.formatToParts(d);
     const get = (t: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === t)?.value || "";
-    return `${get("year")}-${get("month")}-${get("day")}`;
-  }, [meMember?.left_at, ev.data]);
+    leftLocalDate = `${get("year")}-${get("month")}-${get("day")}`;
+  }
 
   const inactiveForDate = !!leftLocalDate && forDate >= leftLocalDate;
 

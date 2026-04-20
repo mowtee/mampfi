@@ -128,7 +128,7 @@ function InvitesTable({ eventId, invites }: { eventId: string; invites: Invite[]
   const [showRevoked, setShowRevoked] = React.useState(false);
   const [copied, setCopied] = React.useState<string | null>(null);
 
-  const now = Date.now();
+  const [now] = React.useState(() => Date.now());
   const active = invites.filter((inv) => !inv.revoked_at);
   const revoked = invites.filter((inv) => !!inv.revoked_at);
   const visible = showRevoked ? invites : active;

@@ -414,14 +414,18 @@ function NewPaymentForm({
   const myBal = Number((totals || []).find((t) => t.user_id === me)?.balance_minor || 0);
   const toBal = Number((totals || []).find((t) => t.user_id === payTo)?.balance_minor || 0);
 
-  React.useEffect(() => {
-    if (!payTo) return;
-    if (myBal < 0 && toBal > 0) {
-      const exact = Math.min(-myBal, toBal);
+  // Pre-fill the amount to settle up exactly when the recipient is selected.
+  const selectPayTo = (id: string) => {
+    setPayTo(id);
+    if (!id) return;
+    const recipientBal = Number(
+      (totals || []).find((t) => t.user_id === id)?.balance_minor || 0,
+    );
+    if (myBal < 0 && recipientBal > 0) {
+      const exact = Math.min(-myBal, recipientBal);
       setPayAmount((exact / 100).toFixed(2));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [payTo]);
+  };
 
   return (
     <div>
@@ -431,7 +435,7 @@ function NewPaymentForm({
         <select
           className="input select"
           value={payTo}
-          onChange={(e) => setPayTo(e.target.value)}
+          onChange={(e) => selectPayTo(e.target.value)}
           style={{ width: 320 }}
         >
           <option value="">{t("payments.chooseRecipient")}</option>

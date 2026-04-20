@@ -1,6 +1,8 @@
 import React from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../../lib/api";
 import { formatYMDToLocale } from "../../lib/date";
 import { formatMoney } from "../../lib/money";
 import { useHolidays } from "../../lib/holidays";
@@ -24,8 +26,9 @@ function addDaysStr(dateStr: string, days: number) {
 
 export default function EventDetail() {
   const { eventId = "" } = useParams();
-  const tomorrow = isoDate(new Date(Date.now() + 24 * 3600 * 1000));
-  const [forDate, setForDate] = React.useState<string>(tomorrow);
+  const [forDate, setForDate] = React.useState<string>(() =>
+    isoDate(new Date(Date.now() + 24 * 3600 * 1000)),
+  );
   const [search, setSearch] = useSearchParams();
   const activeTab = (search.get("tab") || "day") as
     | "day"
@@ -41,7 +44,28 @@ export default function EventDetail() {
     });
 
   const { t } = useTranslation();
-  const ctx = useEventContext(eventId, forDate, activeTab);
+
+  // Prime the event-bounds query ahead of the full context so we can clamp
+  // forDate before downstream queries fire. Shares its queryKey with the one
+  // inside useEventContext, so TanStack Query dedupes the request.
+  const evBounds = useQuery({
+    queryKey: ["event", eventId],
+    queryFn: () => api.getEvent(eventId),
+    enabled: !!eventId,
+    staleTime: 5 * 60_000,
+  });
+  const startDate = evBounds.data?.start_date;
+  const endDate = evBounds.data?.end_date;
+
+  // Derivation (not effect-based sync) keeps downstream queries stable.
+  const effectiveForDate = React.useMemo(() => {
+    if (!startDate || !endDate) return forDate;
+    if (forDate < startDate) return startDate;
+    if (forDate > endDate) return endDate;
+    return forDate;
+  }, [forDate, startDate, endDate]);
+
+  const ctx = useEventContext(eventId, effectiveForDate, activeTab);
   const { ev, meMember, isOwner, qc, balances, meId } = ctx;
 
   const holidayCountry = ev.data?.holiday_country_code;
@@ -53,17 +77,8 @@ export default function EventDetail() {
     ev.data?.end_date,
   );
 
-  const startDate = ev.data?.start_date;
-  const endDate = ev.data?.end_date;
-  const prevDisabled = !!startDate && forDate <= startDate;
-  const nextDisabled = !!endDate && forDate >= endDate;
-
-  // Clamp date to event range when data loads
-  React.useEffect(() => {
-    if (!startDate || !endDate) return;
-    if (forDate < startDate) setForDate(startDate);
-    else if (forDate > endDate) setForDate(endDate);
-  }, [startDate, endDate]); // eslint-disable-line react-hooks/exhaustive-deps
+  const prevDisabled = !!startDate && effectiveForDate <= startDate;
+  const nextDisabled = !!endDate && effectiveForDate >= endDate;
 
   function changeDate(newDate: string) {
     setForDate(newDate);
@@ -76,11 +91,11 @@ export default function EventDetail() {
   // Invalidate when date changes
   React.useEffect(() => {
     if (!eventId) return;
-    qc.invalidateQueries({ queryKey: ["myOrder", eventId, forDate] });
-    qc.invalidateQueries({ queryKey: ["agg", eventId, forDate] });
-    qc.invalidateQueries({ queryKey: ["purchase", eventId, forDate] });
+    qc.invalidateQueries({ queryKey: ["myOrder", eventId, effectiveForDate] });
+    qc.invalidateQueries({ queryKey: ["agg", eventId, effectiveForDate] });
+    qc.invalidateQueries({ queryKey: ["purchase", eventId, effectiveForDate] });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [forDate]);
+  }, [effectiveForDate]);
 
   if (ev.isLoading) return <p className="muted">{t("app.loading")}</p>;
   if (ev.error) return <p className="danger">{String(ev.error)}</p>;
@@ -182,12 +197,12 @@ export default function EventDetail() {
         <DayTab
           ctx={ctx}
           eventId={eventId}
-          forDate={forDate}
+          forDate={effectiveForDate}
           holidays={holidays}
           prevDisabled={prevDisabled}
           nextDisabled={nextDisabled}
           onChangeDate={changeDate}
-          onAddDays={(n) => addDaysStr(forDate, n)}
+          onAddDays={(n) => addDaysStr(effectiveForDate, n)}
           onSetTab={setTab}
         />
       )}

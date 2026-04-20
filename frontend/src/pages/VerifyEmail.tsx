@@ -8,15 +8,15 @@ export default function VerifyEmail() {
   const { t } = useTranslation();
   const [search] = useSearchParams();
   const token = search.get("token") || "";
-  const [status, setStatus] = React.useState<"loading" | "ok" | "error">("loading");
-  const [error, setError] = React.useState<string | null>(null);
+  const [status, setStatus] = React.useState<"loading" | "ok" | "error">(() =>
+    token ? "loading" : "error",
+  );
+  const [error, setError] = React.useState<string | null>(() =>
+    token ? null : t("auth.missingToken"),
+  );
 
   React.useEffect(() => {
-    if (!token) {
-      setStatus("error");
-      setError(t("auth.missingToken"));
-      return;
-    }
+    if (!token) return;
     api
       .verifyEmail(token)
       .then(() => setStatus("ok"))
@@ -24,7 +24,7 @@ export default function VerifyEmail() {
         setStatus("error");
         setError(errorMessage(err));
       });
-  }, [token, t]);
+  }, [token]);
 
   return (
     <div style={{ maxWidth: 400, margin: "40px auto", padding: "0 16px" }}>

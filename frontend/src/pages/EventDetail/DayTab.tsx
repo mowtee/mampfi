@@ -64,10 +64,14 @@ export default function DayTab({
   const activePurchase = purchase.data && !purchase.data.invalidated_at ? purchase.data : null;
   const canFinalize = !activePurchase && (purchase.error || purchase.data?.invalidated_at);
 
+  // Snapshot "tomorrow" once per mount — chip label doesn't need sub-day accuracy.
+  const [tomorrow] = React.useState(() =>
+    new Date(Date.now() + 86400000).toISOString().slice(0, 10),
+  );
+
   const statusChip = React.useMemo(() => {
     if (activePurchase) return { className: "chip finalized", text: t("day.finalized") };
     if (lockInfo.locked) return { className: "chip locked", text: t("day.locked") };
-    const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
     if (forDate === tomorrow) {
       return {
         className: "chip open",
@@ -75,7 +79,7 @@ export default function DayTab({
       };
     }
     return { className: "chip open", text: t("day.open") };
-  }, [activePurchase, lockInfo, t, forDate]);
+  }, [activePurchase, lockInfo, t, forDate, tomorrow]);
 
   // --- Rollover (server-side preference) ---
   const rolloverEnabled = ctx.meMember?.rollover_enabled ?? true;
@@ -88,29 +92,25 @@ export default function DayTab({
   }, [eventId, forDate, rolloverEnabled, qc]);
 
   // --- Local state ---
-  const [quantities, setQuantities] = React.useState<Record<string, number>>({});
-
-  React.useEffect(() => {
+  // Derive saved quantities from the server; overlay user edits via `dirty`.
+  // When dirty is null, the form shows the server value. Reset via setDirty(null).
+  const saved = React.useMemo(() => {
     const q: Record<string, number> = {};
     myOrder.data?.items?.forEach((it) => (q[it.price_item_id] = it.qty));
-    setQuantities(q);
+    return q;
   }, [myOrder.data]);
+  const [dirty, setDirty] = React.useState<Record<string, number> | null>(null);
+  const quantities = dirty ?? saved;
 
   // Check if quantities differ from saved order
   const orderUnchanged = React.useMemo(() => {
-    const saved: Record<string, number> = {};
-    (myOrder.data?.items || []).forEach((it) => {
-      saved[it.price_item_id] = it.qty;
-    });
+    if (dirty === null) return true;
     const activeIds = new Set((price.data || []).map((pi) => pi.id));
-    // Compare only active items
     for (const id of activeIds) {
-      const q = quantities[id] || 0;
-      const s = saved[id] || 0;
-      if (q !== s) return false;
+      if ((dirty[id] || 0) !== (saved[id] || 0)) return false;
     }
     return true;
-  }, [quantities, myOrder.data, price.data]);
+  }, [dirty, saved, price.data]);
 
   // --- Mutations ---
   const upsert = useMutation({
@@ -122,6 +122,7 @@ export default function DayTab({
       return api.upsertMyOrder(eventId, forDate, items);
     },
     onSuccess: () => {
+      setDirty(null);
       qc.invalidateQueries({ queryKey: ["myOrder", eventId, forDate] });
       qc.invalidateQueries({ queryKey: ["agg", eventId, forDate] });
     },
@@ -405,10 +406,13 @@ export default function DayTab({
                         <button
                           className="btn"
                           onClick={() =>
-                            setQuantities((cur) => ({
-                              ...cur,
-                              [pi.id]: Math.max(0, (cur[pi.id] || 0) - 1),
-                            }))
+                            setDirty((cur) => {
+                              const base = cur ?? saved;
+                              return {
+                                ...base,
+                                [pi.id]: Math.max(0, (base[pi.id] || 0) - 1),
+                              };
+                            })
                           }
                           disabled={readOnly || qty <= 0}
                         >
@@ -418,10 +422,10 @@ export default function DayTab({
                         <button
                           className="btn"
                           onClick={() =>
-                            setQuantities((cur) => ({
-                              ...cur,
-                              [pi.id]: (cur[pi.id] || 0) + 1,
-                            }))
+                            setDirty((cur) => {
+                              const base = cur ?? saved;
+                              return { ...base, [pi.id]: (base[pi.id] || 0) + 1 };
+                            })
                           }
                           disabled={readOnly}
                         >

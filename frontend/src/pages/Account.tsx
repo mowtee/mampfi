@@ -14,17 +14,15 @@ export default function Account() {
   const navigate = useNavigate();
   const qc = useQueryClient();
 
-  const [nameDraft, setNameDraft] = React.useState(user?.name || "");
+  const [dirtyName, setDirtyName] = React.useState<string | null>(null);
+  const nameDraft = dirtyName ?? (user?.name || "");
   const [nameSaved, setNameSaved] = React.useState(false);
-
-  React.useEffect(() => {
-    setNameDraft(user?.name || "");
-  }, [user?.name]);
 
   const updateName = useMutation({
     mutationFn: (name: string) => api.updateMe(name),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["auth", "me"] });
+      setDirtyName(null);
       setNameSaved(true);
       setTimeout(() => setNameSaved(false), 2000);
     },
@@ -87,7 +85,7 @@ export default function Account() {
               className="input"
               value={nameDraft}
               onChange={(e) => {
-                setNameDraft(e.target.value);
+                setDirtyName(e.target.value);
                 setNameSaved(false);
               }}
               minLength={1}
