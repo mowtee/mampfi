@@ -766,18 +766,18 @@ export default function DayTab({
               </ModalBody>
               <ModalActions>
                 <button
-                  className="btn"
-                  onClick={() => setModal("closed")}
-                  disabled={finalize.isPending}
-                >
-                  {t("app.cancel")}
-                </button>
-                <button
                   className="btn primary"
                   onClick={() => finalize.mutate()}
                   disabled={finalize.isPending}
                 >
                   {finalize.isPending ? t("day.finalizing") : t("day.confirmFinalize")}
+                </button>
+                <button
+                  className="btn"
+                  onClick={() => setModal("closed")}
+                  disabled={finalize.isPending}
+                >
+                  {t("app.cancel")}
                 </button>
               </ModalActions>
             </Modal>

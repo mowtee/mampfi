@@ -38,20 +38,21 @@ export default function DateField({
       if (portalEl && e.target instanceof Node && portalEl.contains(e.target)) return;
       setOpen(false);
     }
-    // Dismiss on page scroll/resize instead of repositioning. Tracking the
-    // input frame-by-frame causes jitter on iOS momentum scroll, and matches
-    // the native popover/select dismissal pattern.
-    function dismiss(e: Event) {
-      if (e.target instanceof Node && portalRef.current?.contains(e.target)) return;
+    // Lock background scroll while the calendar is open. Reuses the same
+    // class the Modal component uses (body { overflow: hidden }), so an
+    // accidental scroll attempt no longer fires events that close the picker.
+    document.body.classList.add("modal-open");
+    document.addEventListener("mousedown", onDoc);
+    // Resize (e.g. orientation change) still closes — the anchored position
+    // would otherwise drift off-screen.
+    function onResize() {
       setOpen(false);
     }
-    document.addEventListener("mousedown", onDoc);
-    window.addEventListener("scroll", dismiss, true);
-    window.addEventListener("resize", dismiss);
+    window.addEventListener("resize", onResize);
     return () => {
+      document.body.classList.remove("modal-open");
       document.removeEventListener("mousedown", onDoc);
-      window.removeEventListener("scroll", dismiss, true);
-      window.removeEventListener("resize", dismiss);
+      window.removeEventListener("resize", onResize);
     };
   }, [open]);
 
