@@ -681,13 +681,12 @@ function LeavePlanView({
             {t("payments.balanceNotZeroOwe", { amount: (-bal / 100).toFixed(2), currency })}
           </div>
           <div className="muted">{t("payments.payToGetEven")}</div>
-          <ul>
+          <ul style={{ listStyle: "disc", paddingLeft: 20, margin: "8px 0" }}>
             {plan.map((p, i) => {
               const toId = "to_user_id" in p ? p.to_user_id : "";
               const amt = Number(p.amount_minor);
               return (
                 <li key={i}>
-                  <input type="checkbox" readOnly style={{ marginRight: 6 }} />
                   {t("payments.payTo", {
                     amount: (amt / 100).toFixed(2),
                     currency,
@@ -715,13 +714,12 @@ function LeavePlanView({
             {t("payments.balanceNotZeroReceive", { amount: (bal / 100).toFixed(2), currency })}
           </div>
           <div className="muted">{t("payments.askToPayYou")}</div>
-          <ul>
+          <ul style={{ listStyle: "disc", paddingLeft: 20, margin: "8px 0" }}>
             {plan.map((p, i) => {
               const fromId = "from_user_id" in p ? p.from_user_id : "";
               const amt = Number(p.amount_minor);
               return (
                 <li key={i}>
-                  <input type="checkbox" readOnly style={{ marginRight: 6 }} />
                   {t("payments.shouldPayYou", {
                     name: label(fromId),
                     amount: (amt / 100).toFixed(2),
