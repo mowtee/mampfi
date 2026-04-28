@@ -94,6 +94,7 @@ def leave_event(session: Session, event_id: uuid.UUID, user: User) -> None:
                             "amount_minor": int(will),
                         }
                     )
+                    remaining -= will
 
         raise Conflict(
             {
