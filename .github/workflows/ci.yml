@@ -44,7 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           # Read pnpm version from frontend/package.json packageManager field
           # so CI, Docker build, and local stay on the same pnpm version.
