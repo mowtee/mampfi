@@ -45,8 +45,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
-        # No version: reads it from frontend/package.json packageManager field
-        # so CI, Docker build, and local stay on the same pnpm version.
+        with:
+          # Read pnpm version from frontend/package.json packageManager field
+          # so CI, Docker build, and local stay on the same pnpm version.
+          # action-setup defaults to ./package.json (repo root), so we point
+          # it at the frontend one explicitly.
+          package_json_file: frontend/package.json
 
       - uses: actions/setup-node@v4
         with:
