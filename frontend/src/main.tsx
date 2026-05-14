@@ -1,10 +1,10 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./i18n";
 import App from "./App";
-import { useAuth } from "./hooks/useAuth";
+import RequireAuth from "./components/RequireAuth";
 import EventsList from "./pages/EventsList";
 import EventDetail from "./pages/EventDetail";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -18,18 +18,6 @@ import LegalPage from "./pages/LegalPage";
 import Account from "./pages/Account";
 import "./tailwind.css";
 import "./styles.css";
-
-function RequireAuth() {
-  const { isAuthenticated, isLoading } = useAuth();
-  if (isLoading)
-    return (
-      <p className="muted" style={{ padding: 24 }}>
-        Loading...
-      </p>
-    );
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
-  return <Outlet />;
-}
 
 const el = document.getElementById("root")!;
 const queryClient = new QueryClient({
