@@ -277,6 +277,42 @@ def test_password_reset_flow(client: TestClient, session: Session):
     )
     assert resp.status_code == 200
 
+
+def test_password_reset_verifies_unverified_email(client: TestClient, session: Session):
+    """A successful reset implies the user controls the inbox, so it should
+    mark the email as verified. Regression: users who skipped signup
+    verification and then went through reset were locked out by the
+    "email not verified" login check."""
+    # Signup leaves email_verified_at = None
+    client.post(
+        "/v1/auth/signup",
+        json={"email": "unverified-reset@example.com", "password": "oldpass123", "name": "B"},
+    )
+    user = session.exec(select(User).where(User.email == "unverified-reset@example.com")).first()
+    assert user is not None
+    assert user.email_verified_at is None  # precondition
+
+    # Reset password using a valid token, never having verified the email
+    token = create_email_token(user.id, "password_reset", "change-me", hours=1)
+    resp = client.post(
+        "/v1/auth/reset-password",
+        json={"token": token, "password": "newpass456"},
+    )
+    assert resp.status_code == 200
+
+    # Email is now considered verified
+    session.expire_all()
+    user = session.exec(select(User).where(User.email == "unverified-reset@example.com")).first()
+    assert user is not None
+    assert user.email_verified_at is not None
+
+    # And login works end-to-end with the new password
+    resp = client.post(
+        "/v1/auth/login",
+        json={"email": "unverified-reset@example.com", "password": "newpass456"},
+    )
+    assert resp.status_code == 200
+
     # Old password fails
     resp = client.post(
         "/v1/auth/login",

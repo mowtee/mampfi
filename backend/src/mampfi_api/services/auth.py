@@ -267,6 +267,12 @@ def reset_password(session: Session, token: str, new_password: str, secret: str)
     if not user:
         raise DomainError("user not found")
     user.password_hash = hash_password(new_password)
+    # Receiving the reset email is proof of inbox control, so a successful
+    # reset implicitly verifies the email. Without this, users who skipped the
+    # signup verification step are locked out by the login check even after a
+    # successful reset.
+    if user.email_verified_at is None:
+        user.email_verified_at = now_utc()
     session.add(user)
     revoke_all_user_tokens(session, user.id)
     session.commit()
