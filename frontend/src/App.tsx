@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Modal, ModalBody, ModalActions } from "./components/ui/Modal";
 import { useAuth } from "./hooks/useAuth";
