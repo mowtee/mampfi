@@ -14,7 +14,7 @@ export function parseMoneyToMinor(input: string): number {
 
   const hasComma = s.includes(",");
   const hasDot = s.includes(".");
-  let decimalSep: "," | "." | null = null;
+  let decimalSep: "," | "." | null;
 
   if (hasComma && hasDot) {
     // Choose the last separator as the decimal separator
