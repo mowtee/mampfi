@@ -31,11 +31,7 @@ export default function EventDetail() {
   );
   const [search, setSearch] = useSearchParams();
   const activeTab = (search.get("tab") || "day") as
-    | "day"
-    | "history"
-    | "payments"
-    | "members"
-    | "admin";
+    "day" | "history" | "payments" | "members" | "admin";
   const setTab = (tab: string) =>
     setSearch((prev) => {
       const n = new URLSearchParams(prev);
